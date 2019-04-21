@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QDir>
 
+#include "paths.h"
+
 int main(int argc, char* argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -9,7 +11,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    engine.load(QDir(QCoreApplication::applicationDirPath()).filePath("qml/main.qml"));
+    engine.load(QDir(QString::fromStdString(Paths::kQmlPath)).filePath(QString::fromStdString(Paths::kMainQmlFile)));
     if (engine.rootObjects().isEmpty())
         return -1;
 
