@@ -5,13 +5,13 @@
 
 #include "paths.h"
 #include "dependencyinjector.h"
+#include "single.h"
 
 int main(int argc, char* argv[])
 {
-    DependencyInjector depInjector;
-    depInjector.registerInstance<int>(std::make_shared<int>(5));
+    Single<DependencyInjector>::instance().registerInstance<int>(std::make_shared<int>(5));
 
-    auto test = depInjector.getInstance<int>();
+    auto test = Single<DependencyInjector>::instance().getInstance<int>();
 
     qDebug() << *test;
 

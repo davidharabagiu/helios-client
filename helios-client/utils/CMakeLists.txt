@@ -5,6 +5,7 @@ project(utils)
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
+    "inc/single.h"
     "inc/dependencyinjector.h"
     "inc/dependencyinjector.tpp"
     "src/dependencyinjector.cpp"

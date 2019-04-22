@@ -7,6 +7,19 @@ bool DependencyInjector::registerInstance(const std::shared_ptr<T>& instance)
 }
 
 template <typename T>
+bool DependencyInjector::replaceInstance(const std::shared_ptr<T>& instance)
+{
+    auto prevInstance = m_instances.find(std::type_index(typeid(T)));
+    if (prevInstance == m_instances.end())
+    {
+        return false;
+    }
+    m_instances.erase(prevInstance);
+
+    return registerInstance(instance);
+}
+
+template <typename T>
 std::shared_ptr<T> DependencyInjector::getInstance()
 {
     auto instance = m_instances.find(std::type_index(typeid(T)));
