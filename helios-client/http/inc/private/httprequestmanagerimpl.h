@@ -23,13 +23,13 @@ public:
 
 public:  // from HttpRequestManager
     void post(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-              HttpReplyCallback callback) override;
+              const HttpReplyCallback& callback) override;
 
     void postMultiPart(const QString& url, const HttpParams& headerParams, const HttpParts& parts,
-                       HttpReplyCallback callback) override;
+                       const HttpReplyCallback& callback) override;
 
     void get(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-             HttpReplyCallback callback) override;
+             const HttpReplyCallback& callback) override;
 
 private:
     /**
@@ -43,7 +43,7 @@ private:
      * @param reply - Reply object
      * @param callback - Callback
      */
-    void addPendingReply(const std::shared_ptr<QNetworkReply>& reply, HttpReplyCallback callback);
+    void addPendingReply(const std::shared_ptr<QNetworkReply>& reply, const HttpReplyCallback& callback);
 
 private:
     /**

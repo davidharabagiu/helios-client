@@ -16,7 +16,7 @@ HttpRequestManagerImpl::HttpRequestManagerImpl(const QString& baseUrl)
 }
 
 void HttpRequestManagerImpl::post(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-                                  HttpReplyCallback callback)
+                                  const HttpReplyCallback& callback)
 {
     QNetworkRequest request(QUrl(m_baseUrl + "/" + url));
     for (const auto& param : headerParams)
@@ -35,7 +35,7 @@ void HttpRequestManagerImpl::post(const QString& url, const HttpParams& headerPa
 }
 
 void HttpRequestManagerImpl::postMultiPart(const QString& url, const HttpParams& headerParams, const HttpParts& parts,
-                                           HttpReplyCallback callback)
+                                           const HttpReplyCallback& callback)
 {
     QNetworkRequest request(QUrl(m_baseUrl + "/" + url));
     for (const auto& param : headerParams)
@@ -72,7 +72,7 @@ void HttpRequestManagerImpl::postMultiPart(const QString& url, const HttpParams&
 }
 
 void HttpRequestManagerImpl::get(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-                                 HttpReplyCallback callback)
+                                 const HttpReplyCallback& callback)
 {
     QUrlQuery query;
     for (const auto& param : params)
@@ -107,9 +107,10 @@ void HttpRequestManagerImpl::repliedReceived(int id)
     m_pendingReplies.erase(it);
 }
 
-void HttpRequestManagerImpl::addPendingReply(const std::shared_ptr<QNetworkReply>& reply, HttpReplyCallback callback)
+void HttpRequestManagerImpl::addPendingReply(const std::shared_ptr<QNetworkReply>& reply,
+                                             const HttpReplyCallback&              callback)
 {
     auto listener =
         std::make_shared<HttpReplyListener>(++m_lastAssignedRequestId, reply, [this](int id) { repliedReceived(id); });
-    m_pendingReplies.emplace(m_lastAssignedRequestId, std::make_pair(std::move(listener), std::move(callback)));
+    m_pendingReplies.emplace(m_lastAssignedRequestId, std::make_pair(listener, callback));
 }

@@ -46,7 +46,7 @@ public:
      * @param callback - Reply callback
      */
     virtual void post(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-                      HttpReplyCallback callback) = 0;
+                      const HttpReplyCallback& callback) = 0;
 
     /**
      * @brief Send an http post request with multipart form data parameters
@@ -56,7 +56,7 @@ public:
      * @param callback - Reply callback
      */
     virtual void postMultiPart(const QString& url, const HttpParams& headerParams, const HttpParts& parts,
-                               HttpReplyCallback callback) = 0;
+                               const HttpReplyCallback& callback) = 0;
 
     /**
      * @brief Send an http get request with url encoded parameters
@@ -66,5 +66,5 @@ public:
      * @param callback - Reply callback
      */
     virtual void get(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-                     HttpReplyCallback callback) = 0;
+                     const HttpReplyCallback& callback) = 0;
 };

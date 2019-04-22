@@ -3,7 +3,7 @@
 #include "httpreplylistener.h"
 
 HttpReplyListener::HttpReplyListener(int id, const std::shared_ptr<QNetworkReply>& reply,
-                                     std::function<void(int)> callback)
+                                     const std::function<void(int)>& callback)
     : m_id(id)
     , m_reply(reply)
     , m_callback(callback)

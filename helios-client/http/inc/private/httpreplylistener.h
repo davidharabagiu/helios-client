@@ -19,7 +19,7 @@ public:
      * @param reply - QNetworkReply
      * @param callback - Function to be called when a reply arrives. The callback parameter is the given request id.
      */
-    HttpReplyListener(int id, const std::shared_ptr<QNetworkReply>& reply, std::function<void(int)> callback);
+    HttpReplyListener(int id, const std::shared_ptr<QNetworkReply>& reply, const std::function<void(int)>& callback);
 
     /**
      * @brief Returns the reply object
