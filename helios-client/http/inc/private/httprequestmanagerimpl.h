@@ -1,3 +1,6 @@
+#ifndef HTTPREQUESTMANAGERIMPL_H
+#define HTTPREQUESTMANAGERIMPL_H
+
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -66,3 +69,5 @@ private:
      */
     int m_lastAssignedRequestId;
 };
+
+#endif  // HTTPREQUESTMANAGERIMPL_H

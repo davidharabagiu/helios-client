@@ -1,3 +1,6 @@
+#ifndef HTTPREPLYLISTENER_H
+#define HTTPREPLYLISTENER_H
+
 #include <QObject>
 #include <memory>
 #include <functional>
@@ -49,3 +52,5 @@ private:
      */
     std::function<void(int)> m_callback;
 };
+
+#endif  // HTTPREPLYLISTENER_H

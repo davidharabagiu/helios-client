@@ -1,3 +1,6 @@
+#ifndef HTTPSTATUS_H
+#define HTTPSTATUS_H
+
 /**
  * @brief HTTP status codes
  */
@@ -67,3 +70,5 @@ enum class HttpStatus
     NETWORK_AUTHENTICATION_REQUIRED    = 511,
     NETWORK_CONNECT_TIMEOUT_ERROR      = 599
 };
+
+#endif  // HTTPSTATUS_H

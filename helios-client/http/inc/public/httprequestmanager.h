@@ -1,3 +1,6 @@
+#ifndef HTTPREQUESTMANAGER_H
+#define HTTPREQUESTMANAGER_H
+
 #include <QString>
 #include <QByteArray>
 #include <functional>
@@ -39,6 +42,11 @@ class HttpRequestManager
 {
 public:
     /**
+     * @brief Destructor
+     */
+    virtual ~HttpRequestManager() = default;
+
+    /**
      * @brief Send an http post request with url encoded parameters
      * @param url - Relative url
      * @param headerParams - Request header parameters
@@ -68,3 +76,5 @@ public:
     virtual void get(const QString& url, const HttpParams& headerParams, const HttpParams& params,
                      const HttpReplyCallback& callback) = 0;
 };
+
+#endif  // HTTPREQUESTMANAGER_H
