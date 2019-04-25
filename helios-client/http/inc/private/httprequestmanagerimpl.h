@@ -4,12 +4,17 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <string>
+#include <map>
 
 #include "httprequestmanager.h"
 
 class QNetworkAccessManager;
+class QNetworkRequest;
 class QNetworkReply;
 class HttpReplyListener;
+class UrlEncodedRequest;
+class FormDataRequest;
 
 /**
  * @class HttpRequestManager
@@ -20,19 +25,13 @@ class HttpRequestManagerImpl : public HttpRequestManager
 public:
     /**
      * @brief Constructor
-     * @param baseUrl - http server base url
      */
-    HttpRequestManagerImpl(const QString& baseUrl);
+    HttpRequestManagerImpl();
 
 public:  // from HttpRequestManager
-    void post(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-              const HttpReplyCallback& callback) override;
-
-    void postMultiPart(const QString& url, const HttpParams& headerParams, const HttpParts& parts,
-                       const HttpReplyCallback& callback) override;
-
-    void get(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-             const HttpReplyCallback& callback) override;
+    void post(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
+    void post(std::unique_ptr<FormDataRequest> request, const HttpReplyCallback& callback) override;
+    void get(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
 
 private:
     /**
@@ -48,12 +47,14 @@ private:
      */
     void addPendingReply(const std::shared_ptr<QNetworkReply>& reply, const HttpReplyCallback& callback);
 
-private:
     /**
-     * @brief Server base url for all requests
+     * @brief Collect all the header values from a map in a QNetworkRequest object
+     * @param values - Header values map
+     * @param result - Output
      */
-    QString m_baseUrl;
+    void collectHeaderValues(const std::map<std::string, std::string>& values, QNetworkRequest& result);
 
+private:
     /**
      * @brief Network access manager
      */
@@ -68,6 +69,11 @@ private:
      * @brief Last assigned request id
      */
     int m_lastAssignedRequestId;
+
+    /**
+     * @brief Url separator
+     */
+    static const std::string s_kUrlSeparator;
 };
 
 #endif  // HTTPREQUESTMANAGERIMPL_H

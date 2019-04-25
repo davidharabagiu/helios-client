@@ -1,92 +1,65 @@
 #include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QHttpMultiPart>
-#include <QUrl>
-#include <QUrlQuery>
 #include <QDebug>
+#include <QHttpMultiPart>
+#include <QNetworkReply>
+#include <QUrlQuery>
+#include <cassert>
 
 #include "httprequestmanagerimpl.h"
 #include "httpreplylistener.h"
+#include "urlencodedrequest.h"
+#include "urlencodedrequestprivate.h"
+#include "formdatarequest.h"
+#include "formdatarequestprivate.h"
+#include "misc.h"
 
-HttpRequestManagerImpl::HttpRequestManagerImpl(const QString& baseUrl)
-    : m_baseUrl(baseUrl)
-    , m_networkAccessManager(new QNetworkAccessManager())
+const std::string HttpRequestManagerImpl::s_kUrlSeparator = "/";
+
+HttpRequestManagerImpl::HttpRequestManagerImpl()
+    : m_networkAccessManager(new QNetworkAccessManager())
     , m_lastAssignedRequestId(-1)
 {
 }
 
-void HttpRequestManagerImpl::post(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-                                  const HttpReplyCallback& callback)
+void HttpRequestManagerImpl::post(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback)
 {
-    QNetworkRequest request(QUrl(m_baseUrl + "/" + url));
-    for (const auto& param : headerParams)
-    {
-        request.setRawHeader(param.first.toUtf8(), param.second.toUtf8());
-    }
+    auto _request = dynamic_unique_cast<UrlEncodedRequestPrivate>(std::move(request));
+    assert(_request);
 
-    QUrlQuery query;
-    for (const auto& param : params)
-    {
-        query.addQueryItem(param.first, param.second);
-    }
+    QNetworkRequest networkRequest(QUrl(QString(_request->url().c_str())));
 
-    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->post(request, query.query().toUtf8()));
+    collectHeaderValues(_request->header(), networkRequest);
+
+    const auto& urlQuery = _request->urlQuery().query();
+
+    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->post(networkRequest, urlQuery.toUtf8()));
     addPendingReply(reply, callback);
 }
 
-void HttpRequestManagerImpl::postMultiPart(const QString& url, const HttpParams& headerParams, const HttpParts& parts,
-                                           const HttpReplyCallback& callback)
+void HttpRequestManagerImpl::post(std::unique_ptr<FormDataRequest> request, const HttpReplyCallback& callback)
 {
-    QNetworkRequest request(QUrl(m_baseUrl + "/" + url));
-    for (const auto& param : headerParams)
-    {
-        request.setRawHeader(param.first.toUtf8(), param.second.toUtf8());
-    }
+    auto _request = dynamic_unique_cast<FormDataRequestPrivate>(std::move(request));
+    assert(_request);
 
-    QHttpMultiPart multiPart;
-    for (const auto& part : parts)
-    {
-        QHttpPart httpPart;
-        httpPart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"" + part.first + "\"");
-        httpPart.setBody(part.second.second);
-        switch (part.second.first)
-        {
-            case HttpPartType::TEXT:
-            {
-                httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
-            }
-            case HttpPartType::FILE:
-            {
-                httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
-            }
-            default:
-            {
-                qWarning() << "Unknown http part type: " << static_cast<int>(part.second.first);
-                continue;
-            }
-        }
-    }
+    QNetworkRequest networkRequest(QUrl(QString(_request->url().c_str())));
 
-    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->post(request, &multiPart));
+    collectHeaderValues(_request->header(), networkRequest);
+
+    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->post(networkRequest, _request->multiPart().get()));
     addPendingReply(reply, callback);
 }
 
-void HttpRequestManagerImpl::get(const QString& url, const HttpParams& headerParams, const HttpParams& params,
-                                 const HttpReplyCallback& callback)
+void HttpRequestManagerImpl::get(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback)
 {
-    QUrlQuery query;
-    for (const auto& param : params)
-    {
-        query.addQueryItem(param.first, param.second);
-    }
+    auto _request = dynamic_unique_cast<UrlEncodedRequestPrivate>(std::move(request));
+    assert(_request);
 
-    QNetworkRequest request(QUrl(m_baseUrl + "/" + url + "/" + query.query()));
-    for (const auto& param : headerParams)
-    {
-        request.setRawHeader(param.first.toUtf8(), param.second.toUtf8());
-    }
+    auto            url = _request->url() + s_kUrlSeparator + _request->urlQuery().query().toStdString();
+    QNetworkRequest networkRequest(QUrl(QString(url.c_str())));
 
-    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->get(request));
+    collectHeaderValues(_request->header(), networkRequest);
+
+    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->get(networkRequest));
     addPendingReply(reply, callback);
 }
 
@@ -102,8 +75,10 @@ void HttpRequestManagerImpl::repliedReceived(int id)
     const auto&       reply    = it->second.first->reply();
     HttpReplyCallback callback = it->second.second;
 
+    const auto& replyString = reply->readAll().toStdString();
+
     callback(static_cast<HttpStatus>(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()),
-             reply->readAll());
+             std::vector<uint8_t>(replyString.cbegin(), replyString.cend()));
     m_pendingReplies.erase(it);
 }
 
@@ -113,4 +88,14 @@ void HttpRequestManagerImpl::addPendingReply(const std::shared_ptr<QNetworkReply
     auto listener =
         std::make_shared<HttpReplyListener>(++m_lastAssignedRequestId, reply, [this](int id) { repliedReceived(id); });
     m_pendingReplies.emplace(m_lastAssignedRequestId, std::make_pair(listener, callback));
+}
+
+void HttpRequestManagerImpl::collectHeaderValues(const std::map<std::string, std::string>& values,
+                                                 QNetworkRequest&                          result)
+{
+    for (const auto& param : values)
+    {
+        result.setRawHeader(QByteArray(param.first.data(), static_cast<int>(param.first.size())),
+                            QByteArray(param.second.data(), static_cast<int>(param.second.size())));
+    }
 }

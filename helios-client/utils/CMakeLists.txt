@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
     "inc/single.h"
     "inc/dependencyinjector.h"
     "inc/dependencyinjector.tpp"
+    "inc/misc.h"
     "src/dependencyinjector.cpp"
 )
 
