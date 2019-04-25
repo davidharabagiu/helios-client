@@ -5,7 +5,7 @@
 
 /**
  * @class HttpRequestFactoryImpl
- * @brief Private implementation of HttpRequestFactoryu
+ * @brief Private implementation of HttpRequestFactory
  */
 class HttpRequestFactoryImpl : public HttpRequestFactory
 {

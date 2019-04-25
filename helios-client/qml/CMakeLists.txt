@@ -9,5 +9,4 @@ set(QML_FILES
 
 add_custom_target(${PROJECT_NAME} SOURCES ${QML_FILES})
 
-# Install
 install(FILES ${QML_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/qml)
