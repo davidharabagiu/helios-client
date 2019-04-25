@@ -5,6 +5,7 @@
 
 namespace Paths
 {
+const std::string kSeparator   = "/";
 const std::string kQmlPath     = "qml";
 const std::string kMainQmlFile = "main.qml";
 }  // namespace Paths

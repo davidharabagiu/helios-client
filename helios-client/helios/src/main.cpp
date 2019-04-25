@@ -20,7 +20,8 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    engine.load(QDir(QString::fromStdString(Paths::kQmlPath)).filePath(QString::fromStdString(Paths::kMainQmlFile)));
+    engine.load(QDir(QCoreApplication::applicationDirPath())
+                    .filePath(QString::fromStdString(Paths::kQmlPath + Paths::kSeparator + Paths::kMainQmlFile)));
     if (engine.rootObjects().isEmpty())
         return -1;
 
