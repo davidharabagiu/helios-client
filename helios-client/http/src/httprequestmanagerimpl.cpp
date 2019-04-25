@@ -72,8 +72,8 @@ void HttpRequestManagerImpl::repliedReceived(int id)
         return;
     }
 
-    const auto&       reply    = it->second.first->reply();
-    HttpReplyCallback callback = it->second.second;
+    const auto&       reply    = std::get<0>(it->second)->reply();
+    HttpReplyCallback callback = std::get<1>(it->second);
 
     const auto& replyString = reply->readAll().toStdString();
 
@@ -87,7 +87,7 @@ void HttpRequestManagerImpl::addPendingReply(const std::shared_ptr<QNetworkReply
 {
     auto listener =
         std::make_shared<HttpReplyListener>(++m_lastAssignedRequestId, reply, [this](int id) { repliedReceived(id); });
-    m_pendingReplies.emplace(m_lastAssignedRequestId, std::make_pair(listener, callback));
+    m_pendingReplies.emplace(m_lastAssignedRequestId, std::make_tuple(listener, callback));
 }
 
 void HttpRequestManagerImpl::collectHeaderValues(const std::map<std::string, std::string>& values,

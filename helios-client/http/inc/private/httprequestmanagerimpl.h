@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
-#include <utility>
+#include <tuple>
 #include <string>
 #include <map>
 
@@ -63,7 +63,7 @@ private:
     /**
      * @brief Pending replies
      */
-    std::unordered_map<int, std::pair<std::shared_ptr<HttpReplyListener>, HttpReplyCallback>> m_pendingReplies;
+    std::unordered_map<int, std::tuple<std::shared_ptr<HttpReplyListener>, HttpReplyCallback>> m_pendingReplies;
 
     /**
      * @brief Last assigned request id
