@@ -4,7 +4,7 @@
 #include <string>
 #include <functional>
 
-#include "apicallstatus.h"
+#include "apicalldefs.h"
 
 /**
  * @class UserApiCaller
@@ -12,30 +12,20 @@
  */
 class UserApiCaller
 {
-public:  // callback definitions
-    /**
-     * @brief Register user callback function. Receives the call status.
-     */
-    using RegisterUserCallback = std::function<void(ApiCallStatus)>;
-
-    /**
-     * @brief Login callback function. Receives the call status and the authentication token.
-     */
-    using LoginCallback = std::function<void(ApiCallStatus, const std::string&)>;
-
-    /**
-     * @brief Logout callback function. Receives the call status.
-     */
-    using LogoutCallback = std::function<void(ApiCallStatus)>;
-
 public:
+    /**
+     * @brief Destructor
+     */
+    virtual ~UserApiCaller() = default;
+
     /**
      * @brief Create a new user account.
      * @param username - Name of the new user account
      * @param password - Password of the new user account
      * @param callback - RegisterUserCallback
      */
-    void registerUser(const std::string& username, const std::string& password, const RegisterUserCallback& callback);
+    virtual void registerUser(const std::string& username, const std::string& password,
+                              const ApiCallbacks::RegisterUserCallback& callback) = 0;
 
     /**
      * @brief Authenticate as an existing user.
@@ -43,14 +33,15 @@ public:
      * @param password - Password
      * @param callback - LoginCallback
      */
-    void login(const std::string& username, const std::string& password, const LoginCallback& callback);
+    virtual void login(const std::string& username, const std::string& password,
+                       const ApiCallbacks::LoginCallback& callback) = 0;
 
     /**
      * @brief Logout from the system using an active authentication token.
      * @param token - Authentication token
      * @param callback - LogoutCallback
      */
-    void logout(const std::string& token, const LogoutCallback& callback);
+    virtual void logout(const std::string& token, const ApiCallbacks::LogoutCallback& callback) = 0;
 };
 
 #endif  // USERAPICALLER_H

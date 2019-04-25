@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "apicallstatus.h"
+#include "apicalldefs.h"
 
 /**
  * @class FileApiCaller
@@ -14,66 +14,20 @@
  */
 class FileApiCaller
 {
-public:  // callback definitions
-    /**
-     * @brief Create directory callback function. Receives the call status.
-     */
-    using CreateDirectoryCallback = std::function<void(ApiCallStatus)>;
-
-    /**
-     * @brief Begin upload callback function. Receives the call status and the id of the transfer.
-     */
-    using BeginUploadCallback = std::function<void(ApiCallStatus, const std::string&)>;
-
-    /**
-     * @brief Upload callback function. Receives the call status.
-     */
-    using UploadCallback = std::function<void(ApiCallStatus)>;
-
-    /**
-     * @brief Begin download callback function. Receives the call status and the id of the transfer.
-     */
-    using BeginDownloadCallback = std::function<void(ApiCallStatus, const std::string&)>;
-
-    /**
-     * @brief Download callback function. Receives the call status and the requested file bytes.
-     */
-    using DownloadCallback = std::function<void(ApiCallStatus, const std::vector<uint8_t>&)>;
-
-    /**
-     * @brief End transfer callback function. Receives the call status.
-     */
-    using EndTransferCallback = std::function<void(ApiCallStatus)>;
-
-    /**
-     * @brief Get file size callback function. Receives the call status and the requested file size.
-     */
-    using GetFileSizeCallback = std::function<void(ApiCallStatus, uint64_t)>;
-
-    /**
-     * @brief List callback function. Receives the call status and a list of files and directories names.
-     */
-    using ListCallback = std::function<void(ApiCallStatus, const std::vector<std::string>&)>;
-
-    /**
-     * @brief Remove callback function. Receives the call status.
-     */
-    using RemoveCallback = std::function<void(ApiCallStatus)>;
-
-    /**
-     * @brief Move callback function. Receives the call status.
-     */
-    using MoveCallback = std::function<void(ApiCallStatus)>;
-
 public:
+    /**
+     * @brief Destructor
+     */
+    virtual ~FileApiCaller() = default;
+
     /**
      * @brief Create a new directory in the user's storage.
      * @param authToken - User authentication token
      * @param path - Path of the new directory
      * @param callback - CreateDirectoryCallback
      */
-    void createDirectory(const std::string& authToken, const std::string& path,
-                         const CreateDirectoryCallback& callback);
+    virtual void createDirectory(const std::string& authToken, const std::string& path,
+                                 const ApiCallbacks::CreateDirectoryCallback& callback) = 0;
 
     /**
      * @brief Begin a file upload operation. The callback will contain a transfer id used to upload the file contents
@@ -83,7 +37,8 @@ public:
      * @param path - Path of the uploaded file
      * @param callback - BeginUploadCallback
      */
-    void beginUpload(const std::string& authToken, const std::string& path, const BeginUploadCallback& callback);
+    virtual void beginUpload(const std::string& authToken, const std::string& path,
+                             const ApiCallbacks::BeginUploadCallback& callback) = 0;
 
     /**
      * @brief Upload a chunk of a file in the user's storage.
@@ -93,8 +48,8 @@ public:
      * @param content - File data chunk
      * @param callback - UploadCallback
      */
-    void upload(const std::string& authToken, const std::string& transferId, uint64_t offset,
-                const std::vector<uint8_t>& content, const UploadCallback& callback);
+    virtual void upload(const std::string& authToken, const std::string& transferId, uint64_t offset,
+                        const std::vector<uint8_t>& content, const ApiCallbacks::UploadCallback& callback) = 0;
 
     /**
      * @brief Begin a file download operation. The callback will contain a transfer id used to download the file
@@ -103,7 +58,8 @@ public:
      * @param path - Path of the file to download
      * @param callback - BeginDownloadCallback
      */
-    void beginDownload(const std::string& authToken, const std::string& path, const BeginDownloadCallback& callback);
+    virtual void beginDownload(const std::string& authToken, const std::string& path,
+                               const ApiCallbacks::BeginDownloadCallback& callback) = 0;
 
     /**
      * @brief Download a chunk of a file from the user's storage.
@@ -113,8 +69,8 @@ public:
      * @param size - Retrieved file chunk size
      * @param callback - DownloadCallback
      */
-    void download(const std::string& authToken, const std::string& transferId, uint64_t offset, uint64_t size,
-                  const DownloadCallback& callback);
+    virtual void download(const std::string& authToken, const std::string& transferId, uint64_t offset, uint64_t size,
+                          const ApiCallbacks::DownloadCallback& callback) = 0;
 
     /**
      * @brief Ends a file upload or download operation.
@@ -122,7 +78,8 @@ public:
      * @param transferId - Transfer id retrieved using the beginUpload or beginDownload call
      * @param callback - EndTransferCallback
      */
-    void endTransfer(const std::string& authToken, const std::string& transferId, const EndTransferCallback& callback);
+    virtual void endTransfer(const std::string& authToken, const std::string& transferId,
+                             const ApiCallbacks::EndTransferCallback& callback) = 0;
 
     /**
      * @brief Retrieve size information about a file from the user's storage.
@@ -130,7 +87,8 @@ public:
      * @param path - File path
      * @param callback - GetFileSizeCallback
      */
-    void getFileSize(const std::string& authToken, const std::string& path, const GetFileSizeCallback& callback);
+    virtual void getFileSize(const std::string& authToken, const std::string& path,
+                             const ApiCallbacks::GetFileSizeCallback& callback) = 0;
 
     /**
      * @brief List all the files and subdirectories of a directory from the user's storage.
@@ -138,7 +96,8 @@ public:
      * @param path - Directory path
      * @param callback - ListCallback
      */
-    void list(const std::string& authToken, const std::string& path, const ListCallback& callback);
+    virtual void list(const std::string& authToken, const std::string& path,
+                      const ApiCallbacks::ListCallback& callback) = 0;
 
     /**
      * @brief Delete a file or directory from the user's storage. If the path reffers to a directory, then the directory
@@ -147,7 +106,8 @@ public:
      * @param path - File or directory path
      * @param callback - RemoveCallback
      */
-    void remove(const std::string& authToken, const std::string& path, const RemoveCallback& callback);
+    virtual void remove(const std::string& authToken, const std::string& path,
+                        const ApiCallbacks::RemoveCallback& callback) = 0;
 
     /**
      * @brief Move a file or directory to another location in the user's storage.
@@ -156,8 +116,8 @@ public:
      * @param destination - Destination path
      * @param callback - MoveCallback
      */
-    void move(const std::string& authToken, const std::string& source, const std::string& destination,
-              const MoveCallback& callback);
+    virtual void move(const std::string& authToken, const std::string& source, const std::string& destination,
+                      const ApiCallbacks::MoveCallback& callback) = 0;
 };
 
 #endif  // FILEAPICALLER_H
