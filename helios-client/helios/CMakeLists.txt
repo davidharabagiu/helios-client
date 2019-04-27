@@ -8,7 +8,6 @@ include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_executable(${PROJECT_NAME}
     "src/main.cpp"
-    "inc/paths.h"
 )
 
 target_include_directories(${PROJECT_NAME}

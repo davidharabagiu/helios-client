@@ -6,8 +6,10 @@
 #include "httprequestfactory.h"
 #include "apicallvisitor.h"
 #include "httpstatus.h"
+#include "config.h"
+#include "configkeys.h"
 
-const std::string RegisterUserCall::s_kUrl                       = "http://127.0.0.1:8000/register";
+const std::string RegisterUserCall::s_kUrl                       = "register";
 const std::string RegisterUserCall::s_kUsernameParam             = "username";
 const std::string RegisterUserCall::s_kPasswordParam             = "password";
 const std::string RegisterUserCall::s_kErrorUsernameAlreadyTaken = "Username already taken";
@@ -24,7 +26,14 @@ RegisterUserCall::RegisterUserCall(const std::string& username, const std::strin
         qFatal("HttpRequestFactory instance not available");
     }
 
-    m_request = requestFactory->createUrlEncodedRequest(s_kUrl);
+    auto config = Single<DependencyInjector>::instance().getInstance<Config>();
+    if (!config)
+    {
+        qFatal("Config instance not available");
+    }
+
+    m_request = requestFactory->createUrlEncodedRequest(
+        std::any_cast<std::string>(config.get(ConfigKeys::kServerUrlKey)) + "/" + s_kUrl);
     m_request->setParameter(s_kUsernameParam, username);
     m_request->setParameter(s_kPasswordParam, password);
 }
