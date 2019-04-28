@@ -11,7 +11,7 @@
 #include "urlencodedrequestprivate.h"
 #include "formdatarequest.h"
 #include "formdatarequestprivate.h"
-#include "misc.h"
+#include "typeconversions.h"
 
 const std::string HttpRequestManagerImpl::s_kUrlSeparator = "/";
 
