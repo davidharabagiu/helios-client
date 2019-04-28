@@ -73,8 +73,8 @@ safe_integral_cast(U r)
 template <typename T, typename U>
 inline std::enable_if_t<std::is_signed_v<T> && std::is_unsigned_v<U>, T> safe_integral_cast(U r)
 {
-    assert(r <= static_cast<T>(std::numeric_limits<std::make_signed_t<T>>::max()));
-    return safe_integral_cast<T>(static_cast<std::make_signed_t<T>>(r));
+    assert(r <= static_cast<U>(std::numeric_limits<std::make_signed_t<U>>::max()));
+    return safe_integral_cast<T>(static_cast<std::make_signed_t<U>>(r));
 }
 
 /**
@@ -88,7 +88,7 @@ template <typename T, typename U>
 inline std::enable_if_t<std::is_unsigned_v<T> && std::is_signed_v<U>, T> safe_integral_cast(U r)
 {
     assert(r >= 0);
-    return safe_integral_cast<T>(static_cast<std::make_unsigned_t<T>>(r));
+    return safe_integral_cast<T>(static_cast<std::make_unsigned_t<U>>(r));
 }
 
 #endif  // TYPECONVERSIONS_H

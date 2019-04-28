@@ -4,16 +4,14 @@
 #include <QDebug>
 
 #include "paths.h"
-#include "dependencyinjector.h"
-#include "single.h"
+#include "typeconversions.h"
+#include <cstdint>
 
 int main(int argc, char* argv[])
 {
-    Single<DependencyInjector>::instance().registerInstance<int>(std::make_shared<int>(5));
-
-    auto test = Single<DependencyInjector>::instance().getInstance<int>();
-
-    qDebug() << *test;
+    unsigned long long a = 1000000000000ULL;
+    auto               b = safe_integral_cast<int>(a);
+    (void)b;
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
