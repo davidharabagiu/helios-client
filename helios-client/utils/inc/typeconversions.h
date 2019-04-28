@@ -73,8 +73,15 @@ safe_integral_cast(U r)
 template <typename T, typename U>
 inline std::enable_if_t<std::is_signed_v<T> && std::is_unsigned_v<U>, T> safe_integral_cast(U r)
 {
-    assert(r <= static_cast<U>(std::numeric_limits<std::make_signed_t<U>>::max()));
-    return safe_integral_cast<T>(static_cast<std::make_signed_t<U>>(r));
+    if constexpr (sizeof(T) <= sizeof(U))
+    {
+        assert(r <= static_cast<U>(std::numeric_limits<std::make_signed_t<U>>::max()));
+        return safe_integral_cast<T>(static_cast<std::make_signed_t<U>>(r));
+    }
+    else
+    {
+        return static_cast<T>(r);
+    }
 }
 
 /**

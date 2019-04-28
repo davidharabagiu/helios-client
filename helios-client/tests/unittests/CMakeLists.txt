@@ -8,7 +8,8 @@ include(${CMAKE_SCRIPTS}/rpath_config.cmake REQUIRED)
 
 add_executable(${PROJECT_NAME}
     "src/main.cpp"
-    "src/dependencyinjector_tests"
+    "src/dependencyinjector_tests.cpp"
+    "src/typeconversions_tests.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
