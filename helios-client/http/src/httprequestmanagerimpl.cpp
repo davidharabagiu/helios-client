@@ -95,7 +95,7 @@ void HttpRequestManagerImpl::collectHeaderValues(const std::map<std::string, std
 {
     for (const auto& param : values)
     {
-        result.setRawHeader(QByteArray(param.first.data(), static_cast<int>(param.first.size())),
-                            QByteArray(param.second.data(), static_cast<int>(param.second.size())));
+        result.setRawHeader(QByteArray(param.first.data(), safe_integral_cast<int>(param.first.size())),
+                            QByteArray(param.second.data(), safe_integral_cast<int>(param.second.size())));
     }
 }

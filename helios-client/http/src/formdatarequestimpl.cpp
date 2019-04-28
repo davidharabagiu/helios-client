@@ -2,6 +2,7 @@
 #include <QHttpMultiPart>
 
 #include "formdatarequestimpl.h"
+#include "typeconversions.h"
 
 FormDataRequestImpl::FormDataRequestImpl(const std::string& url)
     : m_url(url)
@@ -25,7 +26,7 @@ void FormDataRequestImpl::setPart(const std::string& name, HttpPartType type, co
 
     httpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
                        QString(("form-data; name=\"" + name + "\"").c_str()));
-    httpPart.setBody(QByteArray(reinterpret_cast<const char*>(value.data()), static_cast<int>(value.size())));
+    httpPart.setBody(QByteArray(reinterpret_cast<const char*>(value.data()), safe_integral_cast<int>(value.size())));
 
     if (type == HttpPartType::TEXT)
     {

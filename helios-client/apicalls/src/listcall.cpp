@@ -13,6 +13,7 @@
 #include "httpstatus.h"
 #include "config.h"
 #include "configkeys.h"
+#include "typeconversions.h"
 
 const std::string ListCall::s_kUrl               = "list";
 const std::string ListCall::s_kTokenParam        = "token";
@@ -58,8 +59,8 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
 
     if (status == HttpStatus::OK)
     {
-        auto json =
-            QJsonDocument::fromRawData(reinterpret_cast<const char*>(reply.data()), static_cast<int>(reply.size()));
+        auto json = QJsonDocument::fromRawData(reinterpret_cast<const char*>(reply.data()),
+                                               safe_integral_cast<int>(reply.size()));
         if (json.isNull() || json.isEmpty() || !json.isArray())
         {
             qCritical() << "Invalid json reply received: " << replyStr.c_str();
