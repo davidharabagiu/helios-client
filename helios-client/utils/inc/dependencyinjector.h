@@ -47,7 +47,7 @@ public:
      * @return The instance of the T. If there is no such instance, returns an invalid pointer.
      */
     template <typename T>
-    std::shared_ptr<T> getInstance();
+    std::shared_ptr<T> getInstance() const;
 
     /**
      * @brief Unregister all existing instances.
