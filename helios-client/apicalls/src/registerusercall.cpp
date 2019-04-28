@@ -33,7 +33,7 @@ RegisterUserCall::RegisterUserCall(const std::string& username, const std::strin
     }
 
     m_request = requestFactory->createUrlEncodedRequest(
-        std::any_cast<std::string>(config.get(ConfigKeys::kServerUrlKey)) + "/" + s_kUrl);
+        config->get(ConfigKeys::kServerUrlKey).toString().toStdString() + "/" + s_kUrl);
     m_request->setParameter(s_kUsernameParam, username);
     m_request->setParameter(s_kPasswordParam, password);
 }
@@ -43,9 +43,9 @@ std::unique_ptr<UrlEncodedRequest> RegisterUserCall::request()
     return std::move(m_request);
 }
 
-void RegisterUserCall::send(const ApiCallVisitor& visitor)
+void RegisterUserCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor.visit(*this);
+    visitor->visit(*this);
 }
 
 void RegisterUserCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

@@ -25,7 +25,7 @@ public:
      * @param callback - RegisterUserCallback
      */
     virtual void registerUser(const std::string& username, const std::string& password,
-                              const ApiCallbacks::RegisterUserCallback& callback) = 0;
+                              const ApiCallbacks::RegisterUserCallback& callback) const = 0;
 
     /**
      * @brief Authenticate as an existing user.
@@ -34,14 +34,14 @@ public:
      * @param callback - LoginCallback
      */
     virtual void login(const std::string& username, const std::string& password,
-                       const ApiCallbacks::LoginCallback& callback) = 0;
+                       const ApiCallbacks::LoginCallback& callback) const = 0;
 
     /**
      * @brief Logout from the system using an active authentication token.
      * @param token - Authentication token
      * @param callback - LogoutCallback
      */
-    virtual void logout(const std::string& token, const ApiCallbacks::LogoutCallback& callback) = 0;
+    virtual void logout(const std::string& token, const ApiCallbacks::LogoutCallback& callback) const = 0;
 };
 
 #endif  // USERAPICALLER_H

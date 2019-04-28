@@ -20,6 +20,7 @@ public:  // from FormDataRequest
     void setUrl(const std::string& url) override;
     void setHeaderValue(const std::string& name, const std::string& value) override;
     void setPart(const std::string& name, HttpPartType type, const std::vector<uint8_t>& value) override;
+    void setPart(const std::string& name, HttpPartType type, const std::string& value) override;
 
 public:  // from UrlEncodedRequestPrivate
     std::string                        url() const override;

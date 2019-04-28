@@ -1,5 +1,5 @@
-#ifndef REGISTERUSERCALL_H
-#define REGISTERUSERCALL_H
+#ifndef LOGINCALL_H
+#define LOGINCALL_H
 
 #include <string>
 #include <vector>
@@ -9,14 +9,13 @@
 #include "urlencodedrequest.h"
 
 /**
- * @class RegisterUserCall
- * @brief Manages a user registration call
+ * @class LoginCall
+ * @brief Manages a user authentication call
  */
-class RegisterUserCall : public ApiCall
+class LoginCall : public ApiCall
 {
 public:
-    RegisterUserCall(const std::string& username, const std::string& password,
-                     const ApiCallbacks::RegisterUserCallback& callback);
+    LoginCall(const std::string& username, const std::string& password, const ApiCallbacks::LoginCallback& callback);
 
 public:
     /**
@@ -38,7 +37,7 @@ private:
     /**
      * @brief Callback
      */
-    ApiCallbacks::RegisterUserCallback m_callback;
+    ApiCallbacks::LoginCallback m_callback;
 
     /**
      * @brief Request url
@@ -56,11 +55,6 @@ private:
     static const std::string s_kPasswordParam;
 
     /**
-     * @brief Username already taken error message
-     */
-    static const std::string s_kErrorUsernameAlreadyTaken;
-
-    /**
      * @brief Invalid username error message
      */
     static const std::string s_kErrorInvalidUsername;
@@ -71,4 +65,4 @@ private:
     static const std::string s_kErrorInvalidPassword;
 };
 
-#endif  // REGISTERUSERCALL_H
+#endif  // LOGINCALL_H

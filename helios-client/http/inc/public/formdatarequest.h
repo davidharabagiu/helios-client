@@ -50,9 +50,17 @@ public:
      * @brief Set the value of a http part. If a part with this name already exists, its value will be replaced.
      * @param name - part name
      * @param type - part type
-     * @param value - part value
+     * @param value - part value (vector of bytes)
      */
     virtual void setPart(const std::string& name, HttpPartType type, const std::vector<uint8_t>& value) = 0;
+
+    /**
+     * @brief Set the value of a http part. If a part with this name already exists, its value will be replaced.
+     * @param name - part name
+     * @param type - part type
+     * @param value - part value (string, will be converted to vector of bytes)
+     */
+    virtual void setPart(const std::string& name, HttpPartType type, const std::string& value) = 0;
 };
 
 #endif  // FORMDATAREQUEST_H

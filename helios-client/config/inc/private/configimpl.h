@@ -15,11 +15,11 @@ public:
     ConfigImpl();
 
 public:  // from Config
-    std::any get(const std::string& key) const override;
+    QVariant get(const std::string& key) const override;
 
 private:
     /**
      * @brief Registry which holds all the config values indexed by their keys
      */
-    std::map<std::string, std::any> m_valuesRegistry;
+    std::map<std::string, QVariant> m_valuesRegistry;
 };

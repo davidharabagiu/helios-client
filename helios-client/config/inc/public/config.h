@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <any>
+#include <QVariant>
 #include <string>
 
 /**
@@ -19,9 +19,9 @@ public:
     /**
      * @brief Returns a config value. If the value with the given key could not be found, it returns an empty object.
      * @param key - Config key
-     * @return std::any
+     * @return QVariant
      */
-    virtual std::any get(const std::string& key) const = 0;
+    virtual QVariant get(const std::string& key) const = 0;
 };
 
 #endif  // CONFIG_H

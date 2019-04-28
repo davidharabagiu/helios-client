@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 class ApiCallVisitor;
 enum class HttpStatus;
@@ -22,7 +23,7 @@ public:
     /**
      * @brief Send call
      */
-    virtual void send(const ApiCallVisitor& visitor) = 0;
+    virtual void send(std::shared_ptr<ApiCallVisitor> visitor) = 0;
 
     /**
      * @brief Receive reply

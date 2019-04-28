@@ -1,6 +1,12 @@
 #ifndef APICALLDEFS_H
 #define APICALLDEFS_H
 
+#include <functional>
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <tuple>
+
 /**
  * @brief Status codes for service API calls
  */
@@ -15,6 +21,7 @@ enum class ApiCallStatus
     FILE_ALREADY_EXISTS,
     INVALID_PATH,
     INVALID_TRANSFER_ID,
+    INVALID_REPLY_FORMAT,
     UNKNOWN_ERROR
 };
 
@@ -71,9 +78,10 @@ using EndTransferCallback = std::function<void(ApiCallStatus)>;
 using GetFileSizeCallback = std::function<void(ApiCallStatus, uint64_t)>;
 
 /**
- * @brief List callback function. Receives the call status and a list of files and directories names.
+ * @brief List callback function. Receives the call status and a list of files and directories names, along with a
+ * boolean indicating if the file is a directory.
  */
-using ListCallback = std::function<void(ApiCallStatus, const std::vector<std::string>&)>;
+using ListCallback = std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, bool>>&)>;
 
 /**
  * @brief Remove callback function. Receives the call status.

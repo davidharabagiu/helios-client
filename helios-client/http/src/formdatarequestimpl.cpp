@@ -44,6 +44,12 @@ void FormDataRequestImpl::setPart(const std::string& name, HttpPartType type, co
     m_multiPart->append(httpPart);
 }
 
+void FormDataRequestImpl::setPart(const std::string& name, FormDataRequest::HttpPartType type, const std::string& value)
+{
+    std::vector<uint8_t> byteData(value.cbegin(), value.cend());
+    setPart(name, type, byteData);
+}
+
 std::string FormDataRequestImpl::url() const
 {
     return m_url;

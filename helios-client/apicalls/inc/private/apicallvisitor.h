@@ -5,6 +5,18 @@
 
 class HttpRequestManager;
 class RegisterUserCall;
+class LoginCall;
+class LogoutCall;
+class CreateDirectoryCall;
+class BeginUploadCall;
+class UploadCall;
+class BeginDownloadCall;
+class DownloadCall;
+class EndTransferCall;
+class GetFileSizeCall;
+class ListCall;
+class RemoveCall;
+class MoveCall;
 
 /**
  * @class ApiCallVisitor
@@ -24,6 +36,95 @@ public:
      * @param call - RegisterUserCall
      */
     void visit(RegisterUserCall& call) const;
+
+    /**
+     * @brief Visit LoginCall
+     * @param call - LoginCall
+     */
+    void visit(LoginCall& call) const;
+
+    /**
+     * @brief Visit LogoutCall
+     * @param call - LogoutCall
+     */
+    void visit(LogoutCall& call) const;
+
+    /**
+     * @brief Visit CreateDirectoryCall
+     * @param call - CreateDirectoryCall
+     */
+    void visit(CreateDirectoryCall& call) const;
+
+    /**
+     * @brief Visit BeginUploadCall
+     * @param call - BeginUploadCall
+     */
+    void visit(BeginUploadCall& call) const;
+
+    /**
+     * @brief Visit UploadCall
+     * @param call - UploadCall
+     */
+    void visit(UploadCall& call) const;
+
+    /**
+     * @brief Visit BeginDownloadCall
+     * @param call - BeginDownloadCall
+     */
+    void visit(BeginDownloadCall& call) const;
+
+    /**
+     * @brief Visit DownloadCall
+     * @param call - DownloadCall
+     */
+    void visit(DownloadCall& call) const;
+
+    /**
+     * @brief Visit EndTransferCall
+     * @param call - EndTransferCall
+     */
+    void visit(EndTransferCall& call) const;
+
+    /**
+     * @brief Visit GetFileSizeCall
+     * @param call - GetFileSizeCall
+     */
+    void visit(GetFileSizeCall& call) const;
+
+    /**
+     * @brief Visit ListCall
+     * @param call - ListCall
+     */
+    void visit(ListCall& call) const;
+
+    /**
+     * @brief Visit RemoveCall
+     * @param call - RemoveCall
+     */
+    void visit(RemoveCall& call) const;
+
+    /**
+     * @brief Visit MoveCall
+     * @param call - MoveCall
+     */
+    void visit(MoveCall& call) const;
+
+private:
+    /**
+     * @brief Handle calls that encapsulate post requests
+     * @param call - Generic call
+     * @tparam Call - Call type
+     */
+    template <typename Call>
+    void handlePost(Call& call) const;
+
+    /**
+     * @brief Handle calls that encapsulate get requests
+     * @param call - Generic call
+     * @tparam Call - Call type
+     */
+    template <typename Call>
+    void handleGet(Call& call) const;
 
 private:
     /**
