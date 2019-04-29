@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "testapplication.h"
 
 int main(int argc, char** argv)
 {
-    testing::InitGoogleMock(&argc, argv);
-    return RUN_ALL_TESTS();
+    TestApplication app(argc, argv);
+    app.postEvent(&app, new QEvent(TestApplication::RunTests));
+    return app.exec();
 }

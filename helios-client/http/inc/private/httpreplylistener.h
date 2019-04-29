@@ -2,8 +2,9 @@
 #define HTTPREPLYLISTENER_H
 
 #include <QObject>
-#include <memory>
 #include <functional>
+
+#include <QSSlError>
 
 class QNetworkReply;
 
@@ -22,13 +23,18 @@ public:
      * @param reply - QNetworkReply
      * @param callback - Function to be called when a reply arrives. The callback parameter is the given request id.
      */
-    HttpReplyListener(int id, const std::shared_ptr<QNetworkReply>& reply, const std::function<void(int)>& callback);
+    HttpReplyListener(int id, QNetworkReply* reply, const std::function<void(int)>& callback);
+
+    /**
+     * @brief Destructor
+     */
+    ~HttpReplyListener();
 
     /**
      * @brief Returns the reply object
      * @return std::shared_ptr<QNetworkReply>
      */
-    std::shared_ptr<QNetworkReply> reply() const;
+    QNetworkReply* reply() const;
 
 private slots:
     /**
@@ -45,7 +51,7 @@ private:
     /**
      * @brief Reply object
      */
-    std::shared_ptr<QNetworkReply> m_reply;
+    QNetworkReply* m_reply;
 
     /**
      * @brief Callback

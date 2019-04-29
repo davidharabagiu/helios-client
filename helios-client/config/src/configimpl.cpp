@@ -16,7 +16,7 @@ ConfigImpl::ConfigImpl()
 
     QJsonParseError err;
     auto            json = QJsonDocument::fromJson(configFile.readAll(), &err);
-    if (err.error != QJsonParseError::ParseError::NoError)
+    if (err.error != QJsonParseError::NoError)
     {
         qFatal("Error while processing %s: %s", Paths::kConfigFile.c_str(), err.errorString().toStdString().c_str());
     }

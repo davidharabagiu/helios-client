@@ -45,7 +45,7 @@ private:
      * @param reply - Reply object
      * @param callback - Callback
      */
-    void addPendingReply(const std::shared_ptr<QNetworkReply>& reply, const HttpReplyCallback& callback);
+    void addPendingReply(QNetworkReply* reply, const HttpReplyCallback& callback);
 
     /**
      * @brief Collect all the header values from a map in a QNetworkRequest object
@@ -69,11 +69,6 @@ private:
      * @brief Last assigned request id
      */
     int m_lastAssignedRequestId;
-
-    /**
-     * @brief Url separator
-     */
-    static const std::string s_kUrlSeparator;
 };
 
 #endif  // HTTPREQUESTMANAGERIMPL_H

@@ -2,16 +2,20 @@
 
 #include "httpreplylistener.h"
 
-HttpReplyListener::HttpReplyListener(int id, const std::shared_ptr<QNetworkReply>& reply,
-                                     const std::function<void(int)>& callback)
+HttpReplyListener::HttpReplyListener(int id, QNetworkReply* reply, const std::function<void(int)>& callback)
     : m_id(id)
     , m_reply(reply)
     , m_callback(callback)
 {
-    connect(reply.get(), SIGNAL(finished()), this, SLOT(onReplyReceived()));
+    connect(reply, SIGNAL(finished()), this, SLOT(onReplyReceived()));
 }
 
-std::shared_ptr<QNetworkReply> HttpReplyListener::reply() const
+HttpReplyListener::~HttpReplyListener()
+{
+    m_reply->deleteLater();
+}
+
+QNetworkReply* HttpReplyListener::reply() const
 {
     return m_reply;
 }

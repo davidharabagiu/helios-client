@@ -8,13 +8,21 @@ include(${CMAKE_SCRIPTS}/rpath_config.cmake REQUIRED)
 
 add_executable(${PROJECT_NAME}
     "src/main.cpp"
+    "inc/testapplication.h"
+    "src/testapplication.cpp"
+    "inc/idleprocessor.h"
+    "src/idleprocessor.cpp"
     "src/dependencyinjector_tests.cpp"
     "src/typeconversions_tests.cpp"
+    "src/formdatarequest_tests.cpp"
+    "src/httpreplylistener_tests.cpp"
+    "src/urlencodedrequest_tests.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc
     PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:http,INCLUDE_DIRECTORIES>
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
@@ -29,6 +37,7 @@ target_link_libraries(${PROJECT_NAME}
     ${GTEST_LIB}
     ${GMOCK_LIB}
     utils
+    http
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})

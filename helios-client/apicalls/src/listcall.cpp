@@ -2,6 +2,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonParseError>
 #include <QDebug>
 #include <tuple>
 
@@ -59,11 +60,12 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
 
     if (status == HttpStatus::OK)
     {
-        auto json = QJsonDocument::fromRawData(reinterpret_cast<const char*>(reply.data()),
-                                               safe_integral_cast<int>(reply.size()));
-        if (json.isNull() || json.isEmpty() || !json.isArray())
+        QJsonParseError jsonError;
+        auto            json = QJsonDocument::fromJson(
+            QByteArray(reinterpret_cast<const char*>(reply.data()), safe_integral_cast<int>(reply.size())), &jsonError);
+        if (jsonError.error != QJsonParseError::NoError)
         {
-            qCritical() << "Invalid json reply received: " << replyStr.c_str();
+            qCritical() << "JSON parse error: " << jsonError.errorString();
             m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, {});
         }
 

@@ -13,8 +13,6 @@
 #include "formdatarequestprivate.h"
 #include "typeconversions.h"
 
-const std::string HttpRequestManagerImpl::s_kUrlSeparator = "/";
-
 HttpRequestManagerImpl::HttpRequestManagerImpl()
     : m_networkAccessManager(new QNetworkAccessManager())
     , m_lastAssignedRequestId(-1)
@@ -32,7 +30,7 @@ void HttpRequestManagerImpl::post(std::unique_ptr<UrlEncodedRequest> request, co
 
     const auto& urlQuery = _request->urlQuery().query();
 
-    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->post(networkRequest, urlQuery.toUtf8()));
+    auto reply = m_networkAccessManager->post(networkRequest, urlQuery.toUtf8());
     addPendingReply(reply, callback);
 }
 
@@ -45,7 +43,7 @@ void HttpRequestManagerImpl::post(std::unique_ptr<FormDataRequest> request, cons
 
     collectHeaderValues(_request->header(), networkRequest);
 
-    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->post(networkRequest, _request->multiPart().get()));
+    auto reply = m_networkAccessManager->post(networkRequest, _request->multiPart().get());
     addPendingReply(reply, callback);
 }
 
@@ -54,12 +52,12 @@ void HttpRequestManagerImpl::get(std::unique_ptr<UrlEncodedRequest> request, con
     auto _request = dynamic_unique_cast<UrlEncodedRequestPrivate>(std::move(request));
     assert(_request);
 
-    auto            url = _request->url() + s_kUrlSeparator + _request->urlQuery().query().toStdString();
+    auto            url = _request->url() + "/?" + _request->urlQuery().query().toStdString();
     QNetworkRequest networkRequest(QUrl(QString(url.c_str())));
 
     collectHeaderValues(_request->header(), networkRequest);
 
-    std::shared_ptr<QNetworkReply> reply(m_networkAccessManager->get(networkRequest));
+    auto reply = m_networkAccessManager->get(networkRequest);
     addPendingReply(reply, callback);
 }
 
@@ -82,8 +80,7 @@ void HttpRequestManagerImpl::repliedReceived(int id)
     m_pendingReplies.erase(it);
 }
 
-void HttpRequestManagerImpl::addPendingReply(const std::shared_ptr<QNetworkReply>& reply,
-                                             const HttpReplyCallback&              callback)
+void HttpRequestManagerImpl::addPendingReply(QNetworkReply* reply, const HttpReplyCallback& callback)
 {
     auto listener =
         std::make_shared<HttpReplyListener>(++m_lastAssignedRequestId, reply, [this](int id) { repliedReceived(id); });
