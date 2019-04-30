@@ -32,9 +32,9 @@ LogoutCall::LogoutCall(const std::string& authToken, const ApiCallbacks::LogoutC
     m_request->setHeaderValue(s_kTokenParam, authToken);
 }
 
-std::unique_ptr<UrlEncodedRequest> LogoutCall::request()
+std::shared_ptr<UrlEncodedRequest> LogoutCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void LogoutCall::send(std::shared_ptr<ApiCallVisitor> visitor)

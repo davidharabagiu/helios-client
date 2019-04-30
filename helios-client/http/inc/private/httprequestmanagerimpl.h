@@ -6,10 +6,10 @@
 #include <tuple>
 #include <string>
 #include <map>
+#include <QNetworkAccessManager>
 
 #include "httprequestmanager.h"
 
-class QNetworkAccessManager;
 class QNetworkRequest;
 class QNetworkReply;
 class HttpReplyListener;
@@ -29,9 +29,9 @@ public:
     HttpRequestManagerImpl();
 
 public:  // from HttpRequestManager
-    void post(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
-    void post(std::unique_ptr<FormDataRequest> request, const HttpReplyCallback& callback) override;
-    void get(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
+    void post(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
+    void post(std::shared_ptr<FormDataRequest> request, const HttpReplyCallback& callback) override;
+    void get(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
 
 private:
     /**

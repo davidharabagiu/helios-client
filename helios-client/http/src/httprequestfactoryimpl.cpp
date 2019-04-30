@@ -2,12 +2,12 @@
 #include "urlencodedrequestimpl.h"
 #include "formdatarequestimpl.h"
 
-std::unique_ptr<UrlEncodedRequest> HttpRequestFactoryImpl::createUrlEncodedRequest(const std::string& url) const
+std::shared_ptr<UrlEncodedRequest> HttpRequestFactoryImpl::createUrlEncodedRequest(const std::string& url) const
 {
-    return std::make_unique<UrlEncodedRequestImpl>(url);
+    return std::make_shared<UrlEncodedRequestImpl>(url);
 }
 
-std::unique_ptr<FormDataRequest> HttpRequestFactoryImpl::createFormDataRequest(const std::string& url) const
+std::shared_ptr<FormDataRequest> HttpRequestFactoryImpl::createFormDataRequest(const std::string& url) const
 {
-    return std::make_unique<FormDataRequestImpl>(url);
+    return std::make_shared<FormDataRequestImpl>(url);
 }

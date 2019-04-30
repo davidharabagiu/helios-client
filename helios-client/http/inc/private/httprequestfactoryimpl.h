@@ -13,8 +13,8 @@ public:
     HttpRequestFactoryImpl() = default;
 
 public:  // from HttpRequestFactory
-    std::unique_ptr<UrlEncodedRequest> createUrlEncodedRequest(const std::string& url) const override;
-    std::unique_ptr<FormDataRequest>   createFormDataRequest(const std::string& url) const override;
+    std::shared_ptr<UrlEncodedRequest> createUrlEncodedRequest(const std::string& url) const override;
+    std::shared_ptr<FormDataRequest>   createFormDataRequest(const std::string& url) const override;
 };
 
 #endif  // HTTPREQUESTFACTORYIMPL_H

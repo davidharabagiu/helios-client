@@ -19,12 +19,13 @@ HttpRequestManagerImpl::HttpRequestManagerImpl()
 {
 }
 
-void HttpRequestManagerImpl::post(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback)
+void HttpRequestManagerImpl::post(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback)
 {
-    auto _request = dynamic_unique_cast<UrlEncodedRequestPrivate>(std::move(request));
+    auto _request = std::dynamic_pointer_cast<UrlEncodedRequestPrivate>(request);
     assert(_request);
 
     QNetworkRequest networkRequest(QUrl(QString(_request->url().c_str())));
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     collectHeaderValues(_request->header(), networkRequest);
 
@@ -34,25 +35,32 @@ void HttpRequestManagerImpl::post(std::unique_ptr<UrlEncodedRequest> request, co
     addPendingReply(reply, callback);
 }
 
-void HttpRequestManagerImpl::post(std::unique_ptr<FormDataRequest> request, const HttpReplyCallback& callback)
+void HttpRequestManagerImpl::post(std::shared_ptr<FormDataRequest> request, const HttpReplyCallback& callback)
 {
-    auto _request = dynamic_unique_cast<FormDataRequestPrivate>(std::move(request));
+    auto _request = std::dynamic_pointer_cast<FormDataRequestPrivate>(request);
     assert(_request);
 
     QNetworkRequest networkRequest(QUrl(QString(_request->url().c_str())));
 
     collectHeaderValues(_request->header(), networkRequest);
 
-    auto reply = m_networkAccessManager->post(networkRequest, _request->multiPart().get());
+    auto reply = m_networkAccessManager->post(networkRequest, _request->multiPart());
+    _request->multiPart()->setParent(reply);
     addPendingReply(reply, callback);
 }
 
-void HttpRequestManagerImpl::get(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback)
+void HttpRequestManagerImpl::get(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback)
 {
-    auto _request = dynamic_unique_cast<UrlEncodedRequestPrivate>(std::move(request));
+    auto _request = std::dynamic_pointer_cast<UrlEncodedRequestPrivate>(request);
     assert(_request);
 
-    auto            url = _request->url() + "/?" + _request->urlQuery().query().toStdString();
+    auto url = _request->url();
+    if (url[url.length() - 1] == '/')
+    {
+        url = url.substr(0, url.length() - 1);
+    }
+    url += "?" + _request->urlQuery().query().toStdString();
+
     QNetworkRequest networkRequest(QUrl(QString(url.c_str())));
 
     collectHeaderValues(_request->header(), networkRequest);
@@ -76,7 +84,7 @@ void HttpRequestManagerImpl::repliedReceived(int id)
     const auto& replyString = reply->readAll().toStdString();
 
     callback(static_cast<HttpStatus>(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()),
-             std::vector<uint8_t>(replyString.cbegin(), replyString.cend()));
+             std::vector<uint8_t>(replyString.cbegin(), replyString.cend()), reply->error() == QNetworkReply::NoError);
     m_pendingReplies.erase(it);
 }
 

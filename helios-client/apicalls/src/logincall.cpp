@@ -37,9 +37,9 @@ LoginCall::LoginCall(const std::string& username, const std::string& password,
     m_request->setParameter(s_kPasswordParam, password);
 }
 
-std::unique_ptr<UrlEncodedRequest> LoginCall::request()
+std::shared_ptr<UrlEncodedRequest> LoginCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void LoginCall::send(std::shared_ptr<ApiCallVisitor> visitor)

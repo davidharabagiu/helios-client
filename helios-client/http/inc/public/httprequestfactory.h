@@ -21,16 +21,16 @@ public:
     /**
      * @brief Create an http request with url encoded parameters
      * @param url - request url
-     * @return std::unique_ptr<UrlEncodedRequest>
+     * @return std::shared_ptr<UrlEncodedRequest>
      */
-    virtual std::unique_ptr<UrlEncodedRequest> createUrlEncodedRequest(const std::string& url) const = 0;
+    virtual std::shared_ptr<UrlEncodedRequest> createUrlEncodedRequest(const std::string& url) const = 0;
 
     /**
      * @brief Create an http request with form data parameters
      * @param url - request url
-     * @return std::unique_ptr<FormDataRequest>
+     * @return std::shared_ptr<FormDataRequest>
      */
-    virtual std::unique_ptr<FormDataRequest> createFormDataRequest(const std::string& url) const = 0;
+    virtual std::shared_ptr<FormDataRequest> createFormDataRequest(const std::string& url) const = 0;
 };
 
 #endif  // HTTPREQUESTFACTORY_H

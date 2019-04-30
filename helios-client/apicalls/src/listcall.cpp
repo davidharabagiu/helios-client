@@ -44,9 +44,9 @@ ListCall::ListCall(const std::string& authToken, const std::string& path, const 
     m_request->setParameter(s_kPathParam, path);
 }
 
-std::unique_ptr<UrlEncodedRequest> ListCall::request()
+std::shared_ptr<UrlEncodedRequest> ListCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void ListCall::send(std::shared_ptr<ApiCallVisitor> visitor)

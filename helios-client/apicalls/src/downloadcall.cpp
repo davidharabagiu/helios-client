@@ -40,9 +40,9 @@ DownloadCall::DownloadCall(const std::string& authToken, const std::string& tran
     m_request->setParameter(s_kChunkSizeParam, std::to_string(size));
 }
 
-std::unique_ptr<UrlEncodedRequest> DownloadCall::request()
+std::shared_ptr<UrlEncodedRequest> DownloadCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void DownloadCall::send(std::shared_ptr<ApiCallVisitor> visitor)

@@ -16,7 +16,7 @@ class FormDataRequest;
  * @param status - Reply status
  * @param content - Reply content
  */
-using HttpReplyCallback = std::function<void(HttpStatus status, const std::vector<uint8_t>& reply)>;
+using HttpReplyCallback = std::function<void(HttpStatus status, const std::vector<uint8_t>& reply, bool success)>;
 
 /**
  * @class HttpRequestManager
@@ -35,21 +35,21 @@ public:
      * @param request - Request
      * @param callback - Reply callback
      */
-    virtual void post(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) = 0;
+    virtual void post(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) = 0;
 
     /**
      * @brief Send an http post request with multipart form data parameters
      * @param request - Request
      * @param callback - Reply callback
      */
-    virtual void post(std::unique_ptr<FormDataRequest> request, const HttpReplyCallback& callback) = 0;
+    virtual void post(std::shared_ptr<FormDataRequest> request, const HttpReplyCallback& callback) = 0;
 
     /**
      * @brief Send an http get request with url encoded parameters
      * @param request - Request
      * @param callback - Reply callback
      */
-    virtual void get(std::unique_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) = 0;
+    virtual void get(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) = 0;
 };
 
 #endif  // HTTPREQUESTMANAGER_H

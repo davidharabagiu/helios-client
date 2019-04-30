@@ -22,9 +22,9 @@ public:
 public:
     /**
      * @brief Returns the http request
-     * @return std::unique_ptr<FormDataRequest>
+     * @return std::shared_ptr<FormDataRequest>
      */
-    std::unique_ptr<FormDataRequest> request();
+    std::shared_ptr<FormDataRequest> request();
 
 public:  // from ApiCall
     void send(std::shared_ptr<ApiCallVisitor> visitor) override;
@@ -34,7 +34,7 @@ private:
     /**
      * @brief Http request
      */
-    std::unique_ptr<FormDataRequest> m_request;
+    std::shared_ptr<FormDataRequest> m_request;
 
     /**
      * @brief Callback

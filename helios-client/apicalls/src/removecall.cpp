@@ -36,9 +36,9 @@ RemoveCall::RemoveCall(const std::string& authToken, const std::string& path,
     m_request->setParameter(s_kPathParam, path);
 }
 
-std::unique_ptr<UrlEncodedRequest> RemoveCall::request()
+std::shared_ptr<UrlEncodedRequest> RemoveCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void RemoveCall::send(std::shared_ptr<ApiCallVisitor> visitor)

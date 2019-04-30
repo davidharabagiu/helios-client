@@ -40,9 +40,9 @@ UploadCall::UploadCall(const std::string& authToken, const std::string& transfer
     m_request->setPart(s_kFileContentParam, FormDataRequest::HttpPartType::FILE, content);
 }
 
-std::unique_ptr<FormDataRequest> UploadCall::request()
+std::shared_ptr<FormDataRequest> UploadCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void UploadCall::send(std::shared_ptr<ApiCallVisitor> visitor)

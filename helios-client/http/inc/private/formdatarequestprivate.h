@@ -3,7 +3,6 @@
 
 #include <string>
 #include <map>
-#include <memory>
 
 class QHttpMultiPart;
 
@@ -33,9 +32,9 @@ public:
 
     /**
      * @brief Http multi-part
-     * @return std::shared_ptr<QHttpMultiPart>
+     * @return QHttpMultiPart*
      */
-    virtual std::shared_ptr<QHttpMultiPart> multiPart() const = 0;
+    virtual QHttpMultiPart* multiPart() const = 0;
 };
 
 #endif  // FORMDATAREQUESTPRIVATE_H

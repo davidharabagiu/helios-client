@@ -36,9 +36,9 @@ EndTransferCall::EndTransferCall(const std::string& authToken, const std::string
     m_request->setParameter(s_kTranferIdParam, transferId);
 }
 
-std::unique_ptr<UrlEncodedRequest> EndTransferCall::request()
+std::shared_ptr<UrlEncodedRequest> EndTransferCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void EndTransferCall::send(std::shared_ptr<ApiCallVisitor> visitor)

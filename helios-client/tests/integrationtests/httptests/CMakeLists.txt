@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(tests)
-
-add_subdirectory(unittests)
-add_subdirectory(integrationtests)
+project(httptests)
 
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
+include(${CMAKE_SCRIPTS}/rpath_config.cmake REQUIRED)
 
-add_library(${PROJECT_NAME}
-    "inc/testapplication.h"
-    "src/testapplication.cpp"
+add_executable(${PROJECT_NAME}
+    "src/main.cpp"
+    "src/http_tests.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    PRIVATE $<TARGET_PROPERTY:tests,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:http,INCLUDE_DIRECTORIES>
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
@@ -28,4 +28,9 @@ target_link_libraries(${PROJECT_NAME}
     ${QT5_LIBS}
     ${GTEST_LIB}
     ${GMOCK_LIB}
+    tests
+    utils
+    http
 )
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})

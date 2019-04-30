@@ -38,9 +38,9 @@ RegisterUserCall::RegisterUserCall(const std::string& username, const std::strin
     m_request->setParameter(s_kPasswordParam, password);
 }
 
-std::unique_ptr<UrlEncodedRequest> RegisterUserCall::request()
+std::shared_ptr<UrlEncodedRequest> RegisterUserCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void RegisterUserCall::send(std::shared_ptr<ApiCallVisitor> visitor)

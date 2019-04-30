@@ -20,9 +20,9 @@ public:
 public:
     /**
      * @brief Returns the http request
-     * @return std::unique_ptr<UrlEncodedRequest>
+     * @return std::shared_ptr<UrlEncodedRequest>
      */
-    std::unique_ptr<UrlEncodedRequest> request();
+    std::shared_ptr<UrlEncodedRequest> request();
 
 public:  // from ApiCall
     void send(std::shared_ptr<ApiCallVisitor> visitor) override;
@@ -32,7 +32,7 @@ private:
     /**
      * @brief Http request
      */
-    std::unique_ptr<UrlEncodedRequest> m_request;
+    std::shared_ptr<UrlEncodedRequest> m_request;
 
     /**
      * @brief Callback

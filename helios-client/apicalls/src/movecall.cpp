@@ -39,9 +39,9 @@ MoveCall::MoveCall(const std::string& authToken, const std::string& path, const 
     m_request->setParameter(s_kDestinationParam, destination);
 }
 
-std::unique_ptr<UrlEncodedRequest> MoveCall::request()
+std::shared_ptr<UrlEncodedRequest> MoveCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void MoveCall::send(std::shared_ptr<ApiCallVisitor> visitor)

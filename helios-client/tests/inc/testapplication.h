@@ -3,6 +3,8 @@
 
 #include <QCoreApplication>
 #include <QEvent>
+#include <cstdint>
+#include <functional>
 
 /**
  * @class TestApplication
@@ -19,6 +21,11 @@ public:
      * @param argv - Application arguments array
      */
     TestApplication(int& argc, char** argv);
+
+    static void processEventsUntilTimeout(int64_t timeout, bool yieldThread = true);
+
+    static void processEventsUntilPredicate(const std::function<bool()>& predicate, int64_t timeout = -1,
+                                            bool yieldThread = true);
 
 protected:  // from QCoreApplication
     bool event(QEvent* event) override;

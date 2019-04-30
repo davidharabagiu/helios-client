@@ -8,10 +8,6 @@ include(${CMAKE_SCRIPTS}/rpath_config.cmake REQUIRED)
 
 add_executable(${PROJECT_NAME}
     "src/main.cpp"
-    "inc/testapplication.h"
-    "src/testapplication.cpp"
-    "inc/idleprocessor.h"
-    "src/idleprocessor.cpp"
     "src/dependencyinjector_tests.cpp"
     "src/typeconversions_tests.cpp"
     "src/formdatarequest_tests.cpp"
@@ -21,6 +17,7 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    PRIVATE $<TARGET_PROPERTY:tests,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:http,INCLUDE_DIRECTORIES>
 )
@@ -36,6 +33,7 @@ target_link_libraries(${PROJECT_NAME}
     ${QT5_LIBS}
     ${GTEST_LIB}
     ${GMOCK_LIB}
+    tests
     utils
     http
 )

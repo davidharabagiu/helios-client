@@ -37,9 +37,9 @@ GetFileSizeCall::GetFileSizeCall(const std::string& authToken, const std::string
     m_request->setParameter(s_kPathParam, path);
 }
 
-std::unique_ptr<UrlEncodedRequest> GetFileSizeCall::request()
+std::shared_ptr<UrlEncodedRequest> GetFileSizeCall::request()
 {
-    return std::move(m_request);
+    return m_request;
 }
 
 void GetFileSizeCall::send(std::shared_ptr<ApiCallVisitor> visitor)

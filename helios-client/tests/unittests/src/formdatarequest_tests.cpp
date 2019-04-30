@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <memory>
+#include <QtGlobal>
 
 #include "formdatarequestimpl.h"
 
@@ -38,8 +39,8 @@ TEST_F(FormDataRequestTests, AddHeaderData)
 TEST_F(FormDataRequestTests, MultiPartValid)
 {
     EXPECT_NE(m_request->multiPart(), nullptr);
-    EXPECT_NO_FATAL_FAILURE(*m_request->multiPart());
+    EXPECT_NO_FATAL_FAILURE(Q_UNUSED(*m_request->multiPart()));
     m_request->setPart("key", FormDataRequest::HttpPartType::TEXT, "value");
     EXPECT_NE(m_request->multiPart(), nullptr);
-    EXPECT_NO_FATAL_FAILURE(*m_request->multiPart());
+    EXPECT_NO_FATAL_FAILURE(Q_UNUSED(*m_request->multiPart()));
 }

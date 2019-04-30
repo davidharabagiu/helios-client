@@ -7,7 +7,7 @@
 #include <QJsonDocument>
 
 #include "httpreplylistener.h"
-#include "idleprocessor.h"
+#include "testapplication.h"
 
 class HttpReplyListenerTests : public testing::Test
 {
@@ -35,7 +35,7 @@ TEST_F(HttpReplyListenerTests, CallbackCalledOnHttpReplyReceived)
         replyReceived = true;
     });
 
-    IdleProcessor::processEventsUntilPredicate([&replyReceived] { return replyReceived; }, m_kRequestTimeout, false);
+    TestApplication::processEventsUntilPredicate([&replyReceived] { return replyReceived; }, m_kRequestTimeout, false);
 
     EXPECT_TRUE(reply->isFinished());
     EXPECT_EQ(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute), 200);

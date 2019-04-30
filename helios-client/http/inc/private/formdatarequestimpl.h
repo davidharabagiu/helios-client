@@ -1,6 +1,9 @@
 #ifndef FORMDATAREQUESTIMPL_H
 #define FORMDATAREQUESTIMPL_H
 
+#include <vector>
+#include <QBuffer>
+
 #include "formdatarequest.h"
 #include "formdatarequestprivate.h"
 
@@ -16,6 +19,8 @@ public:
      */
     FormDataRequestImpl(const std::string& url);
 
+    ~FormDataRequestImpl() override;
+
 public:  // from FormDataRequest
     void setUrl(const std::string& url) override;
     void setHeaderValue(const std::string& name, const std::string& value) override;
@@ -25,7 +30,7 @@ public:  // from FormDataRequest
 public:  // from UrlEncodedRequestPrivate
     std::string                        url() const override;
     std::map<std::string, std::string> header() const override;
-    std::shared_ptr<QHttpMultiPart>    multiPart() const override;
+    QHttpMultiPart*                    multiPart() const override;
 
 private:
     /**
@@ -41,7 +46,12 @@ private:
     /**
      * @brief Request multi-part
      */
-    std::shared_ptr<QHttpMultiPart> m_multiPart;
+    QHttpMultiPart* m_multiPart;
+
+    /**
+     * @brief Vector which holds the transmitted data while it's sent
+     */
+    std::vector<QByteArray*> m_sourceData;
 };
 
 #endif  // FORMDATAREQUESTIMPL_H

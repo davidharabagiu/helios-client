@@ -1,13 +1,22 @@
 #include <QDebug>
 #include <QHttpMultiPart>
+#include <QBuffer>
 
 #include "formdatarequestimpl.h"
 #include "typeconversions.h"
 
 FormDataRequestImpl::FormDataRequestImpl(const std::string& url)
     : m_url(url)
-    , m_multiPart(new QHttpMultiPart())
+    , m_multiPart(new QHttpMultiPart(QHttpMultiPart::FormDataType))
 {
+}
+
+FormDataRequestImpl::~FormDataRequestImpl()
+{
+    for (auto p : m_sourceData)
+    {
+        delete p;
+    }
 }
 
 void FormDataRequestImpl::setUrl(const std::string& url)
@@ -24,21 +33,32 @@ void FormDataRequestImpl::setPart(const std::string& name, HttpPartType type, co
 {
     QHttpPart httpPart;
 
-    httpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QString(("form-data; name=\"" + name + "\"").c_str()));
-    httpPart.setBody(QByteArray(reinterpret_cast<const char*>(value.data()), safe_integral_cast<int>(value.size())));
+    httpPart.setHeader(QNetworkRequest::ContentDispositionHeader, ("form-data; name=\"" + name + "\"").c_str());
+
+    auto bytes = new QByteArray(reinterpret_cast<const char*>(value.data()), safe_integral_cast<int>(value.size()));
 
     if (type == HttpPartType::TEXT)
     {
         httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+        httpPart.setBody(*bytes);
+        delete bytes;
     }
     else if (type == HttpPartType::FILE)
     {
         httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+
+        auto buffer = new QBuffer(bytes);
+        buffer->open(QBuffer::ReadOnly);
+        httpPart.setBodyDevice(buffer);
+
+        // Keep data alive while it's being sent
+        m_sourceData.push_back(bytes);
+        buffer->setParent(m_multiPart);
     }
     else
     {
         qWarning() << "Unknown http part type: " << static_cast<int>(type);
+        delete bytes;
         return;
     }
 
@@ -61,7 +81,7 @@ std::map<std::string, std::string> FormDataRequestImpl::header() const
     return m_header;
 }
 
-std::shared_ptr<QHttpMultiPart> FormDataRequestImpl::multiPart() const
+QHttpMultiPart* FormDataRequestImpl::multiPart() const
 {
     return m_multiPart;
 }
