@@ -10,10 +10,12 @@
 DefaultSettingsProviderImpl::DefaultSettingsProviderImpl()
 {
     QFile defaultSettingsFile(QString::fromStdString(Paths::kDefaultSettingsFile));
-    if (!configFile.exists())
+    if (!defaultSettingsFile.exists())
     {
         qFatal("Default settings file %s not found", Paths::kDefaultSettingsFile.c_str());
     }
+
+    defaultSettingsFile.open(QIODevice::ReadOnly);
 
     QJsonParseError err;
     auto            json = QJsonDocument::fromJson(defaultSettingsFile.readAll(), &err);
@@ -22,6 +24,8 @@ DefaultSettingsProviderImpl::DefaultSettingsProviderImpl()
         qFatal("Error while processing %s: %s", Paths::kDefaultSettingsFile.c_str(),
                err.errorString().toStdString().c_str());
     }
+
+    defaultSettingsFile.close();
 
     const auto& jsonObj = json.object();
     for (auto it = jsonObj.constBegin(); it != jsonObj.constEnd(); ++it)
@@ -42,14 +46,11 @@ DefaultSettingsProviderImpl::DefaultSettingsProviderImpl()
         }
         else
         {
-            qWarning() << "Unknown json value type for default setting " << it.key() << ": "
-                       << static_cast<int>(it.value().type());
+            qFatal("Unknown json value type for default setting %s: %d", it.key().toStdString().c_str(),
+                   static_cast<int>(it.value().type()));
         }
 
-        if (setting.isValid())
-        {
-            m_valuesRegistry.emplace(it.key().toStdString(), setting);
-        }
+        m_valuesRegistry.emplace(it.key().toStdString(), setting);
     }
 }
 
@@ -60,8 +61,5 @@ QVariant DefaultSettingsProviderImpl::get(const std::string& key) const
     {
         return QVariant();
     }
-    else
-    {
-        return *it;
-    }
+    return it->second;
 }

@@ -1,6 +1,8 @@
 #ifndef DEFAULTSETTINGSPROVIDERIMPL_H
 #define DEFAULTSETTINGSPROVIDERIMPL_H
 
+#include <map>
+
 #include "defaultsettingsprovider.h"
 
 /**
@@ -16,7 +18,7 @@ public:
     DefaultSettingsProviderImpl();
 
 public:  // from DefaultSettingsProvider
-    QVariant get(const std::string& key) const;
+    QVariant get(const std::string& key) const override;
 
 private:
     /**

@@ -14,12 +14,16 @@ ConfigImpl::ConfigImpl()
         qFatal("Configuration file %s not found", Paths::kConfigFile.c_str());
     }
 
+    configFile.open(QIODevice::ReadOnly);
+
     QJsonParseError err;
     auto            json = QJsonDocument::fromJson(configFile.readAll(), &err);
     if (err.error != QJsonParseError::NoError)
     {
         qFatal("Error while processing %s: %s", Paths::kConfigFile.c_str(), err.errorString().toStdString().c_str());
     }
+
+    configFile.close();
 
     auto serverUrlObj = json[QString::fromStdString(ConfigKeys::kServerUrlKey)];
     if (serverUrlObj.type() != QJsonValue::String)
@@ -39,6 +43,6 @@ QVariant ConfigImpl::get(const std::string& key) const
     }
     else
     {
-        return *it;
+        return it->second;
     }
 }

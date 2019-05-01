@@ -2,6 +2,7 @@
 #define DEFAULTSETTINGSPROVIDER_H
 
 #include <QVariant>
+#include <string>
 
 /**
  * @class DefaultSettingsProvider

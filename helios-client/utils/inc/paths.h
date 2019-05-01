@@ -10,6 +10,7 @@ const std::string kQmlPath             = "qml";
 const std::string kMainQmlFile         = "main.qml";
 const std::string kConfigFile          = "config.json";
 const std::string kDefaultSettingsFile = "default_settings.json";
+const std::string kSettingsFile        = "settings.json";
 }  // namespace Paths
 
 #endif  // PATHS_H
