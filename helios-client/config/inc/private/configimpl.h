@@ -16,6 +16,7 @@ public:
 
 public:  // from Config
     QVariant get(const std::string& key) const override;
+    QVariant operator[](const std::string& key) const override;
 
 private:
     /**

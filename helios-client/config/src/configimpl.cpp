@@ -34,6 +34,11 @@ ConfigImpl::ConfigImpl()
     m_valuesRegistry.emplace(ConfigKeys::kServerUrlKey, serverUrlObj.toString());
 }
 
+QVariant ConfigImpl::operator[](const std::string& key) const
+{
+    return get(key);
+}
+
 QVariant ConfigImpl::get(const std::string& key) const
 {
     auto it = m_valuesRegistry.find(key);

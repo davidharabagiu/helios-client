@@ -22,6 +22,13 @@ public:
      * @return QVariant
      */
     virtual QVariant get(const std::string& key) const = 0;
+
+    /**
+     * @brief Same as get method
+     * @param key - Config key
+     * @return QVariant
+     */
+    virtual QVariant operator[](const std::string& key) const = 0;
 };
 
 #endif  // CONFIG_H

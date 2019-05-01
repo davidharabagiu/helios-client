@@ -13,6 +13,8 @@ add_executable(${PROJECT_NAME}
     "src/formdatarequest_tests.cpp"
     "src/httpreplylistener_tests.cpp"
     "src/urlencodedrequest_tests.cpp"
+    "src/config_tests.cpp"
+    "src/defaultsettings_tests.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -20,6 +22,8 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:tests,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:http,INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:config,INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:settings,INCLUDE_DIRECTORIES>
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
@@ -36,6 +40,8 @@ target_link_libraries(${PROJECT_NAME}
     tests
     utils
     http
+    config
+    settings
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
