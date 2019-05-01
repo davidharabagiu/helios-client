@@ -32,5 +32,13 @@ ConfigImpl::ConfigImpl()
 
 QVariant ConfigImpl::get(const std::string& key) const
 {
-    return m_valuesRegistry.at(key);
+    auto it = m_valuesRegistry.find(key);
+    if (it == m_valuesRegistry.end())
+    {
+        return QVariant();
+    }
+    else
+    {
+        return *it;
+    }
 }
