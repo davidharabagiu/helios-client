@@ -11,8 +11,12 @@ add_library(${PROJECT_NAME}
     "inc/dependencyinjector.tpp"
     "src/dependencyinjector.cpp"
     "inc/typeconversions.h"
+    "inc/asyncnotifier.h"
+    "inc/asyncnotifier.tpp"
+    "src/asyncnotifier.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
+
