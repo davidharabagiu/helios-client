@@ -17,8 +17,14 @@ class SettingsManagerImpl : public SettingsManager
 public:
     /**
      * @brief Constructor
+     * @param defaultSettingsProvider - Default settings provider
      */
-    SettingsManagerImpl();
+    SettingsManagerImpl(std::unique_ptr<DefaultSettingsProvider> defaultSettingsProvider);
+
+    /**
+     * @brief Destructor
+     */
+    ~SettingsManagerImpl() override;
 
 public:  // from SettingsManager
     QVariant get(const std::string& key) const override;
@@ -39,7 +45,7 @@ private:
     /**
      * @brief Provider for default settings values
      */
-    std::shared_ptr<DefaultSettingsProvider> m_defaultSettingsProvider;
+    std::unique_ptr<DefaultSettingsProvider> m_defaultSettingsProvider;
 };
 
 #endif  // SETTINGSMANAGERIMPL_H

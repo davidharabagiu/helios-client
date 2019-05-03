@@ -5,19 +5,12 @@
 #include <QJsonObject>
 
 #include "settingsmanagerimpl.h"
-#include "single.h"
-#include "dependencyinjector.h"
 #include "defaultsettingsprovider.h"
 #include "paths.h"
 
-SettingsManagerImpl::SettingsManagerImpl()
+SettingsManagerImpl::SettingsManagerImpl(std::unique_ptr<DefaultSettingsProvider> defaultSettingsProvider)
+    : m_defaultSettingsProvider(std::move(defaultSettingsProvider))
 {
-    m_defaultSettingsProvider = Single<DependencyInjector>::instance().getInstance<DefaultSettingsProvider>();
-    if (!m_defaultSettingsProvider)
-    {
-        qFatal("DefaultSettingsManager instance not available");
-    }
-
     QFile settingsFile(QString::fromStdString(Paths::kSettingsFile));
     if (!settingsFile.exists())
     {
@@ -67,6 +60,11 @@ SettingsManagerImpl::SettingsManagerImpl()
     }
 }
 
+SettingsManagerImpl::~SettingsManagerImpl()
+{
+    save();
+}
+
 QVariant SettingsManagerImpl::get(const std::string& key) const
 {
     auto it = m_valuesRegistry.find(key);
@@ -104,6 +102,11 @@ void SettingsManagerImpl::reset()
 
 void SettingsManagerImpl::save() const
 {
+    if (m_valuesRegistry.empty())
+    {
+        QFile(QString::fromStdString(Paths::kSettingsFile)).remove();
+    }
+
     QJsonObject jsonObj;
     for (const auto& el : m_valuesRegistry)
     {
