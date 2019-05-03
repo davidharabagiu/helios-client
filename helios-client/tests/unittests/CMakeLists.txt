@@ -15,6 +15,8 @@ add_executable(${PROJECT_NAME}
     "src/urlencodedrequest_tests.cpp"
     "src/config_tests.cpp"
     "src/defaultsettings_tests.cpp"
+    "src/settingsmanager_tests.cpp"
+    "inc/defaultsettingsprovider_mock.h"
 )
 
 target_include_directories(${PROJECT_NAME}
