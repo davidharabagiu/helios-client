@@ -6,9 +6,11 @@
 #include <vector>
 
 #include "userservice.h"
+#include "apicalldefs.h"
 
 class UserApiCaller;
 class SettingsManager;
+class AsyncNotifier;
 
 /**
  * @class UserServiceImpl
@@ -41,6 +43,35 @@ public:  // from UserService
 
 private:
     /**
+     * @brief Save session so it can be restored when the application restarts.
+     * @param username - User name
+     * @param authToken - Authentication token
+     */
+    void saveSession(const std::string& username, const std::string& authToken);
+
+    /**
+     * @brief Handle login operation completion
+     * @param status - Completion status
+     * @param username - User name
+     * @param authToken - Authentication token
+     * @param persist - True to persist authentication
+     */
+    void handleLoggedIn(ApiCallStatus status, const std::string& username, const std::string& authToken, bool persist);
+
+    /**
+     * @brief Handle logout operation completion
+     * @param status - Completion status
+     */
+    void handleLoggedOut(ApiCallStatus status);
+
+    /**
+     * @brief Handle createUser operation completion
+     * @param status - Completion status
+     */
+    void handleUserCreated(ApiCallStatus status);
+
+private:
+    /**
      * @brief True if the service has be started
      */
     bool m_enabled;
@@ -69,6 +100,11 @@ private:
      * @brief Settings manager
      */
     std::shared_ptr<SettingsManager> m_settingsManager;
+
+    /**
+     * @brief Used for asynchronous notification of clients
+     */
+    std::unique_ptr<AsyncNotifier> m_asyncNotifier;
 };
 
 #endif  // USERSERVICEIMPL_H
