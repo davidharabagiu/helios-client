@@ -1,40 +1,45 @@
-#ifndef USERACCOUNT_H
-#define USERACCOUNT_H
+#ifndef USERSESSION_H
+#define USERSESSION_H
 
 #include <string>
 
 /**
- * @class UserAccount
- * @brief Holds internal data for a user account
+ * @class UserSession
+ * @brief Models a user authentication session
  */
-class UserAccount
+class UserSession
 {
 public:
     /**
      * @brief Constructor
      */
-    UserAccount() = default;
+    UserSession() = default;
 
     /**
      * @brief Constructor
      * @param username - User name
      * @param password - Password
      */
-    UserAccount(const std::string& username, const std::string& password);
+    UserSession(const std::string& username, const std::string& authToken);
 
     /**
      * @brief operator ==
      * @param rhs - The other operand
      * @return bool
      */
-    bool operator==(const UserAccount& rhs) const;
+    bool operator==(const UserSession& rhs) const;
 
     /**
      * @brief operator !=
      * @param rhs - The other operand
      * @return bool
      */
-    bool operator!=(const UserAccount& rhs) const;
+    bool operator!=(const UserSession& rhs) const;
+
+    /**
+     * @brief Clear all data
+     */
+    void clear();
 
     /**
      * @brief Validity check
@@ -50,21 +55,21 @@ public:
 
     /**
      * @brief Setter for username
-     * @param newVal - std::string
+     * @param newVal - const std::string&
      */
     void setUsername(const std::string& newVal);
 
     /**
-     * @brief Getter for password
+     * @brief Getter for authentication token
      * @return const std::string&
      */
-    const std::string& password() const;
+    const std::string& authToken() const;
 
     /**
-     * @brief Setter for password
-     * @param newVal - std::string
+     * @brief Setter for authentication token
+     * @param newVal - const std::string&
      */
-    void setPassword(const std::string& newVal);
+    void setAuthToken(const std::string& newVal);
 
 private:
     /**
@@ -73,9 +78,9 @@ private:
     std::string m_username;
 
     /**
-     * @brief Password
+     * @brief Authentication token
      */
-    std::string m_password;
+    std::string m_authToken;
 };
 
-#endif  // USERACCOUNT_H
+#endif  // USERSESSION_H

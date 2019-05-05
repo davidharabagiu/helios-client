@@ -1,5 +1,3 @@
-#include <memory>
-
 #include "useraccount.h"
 
 UserAccount::UserAccount(const std::string& username, const std::string& password)
@@ -16,6 +14,11 @@ bool UserAccount::operator==(const UserAccount& rhs) const
 bool UserAccount::operator!=(const UserAccount& rhs) const
 {
     return !(*this == rhs);
+}
+
+bool UserAccount::valid() const
+{
+    return !m_username.empty() && !m_password.empty();
 }
 
 const std::string& UserAccount::username() const
@@ -36,11 +39,4 @@ const std::string& UserAccount::password() const
 void UserAccount::setPassword(const std::string& newVal)
 {
     m_password = newVal;
-}
-
-void test()
-{
-    UserAccount a1("pula", "pizda");
-    UserAccount a2("cacat", "pisat");
-    UserAccount a3(a1);
 }

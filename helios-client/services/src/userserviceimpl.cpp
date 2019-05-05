@@ -7,6 +7,7 @@
 #include "settingsmanager.h"
 #include "asyncnotifier.h"
 #include "userservicelistener.h"
+#include "useraccount.h"
 
 namespace SettingsKeys
 {
@@ -49,30 +50,30 @@ void UserServiceImpl::unregisterListener(const std::shared_ptr<UserServiceListen
     m_listeners.erase(std::find(m_listeners.begin(), m_listeners.end(), listener));
 }
 
-const std::string& UserServiceImpl::username() const
+const UserSession& UserServiceImpl::session() const
 {
-    return m_username;
+    return m_session;
 }
 
-const std::string& UserServiceImpl::authenticationToken() const
+bool UserServiceImpl::loggedIn() const
 {
-    return m_authToken;
+    return m_session.valid();
 }
 
-void UserServiceImpl::login(const std::string& username, const std::string& password, bool persist)
+void UserServiceImpl::login(const UserAccount& account, bool persist)
 {
-    if (!m_enabled)
+    if (!m_enabled || !account.valid())
     {
         return;
     }
 
-    m_apiCaller->login(username, password,
-                       [this, &username, &persist](ApiCallStatus status, const std::string& authToken) {
+    m_apiCaller->login(account.username(), account.password(),
+                       [this, &account, &persist](ApiCallStatus status, const std::string& authToken) {
                            if (!m_enabled)
                            {
                                return;
                            }
-                           handleLoggedIn(status, username, authToken, persist);
+                           handleLoggedIn(status, UserSession(account.username(), authToken), persist);
                        });
 }
 
@@ -88,24 +89,26 @@ void UserServiceImpl::restoreSession()
 
     if (username.isValid() && token.isValid())
     {
-        m_username  = username.toString().toStdString();
-        m_authToken = token.toString().toStdString();
+        m_session = UserSession(username.toString().toStdString(), token.toString().toStdString());
     }
 
-    for (const auto& listener : m_listeners)
+    if (m_session.valid())
     {
-        m_asyncNotifier->postNotification(&UserServiceListener::loggedIn, listener.get(), true, std::string());
+        for (const auto& listener : m_listeners)
+        {
+            m_asyncNotifier->postNotification(&UserServiceListener::loggedIn, listener.get(), true, std::string());
+        }
     }
 }
 
 void UserServiceImpl::logout()
 {
-    if (!m_enabled)
+    if (!m_enabled || !m_session.valid())
     {
         return;
     }
 
-    m_apiCaller->logout(m_authToken, [this](ApiCallStatus status) {
+    m_apiCaller->logout(m_session.authToken(), [this](ApiCallStatus status) {
         if (!m_enabled)
         {
             return;
@@ -115,40 +118,26 @@ void UserServiceImpl::logout()
 
     m_settingsManager->reset(SettingsKeys::kUsername);
     m_settingsManager->reset(SettingsKeys::kAuthToken);
-    m_username.clear();
-    m_authToken.clear();
+    m_session.clear();
 }
 
-void UserServiceImpl::createUser(const std::string& username, const std::string& password)
+void UserServiceImpl::createUser(const UserAccount& account)
 {
-    if (!m_enabled)
+    if (!m_enabled || !account.valid())
     {
         return;
     }
 
-    m_apiCaller->registerUser(username, password, [this](ApiCallStatus status) {
+    m_apiCaller->registerUser(account.username(), account.password(), [this](ApiCallStatus status) {
         if (!m_enabled)
         {
             return;
         }
         handleUserCreated(status);
     });
-
-    m_settingsManager->reset(SettingsKeys::kUsername);
-    m_settingsManager->reset(SettingsKeys::kAuthToken);
-    m_username.clear();
-    m_authToken.clear();
 }
 
-void UserServiceImpl::saveSession(const std::string& username, const std::string& authToken)
-{
-    m_settingsManager->set(SettingsKeys::kUsername, QString::fromStdString(username));
-    m_settingsManager->set(SettingsKeys::kAuthToken, QString::fromStdString(authToken));
-    m_settingsManager->save();
-}
-
-void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const std::string& username, const std::string& authToken,
-                                     bool persist)
+void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& session, bool persist)
 {
     bool        success = false;
     std::string errorString;
@@ -156,9 +145,8 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const std::string& us
     {
         case ApiCallStatus::SUCCESS:
         {
-            m_username  = username;
-            m_authToken = authToken;
-            success     = true;
+            m_session = session;
+            success   = true;
             break;
         }
         case ApiCallStatus::INVALID_USERNAME:
@@ -185,7 +173,9 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const std::string& us
 
     if (persist)
     {
-        saveSession(username, authToken);
+        m_settingsManager->set(SettingsKeys::kUsername, QString::fromStdString(session.username()));
+        m_settingsManager->set(SettingsKeys::kAuthToken, QString::fromStdString(session.authToken()));
+        m_settingsManager->save();
     }
 }
 

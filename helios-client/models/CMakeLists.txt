@@ -7,6 +7,8 @@ include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 add_library(${PROJECT_NAME}
     "inc/useraccount.h"
     "src/useraccount.cpp"
+    "inc/usersession.h"
+    "src/usersession.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

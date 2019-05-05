@@ -7,6 +7,7 @@
 
 #include "userservice.h"
 #include "apicalldefs.h"
+#include "usersession.h"
 
 class UserApiCaller;
 class SettingsManager;
@@ -34,29 +35,21 @@ public:  // from ServiceInterface
 public:  // from UserService
     void               registerListener(const std::shared_ptr<UserServiceListener>& listener) override;
     void               unregisterListener(const std::shared_ptr<UserServiceListener>& listener) override;
-    const std::string& username() const override;
-    const std::string& authenticationToken() const override;
-    void               login(const std::string& username, const std::string& password, bool persist) override;
+    const UserSession& session() const override;
+    bool               loggedIn() const override;
+    void               login(const UserAccount& account, bool persist) override;
     void               restoreSession() override;
     void               logout() override;
-    void               createUser(const std::string& username, const std::string& password) override;
+    void               createUser(const UserAccount& account) override;
 
 private:
     /**
-     * @brief Save session so it can be restored when the application restarts.
-     * @param username - User name
-     * @param authToken - Authentication token
-     */
-    void saveSession(const std::string& username, const std::string& authToken);
-
-    /**
      * @brief Handle login operation completion
      * @param status - Completion status
-     * @param username - User name
-     * @param authToken - Authentication token
+     * @param session - New user session
      * @param persist - True to persist authentication
      */
-    void handleLoggedIn(ApiCallStatus status, const std::string& username, const std::string& authToken, bool persist);
+    void handleLoggedIn(ApiCallStatus status, const UserSession& session, bool persist);
 
     /**
      * @brief Handle logout operation completion
@@ -77,14 +70,9 @@ private:
     bool m_enabled;
 
     /**
-     * @brief Name of the currently logged in user
+     * @brief Current user session. Valid only when logged in.
      */
-    std::string m_username;
-
-    /**
-     * @brief Authentication token of the currenly logged in user
-     */
-    std::string m_authToken;
+    UserSession m_session;
 
     /**
      * @brief Operations listeners

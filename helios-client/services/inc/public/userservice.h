@@ -7,6 +7,8 @@
 #include "serviceinterface.h"
 
 class UserServiceListener;
+class UserAccount;
+class UserSession;
 
 /**
  * @class UserService
@@ -33,25 +35,25 @@ public:
     virtual void unregisterListener(const std::shared_ptr<UserServiceListener>& listener) = 0;
 
     /**
-     * @brief Returns the current logged in user name. Valid only when logged in.
-     * @return const std::string&
+     * @brief Returns the current user session which contains the username and the authentication token. Valid only when
+     * logged in.
+     * @return const UserSession&
      */
-    virtual const std::string& username() const = 0;
+    virtual const UserSession& session() const = 0;
 
     /**
-     * @brief Returns the current logged in user authentication token. Valid only when logged in.
-     * @return const std::string&
+     * @brief Logged in check
+     * @return bool
      */
-    virtual const std::string& authenticationToken() const = 0;
+    virtual bool loggedIn() const = 0;
 
     /**
      * @brief Authenticate as a user
-     * @param username - User name
-     * @param password - User password
+     * @param account - UserAccount
      * @param persist - Set to true in order to persist the authentication. Next time the application is started the
      * user will still be logged in.
      */
-    virtual void login(const std::string& username, const std::string& password, bool persist) = 0;
+    virtual void login(const UserAccount& account, bool persist) = 0;
 
     /**
      * @brief Restore the last session if the login operation was persisted.
@@ -65,10 +67,9 @@ public:
 
     /**
      * @brief Create a new user
-     * @param username - User name
-     * @param password - User password
+     * @param account - UserAccount
      */
-    virtual void createUser(const std::string& username, const std::string& password) = 0;
+    virtual void createUser(const UserAccount& account) = 0;
 };
 
 #endif  // USERSERVICE_H
