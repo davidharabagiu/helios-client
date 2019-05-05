@@ -4,16 +4,15 @@
 #include <QMetaType>
 #include <QString>
 #include <memory>
-#include <QObject>
 
 class UserAccount;
 
 /**
  * @brief The UserAccount class
  */
-class QUserAccount : public QObject
+class QUserAccount
 {
-    Q_OBJECT
+    Q_GADGET
 
     /**
      * @property username
@@ -41,25 +40,25 @@ public:
 
     /**
      * @brief Getter for username
-     * @return const QString&
+     * @return QString
      */
     QString username() const;
 
     /**
      * @brief Setter for username
-     * @param newVal - QString
+     * @param newVal - const QString&
      */
     void setUsername(const QString& newVal);
 
     /**
      * @brief Getter for password
-     * @return const QString&
+     * @return QString
      */
     QString password() const;
 
     /**
      * @brief Setter for password
-     * @param newVal - QString
+     * @param newVal - const QString&
      */
     void setPassword(const QString& newVal);
 
@@ -76,6 +75,6 @@ private:
     std::shared_ptr<UserAccount> m_data;
 };
 
-// Q_DECLARE_METATYPE(QUserAccount)
+Q_DECLARE_METATYPE(QUserAccount)
 
 #endif  // QUSERACCOUNT_H
