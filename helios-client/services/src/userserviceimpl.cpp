@@ -96,7 +96,8 @@ void UserServiceImpl::restoreSession()
     {
         for (const auto& listener : m_listeners)
         {
-            m_asyncNotifier->postNotification(&UserServiceListener::loggedIn, listener.get(), true, std::string());
+            m_asyncNotifier->postNotification(&UserServiceListener::loginCompleted, listener.get(), true,
+                                              std::string());
         }
     }
 }
@@ -115,10 +116,6 @@ void UserServiceImpl::logout()
         }
         handleLoggedOut(status);
     });
-
-    m_settingsManager->reset(SettingsKeys::kUsername);
-    m_settingsManager->reset(SettingsKeys::kAuthToken);
-    m_session.clear();
 }
 
 void UserServiceImpl::createUser(const UserAccount& account)
@@ -168,7 +165,7 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
 
     for (const auto& listener : m_listeners)
     {
-        m_asyncNotifier->postNotification(&UserServiceListener::loggedIn, listener.get(), success, errorString);
+        m_asyncNotifier->postNotification(&UserServiceListener::loginCompleted, listener.get(), success, errorString);
     }
 
     if (persist)
@@ -186,6 +183,9 @@ void UserServiceImpl::handleLoggedOut(ApiCallStatus status)
     if (status == ApiCallStatus::SUCCESS)
     {
         success = true;
+        m_settingsManager->reset(SettingsKeys::kUsername);
+        m_settingsManager->reset(SettingsKeys::kAuthToken);
+        m_session.clear();
     }
     else
     {
@@ -194,7 +194,7 @@ void UserServiceImpl::handleLoggedOut(ApiCallStatus status)
 
     for (const auto& listener : m_listeners)
     {
-        m_asyncNotifier->postNotification(&UserServiceListener::loggedOut, listener.get(), success, errorString);
+        m_asyncNotifier->postNotification(&UserServiceListener::logoutCompleted, listener.get(), success, errorString);
     }
 }
 
@@ -233,6 +233,7 @@ void UserServiceImpl::handleUserCreated(ApiCallStatus status)
 
     for (const auto& listener : m_listeners)
     {
-        m_asyncNotifier->postNotification(&UserServiceListener::loggedOut, listener.get(), success, errorString);
+        m_asyncNotifier->postNotification(&UserServiceListener::userCreationCompleted, listener.get(), success,
+                                          errorString);
     }
 }

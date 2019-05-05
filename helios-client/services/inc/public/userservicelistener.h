@@ -20,21 +20,21 @@ public:
      * @param success - Specified whether or not the operation completed successfully
      * @param errorString - Valid only when success is false. It details the occured problem.
      */
-    virtual void loggedIn(bool success, const std::string& errorString) = 0;
+    virtual void loginCompleted(bool success, const std::string& errorString) = 0;
 
     /**
      * @brief Called when a user logout operation completed
      * @param success - Specified whether or not the operation completed successfully
      * @param errorString - Valid only when success is false. It details the occured problem.
      */
-    virtual void loggedOut(bool success, const std::string& errorString) = 0;
+    virtual void logoutCompleted(bool success, const std::string& errorString) = 0;
 
     /**
      * @brief Called when a user registration operation completed
      * @param success - Specified whether or not the operation completed successfully
      * @param errorString - Valid only when success is false. It details the occured problem.
      */
-    virtual void userCreated(bool success, const std::string& errorString) = 0;
+    virtual void userCreationCompleted(bool success, const std::string& errorString) = 0;
 };
 
 #endif  // USERSERVICELISTENER_H
