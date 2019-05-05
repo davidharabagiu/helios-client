@@ -1,17 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QDir>
-#include <QDebug>
 
 #include "paths.h"
-#include "typeconversions.h"
-#include <cstdint>
+#include "qtmodels.h"
 
 int main(int argc, char* argv[])
 {
-    unsigned long long a = 1000000000000ULL;
-    auto               b = safe_integral_cast<int>(a);
-    (void)b;
+    QtModels::registerQmlTypes("helios");
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
