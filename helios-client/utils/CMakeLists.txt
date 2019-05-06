@@ -17,6 +17,8 @@ add_library(${PROJECT_NAME}
     "src/asyncnotifier.cpp"
     "inc/typeutils.h"
     "inc/observable.h"
+    "inc/timer.h"
+    "src/timer.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
