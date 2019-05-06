@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <map>
+#include <cstdint>
 
 #include "qsettingscontroller.h"
 #include "qsettingscontrollerimpl.h"
@@ -8,6 +9,9 @@
 #include "dependencyinjector.h"
 #include "settingsmanager.h"
 #include "defaultsettingskeys.h"
+#include "config.h"
+#include "configkeys.h"
+#include "typeconversions.h"
 
 namespace
 {
@@ -25,6 +29,21 @@ QSettingsControllerImpl::QSettingsControllerImpl(QSettingsController* publicImpl
     if (!m_settingsManager)
     {
         qFatal("SettingsManager instance not available");
+    }
+
+    auto config = Single<DependencyInjector>::instance().getInstance<Config>();
+    if (!config)
+    {
+        qFatal("Config instance not available");
+    }
+
+    uint32_t autoSaveInterval =
+        safe_integral_cast<uint32_t>(config->get(ConfigKeys::kSettingsAutoSaveIntervalKey).toUInt());
+
+    if (autoSaveInterval != 0)
+    {
+        m_autoSaveTimer.reset(new Timer());
+        m_autoSaveTimer->start(autoSaveInterval, [this] { m_settingsManager->save(); }, false);
     }
 }
 

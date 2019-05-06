@@ -25,6 +25,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:qtmodels,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:services,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:settings,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:config,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -33,4 +34,5 @@ target_link_libraries(${PROJECT_NAME}
     qtmodels
     services
     settings
+    config
 )

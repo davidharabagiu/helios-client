@@ -13,12 +13,16 @@
 #include "settingsmanagerimpl.h"
 #include "defaultsettingsproviderimpl.h"
 #include "httprequestmanagerimpl.h"
+#include "configimpl.h"
 
 void registerInstances()
 {
     std::shared_ptr<SettingsManager> settingsManager(
         new SettingsManagerImpl(std::make_unique<DefaultSettingsProviderImpl>()));
     Single<DependencyInjector>::instance().registerInstance<SettingsManager>(settingsManager);
+
+    std::shared_ptr<Config> config(new ConfigImpl());
+    Single<DependencyInjector>::instance().registerInstance<Config>(config);
 
     // std::shared_ptr<HttpRequestManager> httpRequestManager(new HttpRequestManagerImpl());
 

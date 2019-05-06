@@ -59,9 +59,9 @@ private:
     std::shared_ptr<SettingsManager> m_settingsManager;
 
     /**
-     * @brief Timer used for automatic periodic settings save
+     * @brief Timer used for automatic settings save
      */
-    Timer m_autoSaveTimer;
+    std::unique_ptr<Timer> m_autoSaveTimer;
 };
 
 #endif  // QSETTINGSCONTROLLERIMPL_H

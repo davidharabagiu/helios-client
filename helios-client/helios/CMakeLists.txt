@@ -19,6 +19,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:apicalls,INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:settings,INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:http,INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:config,INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -30,6 +31,7 @@ target_link_libraries(${PROJECT_NAME}
     apicalls
     settings
     http
+    config
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})

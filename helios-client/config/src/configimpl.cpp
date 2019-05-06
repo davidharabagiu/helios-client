@@ -5,6 +5,7 @@
 #include "configimpl.h"
 #include "configkeys.h"
 #include "paths.h"
+#include "typeconversions.h"
 
 ConfigImpl::ConfigImpl()
 {
@@ -30,8 +31,15 @@ ConfigImpl::ConfigImpl()
     {
         qFatal("%s not found in %s", ConfigKeys::kServerUrlKey.c_str(), Paths::kConfigFile.c_str());
     }
-
     m_valuesRegistry.emplace(ConfigKeys::kServerUrlKey, serverUrlObj.toString());
+
+    auto settingsAutoSaveIntervalObj = json[QString::fromStdString(ConfigKeys::kSettingsAutoSaveIntervalKey)];
+    if (settingsAutoSaveIntervalObj.type() != QJsonValue::Double)
+    {
+        qFatal("%s not found in %s", ConfigKeys::kSettingsAutoSaveIntervalKey.c_str(), Paths::kConfigFile.c_str());
+    }
+    m_valuesRegistry.emplace(ConfigKeys::kSettingsAutoSaveIntervalKey,
+                             safe_integral_cast<uint>(settingsAutoSaveIntervalObj.toInt()));
 }
 
 QVariant ConfigImpl::operator[](const std::string& key) const
