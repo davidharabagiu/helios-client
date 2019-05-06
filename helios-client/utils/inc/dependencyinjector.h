@@ -19,11 +19,6 @@ public:
     DependencyInjector() = default;
 
     /**
-     * @brief Destructor
-     */
-    ~DependencyInjector();
-
-    /**
      * @brief Register an instance. Only one instance of a certain type may be registered.
      * @param instance - Instance to be registered
      * @tparam T - type of the instance

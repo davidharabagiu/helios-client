@@ -24,9 +24,14 @@ public:
     QAuthenticationControllerImpl(QAuthenticationController* publicImpl);
 
     /**
-     * @brief Destructor
+     * @brief Register for notifications from internal services
      */
-    ~QAuthenticationControllerImpl();
+    void registerForNotifications();
+
+    /**
+     * @brief Unregister from notifications from internal services
+     */
+    void unregisterFromNotifications();
 
 public:  // from UserServiceListener
     void loginCompleted(bool success, const std::string& errorString) override;
@@ -34,6 +39,7 @@ public:  // from UserServiceListener
     void userCreationCompleted(bool success, const std::string& errorString) override;
 
 public:  // forwarded from QAuthenticationController
+    void    restoreSession();
     bool    login(const QString& username, const QString& password);
     bool    logout();
     bool    createUser(const QString& username, const QString& password);

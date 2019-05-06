@@ -16,7 +16,6 @@ AsyncNotifier::~AsyncNotifier()
     // This is done in order to prevent a deadlock in case the executor
     // is waiting for the queue to be populated
     m_notEmptyCondVar.notify_one();
-
     m_executor.join();
 }
 

@@ -14,6 +14,10 @@ Window {
 
     SettingsController {
         id: settings
+
+        onWindowWidthChanged: {
+            console.log("new width:", width);
+        }
     }
 
     Component.onCompleted: {

@@ -20,12 +20,12 @@ void registerInstances()
         new SettingsManagerImpl(std::make_unique<DefaultSettingsProviderImpl>()));
     Single<DependencyInjector>::instance().registerInstance<SettingsManager>(settingsManager);
 
-    std::shared_ptr<HttpRequestManager> httpRequestManager(new HttpRequestManagerImpl());
+    // std::shared_ptr<HttpRequestManager> httpRequestManager(new HttpRequestManagerImpl());
 
-    std::shared_ptr<UserService> userService(
-        new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));
+    /*std::shared_ptr<UserService> userService(
+        new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));*/
 
-    Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
+    // Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
 }
 
 int main(int argc, char* argv[])

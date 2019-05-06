@@ -41,6 +41,16 @@ public:
     explicit QAuthenticationController(QObject* parent = nullptr);
 
     /**
+     * @brief Destructor
+     */
+    ~QAuthenticationController();
+
+    /**
+     * @brief Restore last saved session if it exists
+     */
+    Q_INVOKABLE void restoreSession();
+
+    /**
      * @brief Authenticate
      * @param username - User name
      * @param password - User password

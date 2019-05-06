@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "settingslistener.h"
+#include "timer.h"
 
 // Forward declarations
 class QSettingsController;
@@ -14,7 +15,7 @@ class SettingsManager;
  * @class QSettingsControllerImpl
  * @brief Private implementation of QSettingsController
  */
-class QSettingsControllerImpl : public SettingsListener
+class QSettingsControllerImpl : public SettingsListener, public std::enable_shared_from_this<QSettingsControllerImpl>
 {
 public:
     /**
@@ -22,6 +23,16 @@ public:
      * @param publicImpl - Public implementation
      */
     QSettingsControllerImpl(QSettingsController* publicImpl);
+
+    /**
+     * @brief Register for notifications from internal services
+     */
+    void registerForNotifications();
+
+    /**
+     * @brief Unregister from notifications from internal services
+     */
+    void unregisterFromNotifications();
 
 public:  // from SettingsListener
     void settingChanged(const std::string& key) override;
@@ -46,6 +57,11 @@ private:
      * @brief Settings manager instance
      */
     std::shared_ptr<SettingsManager> m_settingsManager;
+
+    /**
+     * @brief Timer used for automatic periodic settings save
+     */
+    Timer m_autoSaveTimer;
 };
 
 #endif  // QSETTINGSCONTROLLERIMPL_H

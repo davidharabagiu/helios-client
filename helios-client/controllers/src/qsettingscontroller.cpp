@@ -5,6 +5,12 @@ QSettingsController::QSettingsController(QObject* parent)
     : QObject(parent)
     , m_privateImpl(new QSettingsControllerImpl(this))
 {
+    m_privateImpl->registerForNotifications();
+}
+
+QSettingsController::~QSettingsController()
+{
+    m_privateImpl->unregisterFromNotifications();
 }
 
 qreal QSettingsController::windowWidth() const

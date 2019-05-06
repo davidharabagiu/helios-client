@@ -21,12 +21,14 @@ QAuthenticationControllerImpl::QAuthenticationControllerImpl(QAuthenticationCont
     {
         qFatal("UserService is disabled");
     }
-
-    m_userService->registerListener(shared_from_this());
-    m_userService->restoreSession();
 }
 
-QAuthenticationControllerImpl::~QAuthenticationControllerImpl()
+void QAuthenticationControllerImpl::registerForNotifications()
+{
+    m_userService->registerListener(shared_from_this());
+}
+
+void QAuthenticationControllerImpl::unregisterFromNotifications()
 {
     m_userService->unregisterListener(shared_from_this());
 }
@@ -59,6 +61,11 @@ void QAuthenticationControllerImpl::userCreationCompleted(bool success, const st
 {
     QMetaObject::invokeMethod(m_publicImpl, "userCreationCompleted", Qt::QueuedConnection, Q_ARG(bool, success),
                               Q_ARG(const QString&, QString::fromStdString(errorString)));
+}
+
+void QAuthenticationControllerImpl::restoreSession()
+{
+    m_userService->restoreSession();
 }
 
 bool QAuthenticationControllerImpl::login(const QString& username, const QString& password)

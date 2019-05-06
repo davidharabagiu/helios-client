@@ -47,6 +47,11 @@ public:
     explicit QSettingsController(QObject* parent = nullptr);
 
     /**
+     * @brief Destructor
+     */
+    ~QSettingsController();
+
+    /**
      * @brief Getter for windowWidth
      * @return qreal
      */

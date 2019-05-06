@@ -5,6 +5,17 @@ QAuthenticationController::QAuthenticationController(QObject* parent)
     : QObject(parent)
     , m_privateImpl(new QAuthenticationControllerImpl(this))
 {
+    m_privateImpl->registerForNotifications();
+}
+
+QAuthenticationController::~QAuthenticationController()
+{
+    m_privateImpl->unregisterFromNotifications();
+}
+
+void QAuthenticationController::restoreSession()
+{
+    m_privateImpl->restoreSession();
 }
 
 bool QAuthenticationController::login(const QString& username, const QString& password)

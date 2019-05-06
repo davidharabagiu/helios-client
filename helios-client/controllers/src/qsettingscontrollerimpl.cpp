@@ -28,6 +28,16 @@ QSettingsControllerImpl::QSettingsControllerImpl(QSettingsController* publicImpl
     }
 }
 
+void QSettingsControllerImpl::registerForNotifications()
+{
+    m_settingsManager->registerListener(shared_from_this());
+}
+
+void QSettingsControllerImpl::unregisterFromNotifications()
+{
+    m_settingsManager->unregisterListener(shared_from_this());
+}
+
 void QSettingsControllerImpl::settingChanged(const std::string& key)
 {
     auto it = kSettingKeysToSignalNamesMap.find(key);
