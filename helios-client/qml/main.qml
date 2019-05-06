@@ -10,23 +10,20 @@ Window {
 
     ApplicationWorkflow {
         anchors.fill: parent
+        settingsCtl: settingsCtl
     }
 
     SettingsController {
-        id: settings
-
-        onWindowWidthChanged: {
-            console.log("new width:", width);
-        }
+        id: settingsCtl
     }
 
     Component.onCompleted: {
-        width = settings.windowWidth;
-        height = settings.windowHeight;
+        width = settingsCtl.windowWidth;
+        height = settingsCtl.windowHeight;
         x = Screen.width / 2 - width / 2;
         y = Screen.height / 2 - height / 2;
 
-        settings.windowWidth = Qt.binding(function() { return width; });
-        settings.windowHeight = Qt.binding(function() { return height; });
+        settingsCtl.windowWidth = Qt.binding(function() { return width; });
+        settingsCtl.windowHeight = Qt.binding(function() { return height; });
     }
 }
