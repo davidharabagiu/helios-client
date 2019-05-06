@@ -14,6 +14,7 @@ add_library(${PROJECT_NAME}
     "inc/private/defaultsettingsprovider.h"
     "inc/private/defaultsettingsproviderimpl.h"
     "src/defaultsettingsproviderimpl.cpp"
+    "inc/public/settingslistener.h"
 )
 
 target_include_directories(${PROJECT_NAME}

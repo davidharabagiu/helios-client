@@ -78,26 +78,43 @@ QVariant SettingsManagerImpl::get(const std::string& key) const
 void SettingsManagerImpl::set(const std::string& key, bool value)
 {
     m_valuesRegistry[key] = value;
+    Observable::notifyAll(&SettingsListener::settingChanged, key);
 }
 
 void SettingsManagerImpl::set(const std::string& key, double value)
 {
     m_valuesRegistry[key] = value;
+    Observable::notifyAll(&SettingsListener::settingChanged, key);
 }
 
 void SettingsManagerImpl::set(const std::string& key, const QString& value)
 {
     m_valuesRegistry[key] = value;
+    Observable::notifyAll(&SettingsListener::settingChanged, key);
 }
 
 void SettingsManagerImpl::reset(const std::string& key)
 {
     m_valuesRegistry.erase(key);
+    Observable::notifyAll(&SettingsListener::settingChanged, key);
 }
 
 void SettingsManagerImpl::reset()
 {
+    // collect all keys
+    std::vector<std::string> keys;
+    keys.reserve(m_valuesRegistry.size());
+    for (const auto& el : m_valuesRegistry)
+    {
+        keys.push_back(el.first);
+    }
+
     m_valuesRegistry.clear();
+
+    for (const auto& key : keys)
+    {
+        Observable::notifyAll(&SettingsListener::settingChanged, key);
+    }
 }
 
 void SettingsManagerImpl::save() const

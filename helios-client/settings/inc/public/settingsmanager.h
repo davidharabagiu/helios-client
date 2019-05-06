@@ -5,11 +5,14 @@
 #include <QString>
 #include <string>
 
+#include "observable.h"
+#include "settingslistener.h"
+
 /**
  * @class SettingsManager
  * @brief Interface for application settings management
  */
-class SettingsManager
+class SettingsManager : public Observable<SettingsListener, ObservableNotifyMode::ASYNC>
 {
 public:
     /**

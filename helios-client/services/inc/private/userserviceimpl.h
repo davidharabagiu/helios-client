@@ -8,10 +8,10 @@
 #include "userservice.h"
 #include "apicalldefs.h"
 #include "usersession.h"
+#include "asyncnotifier.h"
 
 class UserApiCaller;
 class SettingsManager;
-class AsyncNotifier;
 
 /**
  * @class UserServiceImpl
@@ -31,10 +31,9 @@ public:
 public:  // from ServiceInterface
     void start() override;
     void stop() override;
+    bool enabled() const override;
 
 public:  // from UserService
-    void               registerListener(const std::shared_ptr<UserServiceListener>& listener) override;
-    void               unregisterListener(const std::shared_ptr<UserServiceListener>& listener) override;
     const UserSession& session() const override;
     bool               loggedIn() const override;
     void               login(const UserAccount& account, bool persist) override;
@@ -75,11 +74,6 @@ private:
     UserSession m_session;
 
     /**
-     * @brief Operations listeners
-     */
-    std::vector<std::shared_ptr<UserServiceListener>> m_listeners;
-
-    /**
      * @brief Api caller for user operations
      */
     std::unique_ptr<UserApiCaller> m_apiCaller;
@@ -88,11 +82,6 @@ private:
      * @brief Settings manager
      */
     std::shared_ptr<SettingsManager> m_settingsManager;
-
-    /**
-     * @brief Used for asynchronous notification of clients
-     */
-    std::unique_ptr<AsyncNotifier> m_asyncNotifier;
 };
 
 #endif  // USERSERVICEIMPL_H

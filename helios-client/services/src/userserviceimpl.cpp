@@ -5,7 +5,6 @@
 #include "userserviceimpl.h"
 #include "userapicaller.h"
 #include "settingsmanager.h"
-#include "asyncnotifier.h"
 #include "userservicelistener.h"
 #include "useraccount.h"
 
@@ -25,7 +24,6 @@ UserServiceImpl::UserServiceImpl(std::unique_ptr<UserApiCaller>          userApi
                                  const std::shared_ptr<SettingsManager>& settingsManager)
     : m_apiCaller(std::move(userApiCaller))
     , m_settingsManager(settingsManager)
-    , m_asyncNotifier(new AsyncNotifier())
 {
 }
 
@@ -37,17 +35,12 @@ void UserServiceImpl::start()
 void UserServiceImpl::stop()
 {
     m_enabled = false;
-    m_asyncNotifier->cancelPendingNotifications();
+    Observable::cancelPendingNotifications();
 }
 
-void UserServiceImpl::registerListener(const std::shared_ptr<UserServiceListener>& listener)
+bool UserServiceImpl::enabled() const
 {
-    m_listeners.push_back(listener);
-}
-
-void UserServiceImpl::unregisterListener(const std::shared_ptr<UserServiceListener>& listener)
-{
-    m_listeners.erase(std::find(m_listeners.begin(), m_listeners.end(), listener));
+    return m_enabled;
 }
 
 const UserSession& UserServiceImpl::session() const
@@ -94,11 +87,7 @@ void UserServiceImpl::restoreSession()
 
     if (m_session.valid())
     {
-        for (const auto& listener : m_listeners)
-        {
-            m_asyncNotifier->postNotification(&UserServiceListener::loginCompleted, listener.get(), true,
-                                              std::string());
-        }
+        Observable::notifyAll(&UserServiceListener::loginCompleted, true, std::string());
     }
 }
 
@@ -163,10 +152,7 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
         }
     }
 
-    for (const auto& listener : m_listeners)
-    {
-        m_asyncNotifier->postNotification(&UserServiceListener::loginCompleted, listener.get(), success, errorString);
-    }
+    Observable::notifyAll(&UserServiceListener::loginCompleted, success, errorString);
 
     if (persist)
     {
@@ -192,10 +178,7 @@ void UserServiceImpl::handleLoggedOut(ApiCallStatus status)
         errorString = (status == ApiCallStatus::UNAUTHORIZED) ? "Invalid token" : "Unknown error";
     }
 
-    for (const auto& listener : m_listeners)
-    {
-        m_asyncNotifier->postNotification(&UserServiceListener::logoutCompleted, listener.get(), success, errorString);
-    }
+    Observable::notifyAll(&UserServiceListener::logoutCompleted, success, errorString);
 }
 
 void UserServiceImpl::handleUserCreated(ApiCallStatus status)
@@ -231,9 +214,5 @@ void UserServiceImpl::handleUserCreated(ApiCallStatus status)
         }
     }
 
-    for (const auto& listener : m_listeners)
-    {
-        m_asyncNotifier->postNotification(&UserServiceListener::userCreationCompleted, listener.get(), success,
-                                          errorString);
-    }
+    Observable::notifyAll(&UserServiceListener::userCreationCompleted, success, errorString);
 }

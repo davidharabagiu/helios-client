@@ -1,7 +1,6 @@
 #include <QDebug>
 
 #include "userapicallerimpl.h"
-#include "httprequestmanager.h"
 #include "single.h"
 #include "dependencyinjector.h"
 #include "apicallvisitor.h"
@@ -9,14 +8,8 @@
 #include "logincall.h"
 #include "logoutcall.h"
 
-UserApiCallerImpl::UserApiCallerImpl()
+UserApiCallerImpl::UserApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
-    auto requestManager = Single<DependencyInjector>::instance().getInstance<HttpRequestManager>();
-    if (!requestManager)
-    {
-        qFatal("HttpRequestManager instance not available");
-    }
-
     m_visitor = std::make_shared<ApiCallVisitor>(requestManager);
 }
 

@@ -133,4 +133,6 @@ private:
     std::weak_ptr<HttpRequestManager> m_requestManager;
 };
 
+#include "apicallvisitor.tpp"
+
 #endif  // APICALLVISITOR_H

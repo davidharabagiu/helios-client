@@ -11,15 +11,20 @@ public:
     virtual ~ServiceInterface() = default;
 
     /**
-     * @brief Activates the service. After a call to this method, operations will be enabled and clients will be
+     * @brief Enables the service. After a call to this method, operations will be enabled and clients will be
      * notified with changes.
      */
     virtual void start() = 0;
 
     /**
-     * @brief Deactivates the service. All operations will be disabled and clients will not be notified anymore.
+     * @brief Disables the service. All operations will be disabled and clients will not be notified anymore.
      */
     virtual void stop() = 0;
+
+    /**
+     * @brief Returns true if the service is enabled.
+     */
+    virtual bool enabled() const = 0;
 };
 
 #endif  // SERVICEINTERFACE_H

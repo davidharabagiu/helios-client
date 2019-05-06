@@ -15,6 +15,7 @@ class FormDataRequest;
  * @brief Http reply callback containing the reply data
  * @param status - Reply status
  * @param content - Reply content
+ * @param success - Specified if the request was sent successfully
  */
 using HttpReplyCallback = std::function<void(HttpStatus status, const std::vector<uint8_t>& reply, bool success)>;
 

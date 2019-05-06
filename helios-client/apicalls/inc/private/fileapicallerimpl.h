@@ -6,6 +6,7 @@
 #include "fileapicaller.h"
 
 class ApiCallVisitor;
+class HttpRequestManager;
 
 /**
  * @class FileApiCallerImpl
@@ -16,8 +17,9 @@ class FileApiCallerImpl : public FileApiCaller
 public:
     /**
      * @brief Constructor
+     * @param requestManager - Http request manager instance
      */
-    FileApiCallerImpl();
+    FileApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager);
 
 public:  // from FileApiCaller
     void createDirectory(const std::string& authToken, const std::string& path,

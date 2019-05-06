@@ -2,6 +2,21 @@
 
 #include "apicallvisitor.h"
 #include "httpstatus.h"
+#include "httprequestmanager.h"
+#include "logincall.h"
+#include "logoutcall.h"
+#include "begindownloadcall.h"
+#include "beginuploadcall.h"
+#include "createdirectorycall.h"
+#include "downloadcall.h"
+#include "endtransfercall.h"
+#include "getfilesizecall.h"
+#include "listcall.h"
+#include "movecall.h"
+#include "registerusercall.h"
+#include "removecall.h"
+#include "uploadcall.h"
+#include "typeutils.h"
 
 template <typename Call>
 void ApiCallVisitor::handlePost(Call& call) const
@@ -11,8 +26,13 @@ void ApiCallVisitor::handlePost(Call& call) const
     {
         qFatal("HttpRequestManager is not available");
     }
-    requestManager->post(
-        call.request(), [&call](HttpStatus status, const std::vector<uint8_t>& reply) { call.receive(status, reply); });
+    requestManager->post(call.request(), [&call](HttpStatus status, const std::vector<uint8_t>& reply, bool success) {
+        if (!success)
+        {
+            qCritical() << "Failed http request from API call of type " << TypeUtils::getTypeName<Call>().c_str();
+        }
+        call.receive(status, reply);
+    });
 }
 
 template <typename Call>
@@ -23,6 +43,11 @@ void ApiCallVisitor::handleGet(Call& call) const
     {
         qFatal("HttpRequestManager is not available");
     }
-    requestManager->get(call.request(),
-                        [&call](HttpStatus, const std::vector<uint8_t>& reply) { call.receive(status, reply;) });
+    requestManager->get(call.request(), [&call](HttpStatus status, const std::vector<uint8_t>& reply, bool success) {
+        if (!success)
+        {
+            qCritical() << "Failed http request from API call of type " << TypeUtils::getTypeName<Call>().c_str();
+        }
+        call.receive(status, reply);
+    });
 }

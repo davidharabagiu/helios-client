@@ -5,6 +5,7 @@ set(QML_MODULE_BASE_NAME Helios)
 
 set(QML_FILES
     "main.qml"
+    "ApplicationWorkflow.qml"
 )
 
 add_custom_target(${PROJECT_NAME} SOURCES ${QML_FILES})

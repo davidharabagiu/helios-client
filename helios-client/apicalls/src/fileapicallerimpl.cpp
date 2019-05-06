@@ -16,14 +16,8 @@
 #include "removecall.h"
 #include "movecall.h"
 
-FileApiCallerImpl::FileApiCallerImpl()
+FileApiCallerImpl::FileApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
-    auto requestManager = Single<DependencyInjector>::instance().getInstance<HttpRequestManager>();
-    if (!requestManager)
-    {
-        qFatal("HttpRequestManager instance not available");
-    }
-
     m_visitor = std::make_shared<ApiCallVisitor>(requestManager);
 }
 

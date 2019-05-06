@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "serviceinterface.h"
+#include "observable.h"
 
 class UserServiceListener;
 class UserAccount;
@@ -14,25 +15,13 @@ class UserSession;
  * @class UserService
  * @brief User management service
  */
-class UserService : public ServiceInterface
+class UserService : public ServiceInterface, public Observable<UserServiceListener, ObservableNotifyMode::ASYNC>
 {
 public:
     /**
      * @brief Destructor
      */
     virtual ~UserService() = default;
-
-    /**
-     * @brief Register a listener for user service operations
-     * @param listener - Listener
-     */
-    virtual void registerListener(const std::shared_ptr<UserServiceListener>& listener) = 0;
-
-    /**
-     * @brief Unregister a listener
-     * @param listener - Listener
-     */
-    virtual void unregisterListener(const std::shared_ptr<UserServiceListener>& listener) = 0;
 
     /**
      * @brief Returns the current user session which contains the username and the authentication token. Valid only when

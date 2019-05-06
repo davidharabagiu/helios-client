@@ -6,6 +6,7 @@
 #include "userapicaller.h"
 
 class ApiCallVisitor;
+class HttpRequestManager;
 
 /**
  * @class UserApiCallerImpl
@@ -16,8 +17,9 @@ class UserApiCallerImpl : public UserApiCaller
 public:
     /**
      * @brief Constructor
+     * @param requestManager - Http request manager instance
      */
-    UserApiCallerImpl();
+    UserApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager);
 
 public:  // from UserApiCaller
     void registerUser(const std::string& username, const std::string& password,

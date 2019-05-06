@@ -17,6 +17,11 @@ QAuthenticationControllerImpl::QAuthenticationControllerImpl(QAuthenticationCont
         qFatal("UserService instance not available");
     }
 
+    if (!m_userService->enabled())
+    {
+        qFatal("UserService is disabled");
+    }
+
     m_userService->registerListener(shared_from_this());
     m_userService->restoreSession();
 }
