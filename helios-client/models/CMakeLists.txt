@@ -9,6 +9,8 @@ add_library(${PROJECT_NAME}
     "src/useraccount.cpp"
     "inc/usersession.h"
     "src/usersession.cpp"
+    "inc/file.h"
+    "src/file.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

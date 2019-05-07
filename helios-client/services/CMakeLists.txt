@@ -11,6 +11,9 @@ add_library(${PROJECT_NAME}
     "inc/public/userservice.h"
     "inc/private/userserviceimpl.h"
     "src/userserviceimpl.cpp"
+    "inc/public/fileservice.h"
+    "inc/private/fileserviceimpl.h"
+    "inc/public/fileservicelistener.h"
 )
 
 target_include_directories(${PROJECT_NAME}
