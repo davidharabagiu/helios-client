@@ -50,7 +50,7 @@ const UserSession& UserServiceImpl::session() const
 
 bool UserServiceImpl::loggedIn() const
 {
-    return m_session.valid();
+    return m_loggedIn;
 }
 
 void UserServiceImpl::login(const UserAccount& account, bool persist)
@@ -83,11 +83,14 @@ void UserServiceImpl::restoreSession()
     if (username.isValid() && token.isValid())
     {
         m_session = UserSession(username.toString().toStdString(), token.toString().toStdString());
-    }
-
-    if (m_session.valid())
-    {
-        Observable::notifyAll(&UserServiceListener::loginCompleted, true, std::string());
+        m_apiCaller->checkToken(username.toString().toStdString(), token.toString().toStdString(),
+                                [this](ApiCallStatus status) {
+                                    if (!m_enabled)
+                                    {
+                                        return;
+                                    }
+                                    handleCheckToken(status);
+                                });
     }
 }
 
@@ -131,8 +134,9 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
     {
         case ApiCallStatus::SUCCESS:
         {
-            m_session = session;
-            success   = true;
+            m_session  = session;
+            m_loggedIn = true;
+            success    = true;
             break;
         }
         case ApiCallStatus::INVALID_USERNAME:
@@ -171,7 +175,9 @@ void UserServiceImpl::handleLoggedOut(ApiCallStatus status)
         success = true;
         m_settingsManager->reset(SettingsKeys::kUsername);
         m_settingsManager->reset(SettingsKeys::kAuthToken);
+        m_settingsManager->save();
         m_session.clear();
+        m_loggedIn = false;
     }
     else
     {
@@ -215,4 +221,23 @@ void UserServiceImpl::handleUserCreated(ApiCallStatus status)
     }
 
     Observable::notifyAll(&UserServiceListener::userCreationCompleted, success, errorString);
+}
+
+void UserServiceImpl::handleCheckToken(ApiCallStatus status)
+{
+    if (status == ApiCallStatus::SUCCESS)
+    {
+        if (m_session.valid())
+        {
+            m_loggedIn = true;
+            Observable::notifyAll(&UserServiceListener::loginCompleted, true, std::string());
+        }
+    }
+    else
+    {
+        m_session.clear();
+        m_settingsManager->reset(SettingsKeys::kUsername);
+        m_settingsManager->reset(SettingsKeys::kAuthToken);
+        m_settingsManager->save();
+    }
 }

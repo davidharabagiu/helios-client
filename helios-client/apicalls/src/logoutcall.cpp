@@ -47,10 +47,12 @@ void LogoutCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED);
+        return;
     }
 
     std::string replyStr(reinterpret_cast<const char*>(reply.data()), reply.size());

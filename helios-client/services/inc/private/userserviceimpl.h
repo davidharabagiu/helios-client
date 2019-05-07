@@ -62,11 +62,22 @@ private:
      */
     void handleUserCreated(ApiCallStatus status);
 
+    /**
+     * @brief Handle checkToken operation completion
+     * @param status - Completion status
+     */
+    void handleCheckToken(ApiCallStatus status);
+
 private:
     /**
      * @brief True if the service has be started
      */
     bool m_enabled;
+
+    /**
+     * @brief True if logged in.
+     */
+    bool m_loggedIn;
 
     /**
      * @brief Current user session. Valid only when logged in.
