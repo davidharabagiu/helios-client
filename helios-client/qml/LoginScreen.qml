@@ -5,6 +5,10 @@ Rectangle {
 
     property bool darkMode: false
 
+    property bool saveSession: saveSessionCheck.checked
+    property string username: usernameInput.text
+    property string password: passwordInput.text
+
     color: darkMode ? "#000000" : "#ffffff"
 
     signal loginButtonActivated()
@@ -18,6 +22,8 @@ Rectangle {
         radius: 25
 
         Item {
+            id: controlsContainer
+
             width: Math.max(usernameInput.width, Math.max(passwordInput.width, Math.max(saveSessionCheck.width, loginButton.width)))
             height: usernameInput.height + passwordInput.height + saveSessionCheck.height +loginButton.height + 15
             anchors.centerIn: parent
@@ -26,8 +32,8 @@ Rectangle {
                 id: usernameInput
                 darkMode: root.darkMode
                 anchors {
-                    left: parent
-                    top: parent
+                    left: parent.left
+                    top: parent.top
                 }
                 width: 165
                 hint: "Username"
@@ -88,5 +94,30 @@ Rectangle {
                 }
             }
         }
+
+        HLabel {
+            id: statusLabel
+            anchors {
+                top: controlsContainer.bottom
+                topMargin: 5
+                horizontalCenter: controlsContainer.horizontalCenter
+            }
+            text: ""
+        }
+    }
+
+    function displayStatus(message) {
+        statusLabel.color = "#00a81c";
+        statusLabel.text = message;
+    }
+
+    function displayError(message) {
+        statusLabel.color = "#ff0000";
+        statusLabel.text = message;
+    }
+
+    function clearInput() {
+        usernameInput.clear();
+        passwordInput.clear();
     }
 }

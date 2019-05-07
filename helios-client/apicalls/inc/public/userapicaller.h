@@ -42,6 +42,15 @@ public:
      * @param callback - LogoutCallback
      */
     virtual void logout(const std::string& token, const ApiCallbacks::LogoutCallback& callback) const = 0;
+
+    /**
+     * @brief Check the validity of a token and if it corresponds with the given username.
+     * @param username - User name
+     * @param token - Authentication token
+     * @param callback - CheckTokenCallback
+     */
+    virtual void checkToken(const std::string& username, const std::string& token,
+                            const ApiCallbacks::CheckTokenCallback& callback) const = 0;
 };
 
 #endif  // USERAPICALLER_H

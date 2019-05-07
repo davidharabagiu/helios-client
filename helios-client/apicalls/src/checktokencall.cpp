@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "removecall.h"
+#include "checktokencall.h"
 #include "single.h"
 #include "dependencyinjector.h"
 #include "httprequestfactory.h"
@@ -9,13 +9,12 @@
 #include "config.h"
 #include "configkeys.h"
 
-const std::string RemoveCall::s_kUrl              = "delete";
-const std::string RemoveCall::s_kTokenParam       = "token";
-const std::string RemoveCall::s_kPathParam        = "path";
-const std::string RemoveCall::s_kErrorInvalidPath = "Invalid path";
+const std::string CheckTokenCall::s_kUrl           = "checktoken";
+const std::string CheckTokenCall::s_kUsernameParam = "username";
+const std::string CheckTokenCall::s_kTokenParam    = "token";
 
-RemoveCall::RemoveCall(const std::string& authToken, const std::string& path,
-                       const ApiCallbacks::RemoveCallback& callback)
+CheckTokenCall::CheckTokenCall(const std::string& username, const std::string& token,
+                               const ApiCallbacks::CheckTokenCallback& callback)
     : m_callback(callback)
 {
     auto requestFactory = Single<DependencyInjector>::instance().getInstance<HttpRequestFactory>();
@@ -32,40 +31,34 @@ RemoveCall::RemoveCall(const std::string& authToken, const std::string& path,
 
     m_request = requestFactory->createUrlEncodedRequest(
         config->get(ConfigKeys::kServerUrlKey).toString().toStdString() + "/" + s_kUrl);
-    m_request->setHeaderValue(s_kTokenParam, authToken);
-    m_request->setParameter(s_kPathParam, path);
+    m_request->setHeaderValue(s_kTokenParam, token);
+    m_request->setParameter(s_kUsernameParam, username);
 }
 
-std::shared_ptr<UrlEncodedRequest> RemoveCall::request()
+std::shared_ptr<UrlEncodedRequest> CheckTokenCall::request()
 {
     return m_request;
 }
 
-void RemoveCall::send(std::shared_ptr<ApiCallVisitor> visitor)
+void CheckTokenCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
     visitor->visit(this);
 }
 
-void RemoveCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
+void CheckTokenCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
 {
-    std::string replyStr(reinterpret_cast<const char*>(reply.data()), reply.size());
-
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED);
-    }
-    else if (status == HttpStatus::BAD_REQUEST)
-    {
-        if (replyStr == s_kErrorInvalidPath)
-        {
-            m_callback(ApiCallStatus::INVALID_PATH);
-        }
+        return;
     }
 
+    std::string replyStr(reinterpret_cast<const char*>(reply.data()), reply.size());
     qCritical() << "Unhandled HTTP reply with status " << static_cast<int>(status) << " and content "
                 << replyStr.c_str();
     m_callback(ApiCallStatus::UNKNOWN_ERROR);

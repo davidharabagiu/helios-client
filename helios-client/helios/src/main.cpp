@@ -14,6 +14,7 @@
 #include "defaultsettingsproviderimpl.h"
 #include "httprequestmanagerimpl.h"
 #include "configimpl.h"
+#include "httprequestfactoryimpl.h"
 
 void registerInstances()
 {
@@ -24,12 +25,16 @@ void registerInstances()
     std::shared_ptr<Config> config(new ConfigImpl());
     Single<DependencyInjector>::instance().registerInstance<Config>(config);
 
-    // std::shared_ptr<HttpRequestManager> httpRequestManager(new HttpRequestManagerImpl());
+    std::shared_ptr<HttpRequestFactory> httpRequestFactory(new HttpRequestFactoryImpl());
+    Single<DependencyInjector>::instance().registerInstance<HttpRequestFactory>(httpRequestFactory);
 
-    /*std::shared_ptr<UserService> userService(
-        new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));*/
+    std::shared_ptr<HttpRequestManager> httpRequestManager(new HttpRequestManagerImpl());
+    Single<DependencyInjector>::instance().registerInstance<HttpRequestManager>(httpRequestManager);
 
-    // Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
+    std::shared_ptr<UserService> userService(
+        new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));
+    Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
+    userService->start();
 }
 
 int main(int argc, char* argv[])

@@ -1,21 +1,27 @@
-#ifndef LOGINCALL_H
-#define LOGINCALL_H
+#ifndef CHECKTOKENCALL_H
+#define CHECKTOKENCALL_H
 
 #include <string>
-#include <vector>
 
 #include "apicall.h"
 #include "apicalldefs.h"
 #include "urlencodedrequest.h"
 
 /**
- * @class LoginCall
- * @brief Manages a user authentication call
+ * @class CheckTokenCall
+ * @brief Manages a check token call
  */
-class LoginCall : public ApiCall
+class CheckTokenCall : public ApiCall
 {
 public:
-    LoginCall(const std::string& username, const std::string& password, const ApiCallbacks::LoginCallback& callback);
+    /**
+     * @brief Constructor
+     * @param username - Username parameter
+     * @param token - Authentication token
+     * @param callback - Callback
+     */
+    CheckTokenCall(const std::string& username, const std::string& token,
+                   const ApiCallbacks::CheckTokenCallback& callback);
 
     /**
      * @brief Returns the http request
@@ -29,14 +35,14 @@ public:  // from ApiCall
 
 private:
     /**
-     * @brief Http request
+     * @brief Http request object
      */
     std::shared_ptr<UrlEncodedRequest> m_request;
 
     /**
      * @brief Callback
      */
-    ApiCallbacks::LoginCallback m_callback;
+    ApiCallbacks::CheckTokenCallback m_callback;
 
     /**
      * @brief Request url
@@ -49,19 +55,9 @@ private:
     static const std::string s_kUsernameParam;
 
     /**
-     * @brief Password parameter name
+     * @brief Token header parameter name
      */
-    static const std::string s_kPasswordParam;
-
-    /**
-     * @brief Invalid username error message
-     */
-    static const std::string s_kErrorInvalidUsername;
-
-    /**
-     * @brief Invalid password error message
-     */
-    static const std::string s_kErrorInvalidPassword;
+    static const std::string s_kTokenParam;
 };
 
-#endif  // LOGINCALL_H
+#endif  // CHECKTOKENCALL_H

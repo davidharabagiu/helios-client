@@ -7,6 +7,7 @@ class HttpRequestManager;
 class RegisterUserCall;
 class LoginCall;
 class LogoutCall;
+class CheckTokenCall;
 class CreateDirectoryCall;
 class BeginUploadCall;
 class UploadCall;
@@ -35,79 +36,85 @@ public:
      * @brief Visit RegisterUserCall
      * @param call - RegisterUserCall
      */
-    void visit(RegisterUserCall& call) const;
+    void visit(RegisterUserCall* call) const;
 
     /**
      * @brief Visit LoginCall
      * @param call - LoginCall
      */
-    void visit(LoginCall& call) const;
+    void visit(LoginCall* call) const;
 
     /**
      * @brief Visit LogoutCall
      * @param call - LogoutCall
      */
-    void visit(LogoutCall& call) const;
+    void visit(LogoutCall* call) const;
 
     /**
      * @brief Visit CreateDirectoryCall
      * @param call - CreateDirectoryCall
      */
-    void visit(CreateDirectoryCall& call) const;
+    void visit(CreateDirectoryCall* call) const;
 
     /**
      * @brief Visit BeginUploadCall
      * @param call - BeginUploadCall
      */
-    void visit(BeginUploadCall& call) const;
+    void visit(BeginUploadCall* call) const;
 
     /**
      * @brief Visit UploadCall
      * @param call - UploadCall
      */
-    void visit(UploadCall& call) const;
+    void visit(UploadCall* call) const;
 
     /**
      * @brief Visit BeginDownloadCall
      * @param call - BeginDownloadCall
      */
-    void visit(BeginDownloadCall& call) const;
+    void visit(BeginDownloadCall* call) const;
 
     /**
      * @brief Visit DownloadCall
      * @param call - DownloadCall
      */
-    void visit(DownloadCall& call) const;
+    void visit(DownloadCall* call) const;
 
     /**
      * @brief Visit EndTransferCall
      * @param call - EndTransferCall
      */
-    void visit(EndTransferCall& call) const;
+    void visit(EndTransferCall* call) const;
 
     /**
      * @brief Visit GetFileSizeCall
      * @param call - GetFileSizeCall
      */
-    void visit(GetFileSizeCall& call) const;
+    void visit(GetFileSizeCall* call) const;
 
     /**
      * @brief Visit ListCall
      * @param call - ListCall
      */
-    void visit(ListCall& call) const;
+    void visit(ListCall* call) const;
 
     /**
      * @brief Visit RemoveCall
      * @param call - RemoveCall
      */
-    void visit(RemoveCall& call) const;
+    void visit(RemoveCall* call) const;
 
     /**
      * @brief Visit MoveCall
      * @param call - MoveCall
      */
-    void visit(MoveCall& call) const;
+    void visit(MoveCall* call) const;
+
+    /**
+     * @brief Visit CheckTokenCall
+     * @param call - CheckTokenCall
+     */
+    void visit(CheckTokenCall* call) const;
 
 private:
     /**
@@ -116,7 +123,7 @@ private:
      * @tparam Call - Call type
      */
     template <typename Call>
-    void handlePost(Call& call) const;
+    void handlePost(Call* call) const;
 
     /**
      * @brief Handle calls that encapsulate get requests
@@ -124,7 +131,7 @@ private:
      * @tparam Call - Call type
      */
     template <typename Call>
-    void handleGet(Call& call) const;
+    void handleGet(Call* call) const;
 
 private:
     /**

@@ -44,7 +44,7 @@ std::shared_ptr<UrlEncodedRequest> LoginCall::request()
 
 void LoginCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void LoginCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
@@ -54,16 +54,19 @@ void LoginCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS, replyStr);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         if (replyStr == s_kErrorInvalidUsername)
         {
             m_callback(ApiCallStatus::INVALID_USERNAME, std::string());
+            return;
         }
         else if (replyStr == s_kErrorInvalidPassword)
         {
             m_callback(ApiCallStatus::INVALID_PASSWORD, std::string());
+            return;
         }
     }
 

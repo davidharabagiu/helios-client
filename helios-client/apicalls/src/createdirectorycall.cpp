@@ -44,7 +44,7 @@ std::shared_ptr<UrlEncodedRequest> CreateDirectoryCall::request()
 
 void CreateDirectoryCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void CreateDirectoryCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

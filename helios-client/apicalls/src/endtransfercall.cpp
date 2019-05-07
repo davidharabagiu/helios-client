@@ -43,7 +43,7 @@ std::shared_ptr<UrlEncodedRequest> EndTransferCall::request()
 
 void EndTransferCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void EndTransferCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

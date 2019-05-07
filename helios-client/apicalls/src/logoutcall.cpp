@@ -39,7 +39,7 @@ std::shared_ptr<UrlEncodedRequest> LogoutCall::request()
 
 void LogoutCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void LogoutCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

@@ -43,7 +43,7 @@ std::shared_ptr<UrlEncodedRequest> BeginUploadCall::request()
 
 void BeginUploadCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void BeginUploadCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

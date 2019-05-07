@@ -20,67 +20,72 @@ ApiCallVisitor::ApiCallVisitor(const std::weak_ptr<HttpRequestManager>& requestM
 {
 }
 
-void ApiCallVisitor::visit(RegisterUserCall& call) const
+void ApiCallVisitor::visit(RegisterUserCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(LoginCall& call) const
+void ApiCallVisitor::visit(LoginCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(LogoutCall& call) const
+void ApiCallVisitor::visit(LogoutCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(CreateDirectoryCall& call) const
+void ApiCallVisitor::visit(CreateDirectoryCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(BeginUploadCall& call) const
+void ApiCallVisitor::visit(BeginUploadCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(UploadCall& call) const
+void ApiCallVisitor::visit(UploadCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(BeginDownloadCall& call) const
+void ApiCallVisitor::visit(BeginDownloadCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(DownloadCall& call) const
+void ApiCallVisitor::visit(DownloadCall* call) const
 {
     handleGet(call);
 }
 
-void ApiCallVisitor::visit(EndTransferCall& call) const
+void ApiCallVisitor::visit(EndTransferCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(GetFileSizeCall& call) const
+void ApiCallVisitor::visit(GetFileSizeCall* call) const
 {
     handleGet(call);
 }
 
-void ApiCallVisitor::visit(ListCall& call) const
+void ApiCallVisitor::visit(ListCall* call) const
 {
     handleGet(call);
 }
 
-void ApiCallVisitor::visit(RemoveCall& call) const
+void ApiCallVisitor::visit(RemoveCall* call) const
 {
     handlePost(call);
 }
 
-void ApiCallVisitor::visit(MoveCall& call) const
+void ApiCallVisitor::visit(MoveCall* call) const
 {
     handlePost(call);
+}
+
+void ApiCallVisitor::visit(CheckTokenCall* call) const
+{
+    handleGet(call);
 }

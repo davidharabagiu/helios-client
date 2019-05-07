@@ -44,7 +44,7 @@ std::shared_ptr<UrlEncodedRequest> GetFileSizeCall::request()
 
 void GetFileSizeCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void GetFileSizeCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

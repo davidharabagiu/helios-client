@@ -45,7 +45,7 @@ std::shared_ptr<UrlEncodedRequest> RegisterUserCall::request()
 
 void RegisterUserCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void RegisterUserCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
@@ -55,24 +55,27 @@ void RegisterUserCall::receive(HttpStatus status, const std::vector<uint8_t>& re
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS);
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorUsernameAlreadyTaken)
         {
             m_callback(ApiCallStatus::USERNAME_ALREADY_EXISTS);
+            return;
         }
         else if (replyStr == s_kErrorInvalidUsername)
         {
             m_callback(ApiCallStatus::INVALID_USERNAME);
+            return;
         }
         else if (replyStr == s_kErrorInvalidPassword)
         {
             m_callback(ApiCallStatus::INVALID_PASSWORD);
+            return;
         }
     }
 
-    qCritical() << "Unhandled HTTP reply with status " << static_cast<int>(status) << " and content "
-                << replyStr.c_str();
+    qCritical() << "Unhandled HTTP reply with status" << static_cast<int>(status) << "and content" << replyStr.c_str();
     m_callback(ApiCallStatus::UNKNOWN_ERROR);
 }

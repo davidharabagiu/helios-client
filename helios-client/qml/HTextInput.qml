@@ -50,4 +50,8 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
     }
+
+    function clear() {
+        input.clear();
+    }
 }

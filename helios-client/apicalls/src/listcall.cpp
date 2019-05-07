@@ -51,7 +51,7 @@ std::shared_ptr<UrlEncodedRequest> ListCall::request()
 
 void ListCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

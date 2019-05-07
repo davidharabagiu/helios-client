@@ -43,6 +43,11 @@ using LoginCallback = std::function<void(ApiCallStatus, const std::string&)>;
 using LogoutCallback = std::function<void(ApiCallStatus)>;
 
 /**
+ * @brief Check token callback function. Receives the call status.
+ */
+using CheckTokenCallback = std::function<void(ApiCallStatus)>;
+
+/**
  * @brief Create directory callback function. Receives the call status.
  */
 using CreateDirectoryCallback = std::function<void(ApiCallStatus)>;

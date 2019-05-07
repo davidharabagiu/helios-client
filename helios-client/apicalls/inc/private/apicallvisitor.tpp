@@ -5,6 +5,7 @@
 #include "httprequestmanager.h"
 #include "logincall.h"
 #include "logoutcall.h"
+#include "checktokencall.h"
 #include "begindownloadcall.h"
 #include "beginuploadcall.h"
 #include "createdirectorycall.h"
@@ -19,35 +20,37 @@
 #include "typeutils.h"
 
 template <typename Call>
-void ApiCallVisitor::handlePost(Call& call) const
+void ApiCallVisitor::handlePost(Call* call) const
 {
     auto requestManager = m_requestManager.lock();
     if (!requestManager)
     {
         qFatal("HttpRequestManager is not available");
     }
-    requestManager->post(call.request(), [&call](HttpStatus status, const std::vector<uint8_t>& reply, bool success) {
+    requestManager->post(call->request(), [call](HttpStatus status, const std::vector<uint8_t>& reply, bool success) {
         if (!success)
         {
-            qCritical() << "Failed http request from API call of type " << TypeUtils::getTypeName<Call>().c_str();
+            qCritical() << "Failed http request from API call of type" << TypeUtils::getTypeName<Call>().c_str();
         }
-        call.receive(status, reply);
+        call->receive(status, reply);
+        delete call;
     });
 }
 
 template <typename Call>
-void ApiCallVisitor::handleGet(Call& call) const
+void ApiCallVisitor::handleGet(Call* call) const
 {
     auto requestManager = m_requestManager.lock();
     if (!requestManager)
     {
         qFatal("HttpRequestManager is not available");
     }
-    requestManager->get(call.request(), [&call](HttpStatus status, const std::vector<uint8_t>& reply, bool success) {
+    requestManager->get(call->request(), [call](HttpStatus status, const std::vector<uint8_t>& reply, bool success) {
         if (!success)
         {
-            qCritical() << "Failed http request from API call of type " << TypeUtils::getTypeName<Call>().c_str();
+            qCritical() << "Failed http request from API call of type" << TypeUtils::getTypeName<Call>().c_str();
         }
-        call.receive(status, reply);
+        call->receive(status, reply);
+        delete call;
     });
 }

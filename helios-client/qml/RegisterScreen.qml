@@ -5,6 +5,10 @@ Rectangle {
 
     property bool darkMode: false
 
+    property string username: usernameInput.text
+    property string password: passwordInput.text
+    property string passwordRepeated: repeatPasswordInput.text
+
     color: darkMode ? "#000000" : "#ffffff"
 
     signal submitButtonActivated()
@@ -18,6 +22,8 @@ Rectangle {
         radius: 25
 
         Item {
+            id: controlsContainer
+
             width: usernameInput.width
             height: usernameInput.height + passwordInput.height + repeatPasswordInput.height + registerButton.height + 15
             anchors.centerIn: parent
@@ -26,8 +32,8 @@ Rectangle {
                 id: usernameInput
                 darkMode: root.darkMode
                 anchors {
-                    left: parent
-                    top: parent
+                    left: parent.left
+                    top: parent.top
                 }
                 width: 165
                 hint: "Username"
@@ -88,5 +94,20 @@ Rectangle {
                 }
             }
         }
+
+        HLabel {
+            id: statusLabel
+            anchors {
+                top: controlsContainer.bottom
+                topMargin: 5
+                horizontalCenter: controlsContainer.horizontalCenter
+            }
+            text: ""
+        }
+    }
+
+    function displayError(message) {
+        statusLabel.color = "#ff0000";
+        statusLabel.text = message;
     }
 }

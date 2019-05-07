@@ -46,7 +46,7 @@ std::shared_ptr<UrlEncodedRequest> MoveCall::request()
 
 void MoveCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void MoveCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

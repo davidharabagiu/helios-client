@@ -47,7 +47,7 @@ std::shared_ptr<UrlEncodedRequest> DownloadCall::request()
 
 void DownloadCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void DownloadCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)

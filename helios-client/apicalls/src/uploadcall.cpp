@@ -47,7 +47,7 @@ std::shared_ptr<FormDataRequest> UploadCall::request()
 
 void UploadCall::send(std::shared_ptr<ApiCallVisitor> visitor)
 {
-    visitor->visit(*this);
+    visitor->visit(this);
 }
 
 void UploadCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
