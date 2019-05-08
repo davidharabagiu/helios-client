@@ -30,26 +30,25 @@ public:
     virtual void fileMoved(const std::string& sourcePath, const std::string& destinationPath) = 0;
 
     /**
-     * @brief A file or directory was renamed
-     * @param oldPath - Old path
-     * @param newPath - New path
-     */
-    virtual void fileRenamed(const std::string& oldPath, const std::string& newPath) = 0;
-
-    /**
      * @brief A file or directory was removed
      * @param path - Path
      */
     virtual void fileRemoved(const std::string& path) = 0;
 
     /**
-     * @brief A file download
+     * @brief A file download operation has started
      * @param path - File path
      */
     virtual void fileDownloadStarted(const std::string& path) = 0;
 
     /**
-     * @brief A file download or upload operation has started or the download progress has changed.
+     * @brief A file upload operation has started
+     * @param path - File path
+     */
+    virtual void fileUploadStarted(const std::string& path) = 0;
+
+    /**
+     * @brief Progress has changed for a file download or upload operation.
      * @param path - File path
      */
     virtual void fileOperationProgressChanged(const std::string& path) = 0;

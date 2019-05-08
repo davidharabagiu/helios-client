@@ -23,13 +23,12 @@ public:  // from FileService
     std::string       currentDirectory() const;
     std::vector<File> files() const;
     void              changeCurrentDirectory(const std::string& path);
-    void              createDirectory(const std::string& name);
-    void              uploadFile(const std::string& localPath);
-    void              downloadFile(const std::string& name, const std::string& localPath);
-    void              cancelOperation(const std::string& filePath);
-    void              moveFile(const std::string& name, const std::string& newParentDirectory);
-    void              renameFile(const std::string& name, const std::string& newName);
-    void              removeFile(const std::string& name);
+    void              createDirectory(const std::string& path, bool relative);
+    void              uploadFile(const std::string& localPath, const std::string& remotePath, bool relative);
+    void              downloadFile(const std::string& remotePath, bool relative, const std::string& localPath);
+    void              cancelOperation(const std::string& path);
+    void              moveFile(const std::string& sourcePath, const std::string& destinationPath);
+    void              removeFile(const std::string& path, bool relative);
 
 private:
     /**

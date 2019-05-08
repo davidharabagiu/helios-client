@@ -51,52 +51,48 @@ public:
     virtual void changeCurrentDirectory(const std::string& path) = 0;
 
     /**
-     * @brief Create a new directory in the current working directory.
-     * @param name - Name of the new directory
+     * @brief Create a new directory.
+     * @param name - Path of the new directory
+     * @param relative - True if path is relative to the current working directory
      */
-    virtual void createDirectory(const std::string& name) = 0;
+    virtual void createDirectory(const std::string& path, bool relative) = 0;
 
     /**
-     * @brief Upload a local file to the remote file system. The file will be uploaded in the current working directory
-     * under the same name as the local file.
+     * @brief Upload a local file to the remote file system.
+     * @param localPath - Path of the local file
+     * @param remotePath - Path of the remote file
+     * @param relative - True if the remote path is relative to the current working directory
+     */
+    virtual void uploadFile(const std::string& localPath, const std::string& remotePath, bool relative) = 0;
+
+    /**
+     * @brief Download a remote file to the local file system. The file will be downloaded at the specified path.
+     * @param remotePath - Path of the remote file
+     * @param relative - True if the remote path is relative to the current working directory
      * @param localPath - Path of the local file
      */
-    virtual void uploadFile(const std::string& localPath) = 0;
-
-    /**
-     * @brief Download a remote file from the current working directory to the local file system. The file will be
-     * downloaded in the specified path under the same name as the remote file.
-     * @param name - Name of the remote file
-     * @param localPath - Directory path of the download destintion
-     */
-    virtual void downloadFile(const std::string& name, const std::string& localPath) = 0;
+    virtual void downloadFile(const std::string& remotePath, bool relative, const std::string& localPath) = 0;
 
     /**
      * @brief Cancel a download or upload operation. The upload progress made so far won't be discarded.
-     * @param filePath - Full path of the remote file
+     * @param filePath - Path of the remote file
      */
-    virtual void cancelOperation(const std::string& filePath) = 0;
+    virtual void cancelOperation(const std::string& path) = 0;
 
     /**
-     * @brief Move a file or directory from the current working directory to another directory.
-     * @param name - Name of the file
-     * @param newParentDirectory - Destination directory path
+     * @brief Move a file or directory.
+     * @param sourcePath - Path of the file or directory to move
+     * @param destinationPath - Destination directory path
      */
-    virtual void moveFile(const std::string& name, const std::string& newParentDirectory) = 0;
-
-    /**
-     * @brief Rename a file or directory from the current working directory.
-     * @param name - Name of the file
-     * @param newName - New name of the file
-     */
-    virtual void renameFile(const std::string& name, const std::string& newName) = 0;
+    virtual void moveFile(const std::string& sourcePath, const std::string& destinationPath) = 0;
 
     /**
      * @brief Deletes a file or directory from the current working directory. If the target is a directory and it
      * contains another files, the contents will be recursively deleted as well.
-     * @param name - Name of the file
+     * @param path - Path of the file or directory
+     * @param relative - True if the path is relative to the current working directory
      */
-    virtual void removeFile(const std::string& name) = 0;
+    virtual void removeFile(const std::string& path, bool relative) = 0;
 }
 
 #endif  // FILESERVICE_H
