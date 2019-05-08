@@ -17,11 +17,6 @@ public:
      */
     FileServiceImpl(std::unique_ptr<FileApiCaller> fileApiCaller);
 
-public:  // from ServiceInterface
-    void start() override;
-    void stop() override;
-    bool enabled() const override;
-
 public:  // from FileService
     void              setAuthToken(const std::string& authToken);
     void              removeAuthToken();

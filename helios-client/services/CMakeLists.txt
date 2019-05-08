@@ -7,7 +7,6 @@ include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
     "inc/public/userservicelistener.h"
-    "inc/public/serviceinterface.h"
     "inc/public/userservice.h"
     "inc/private/userserviceimpl.h"
     "src/userserviceimpl.cpp"

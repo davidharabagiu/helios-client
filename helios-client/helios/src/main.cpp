@@ -34,7 +34,6 @@ void registerInstances()
     std::shared_ptr<UserService> userService(
         new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));
     Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
-    userService->start();
 }
 
 int main(int argc, char* argv[])

@@ -16,11 +16,6 @@ QAuthenticationControllerImpl::QAuthenticationControllerImpl(QAuthenticationCont
     {
         qFatal("UserService instance not available");
     }
-
-    if (!m_userService->enabled())
-    {
-        qFatal("UserService is disabled");
-    }
 }
 
 void QAuthenticationControllerImpl::registerForNotifications()

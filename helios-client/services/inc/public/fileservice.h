@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "serviceinterface.h"
 #include "observable.h"
 #include "fileservicelistener.h"
 #include "file.h"
@@ -13,7 +12,7 @@
  * @class FileService
  * @brief Interface for the remote file system management service
  */
-class FileService : public ServiceInterface, public Observable<FileSeriveListener>
+class FileService : public Observable<FileSeriveListener>
 {
 public:
     /**

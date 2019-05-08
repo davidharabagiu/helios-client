@@ -28,11 +28,6 @@ public:
     UserServiceImpl(std::unique_ptr<UserApiCaller>          userApiCaller,
                     const std::shared_ptr<SettingsManager>& settingsManager);
 
-public:  // from ServiceInterface
-    void start() override;
-    void stop() override;
-    bool enabled() const override;
-
 public:  // from UserService
     const UserSession& session() const override;
     bool               loggedIn() const override;
@@ -65,20 +60,11 @@ private:
     /**
      * @brief Handle checkToken operation completion
      * @param status - Completion status
+     * @param session - Candidate session to be validated
      */
-    void handleCheckToken(ApiCallStatus status);
+    void handleCheckToken(ApiCallStatus status, const UserSession& session);
 
 private:
-    /**
-     * @brief True if the service has be started
-     */
-    bool m_enabled;
-
-    /**
-     * @brief True if logged in.
-     */
-    bool m_loggedIn;
-
     /**
      * @brief Current user session. Valid only when logged in.
      */
