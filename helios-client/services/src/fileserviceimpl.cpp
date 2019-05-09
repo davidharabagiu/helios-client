@@ -338,6 +338,123 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
         });
 }
 
+void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative, const std::string& localPath)
+{
+    // Obtain the full remote path
+    std::string fullRemotePath;
+    if (relative)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        fullRemotePath = concatenatePaths(m_currentDirectory, remotePath);
+    }
+    else
+    {
+        fullRemotePath = remotePath;
+        removeTrailingSlash(fullRemotePath);
+    }
+
+    // Check if there is already an active transfer on this file
+    {
+        bool shouldFail = false;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            shouldFail = m_activeTransfers.find(fullRemotePath) != m_activeTransfers.end();
+        }
+        if (shouldFail)
+        {
+            std::ostringstream ss("There is already an active transfer on file ");
+            ss << fullRemotePath;
+            Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            return;
+        }
+    }
+
+    m_apiCaller->beginDownload(
+        m_authToken, fullRemotePath,
+        [this, localPath, fullRemotePath](ApiCallStatus status, const std::string& transferId, uint64_t fileSize) {
+            if (status == ApiCallStatus::SUCCESS)
+            {
+                auto transfer      = std::make_shared<FileTransferInternal>();
+                transfer->transfer = std::make_shared<FileTransfer>(localPath, fullRemotePath,
+                                                                    FileTransfer::TransferMode::DOWNLOAD, fileSize);
+                transfer->stream   = std::make_shared<std::ofstream>(localPath, std::ios::binary);
+                m_activeTransfers.emplace(fullRemotePath, transfer);
+
+                // Post transfer execution
+                m_transfersExecutor.post([this, transfer, transferId, fullRemotePath] {
+                    Observable::notifyAll(&FileServiceListener::fileDownloadStarted, fullRemotePath);
+
+                    uint64_t chunkSize =
+                        safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
+                    auto                       stream = std::static_pointer_cast<std::ofstream>(transfer->stream);
+                    std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize]);
+
+                    auto     fileSize    = transfer->transfer->fileSize();
+                    uint64_t transferred = transfer->transfer->transferredBytes();
+
+                    AutoResetEvent chunkDone;
+
+                    while (transferred < fileSize)
+                    {
+                        ApiCallStatus lastStatus;
+                        m_apiCaller->download(m_authToken, transferId, transferred, chunkSize,
+                                              [&chunkDone, &lastStatus, &transferred, &stream](
+                                                  ApiCallStatus status, const std::vector<uint8_t>& bytes) {
+                                                  lastStatus = status;
+                                                  if (status == ApiCallStatus::SUCCESS)
+                                                  {
+                                                      stream->write(reinterpret_cast<const char*>(bytes.data()),
+                                                                    safe_integral_cast<long>(bytes.size()));
+                                                      transferred += bytes.size();
+                                                  }
+                                                  chunkDone.set();
+                                              });
+
+                        chunkDone.wait();
+
+                        if (lastStatus == ApiCallStatus::SUCCESS)
+                        {
+                            transfer->transfer->setTransferredBytes(transferred);
+                            Observable::notifyAll(&FileServiceListener::fileOperationProgressChanged, fullRemotePath);
+                        }
+                        else
+                        {
+                            // Upload failure
+                            Observable::notifyAll(&FileServiceListener::fileOperationAborted, fullRemotePath);
+                            std::ostringstream ss("Error while downloading. ApiCallStatus = ");
+                            ss << static_cast<int>(lastStatus);
+                            Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                            break;
+                        }
+                    }
+
+                    // Cleanup
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_activeTransfers.erase(fullRemotePath);
+
+                    if (transferred == fileSize)
+                    {
+                        // Notify completion
+                        Observable::notifyAll(&FileServiceListener::fileOperationCompleted, fullRemotePath);
+                    }
+                });
+            }
+            else if (status == ApiCallStatus::INVALID_PATH)
+            {
+                std::ostringstream ss("Path ");
+                ss << fullRemotePath;
+                ss << " is invalid.";
+                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            }
+            else
+            {
+                std::ostringstream ss("Error while starting download. ApiCallStatus = ");
+                ss << static_cast<int>(status);
+                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            }
+        });
+}
+
 void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string& destinationPath)
 {
     if (!enabled())

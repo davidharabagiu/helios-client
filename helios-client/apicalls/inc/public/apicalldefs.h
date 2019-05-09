@@ -64,9 +64,9 @@ using BeginUploadCallback = std::function<void(ApiCallStatus, const std::string&
 using UploadCallback = std::function<void(ApiCallStatus)>;
 
 /**
- * @brief Begin download callback function. Receives the call status and the id of the transfer.
+ * @brief Begin download callback function. Receives the call status, the id of the transfer and the size of the file.
  */
-using BeginDownloadCallback = std::function<void(ApiCallStatus, const std::string&)>;
+using BeginDownloadCallback = std::function<void(ApiCallStatus, const std::string&, uint64_t)>;
 
 /**
  * @brief Download callback function. Receives the call status and the requested file bytes.
