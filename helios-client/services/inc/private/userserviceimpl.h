@@ -8,7 +8,6 @@
 #include "userservice.h"
 #include "apicalldefs.h"
 #include "usersession.h"
-#include "asyncnotifier.h"
 
 class UserApiCaller;
 class SettingsManager;

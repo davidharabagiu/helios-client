@@ -97,6 +97,11 @@ using RemoveCallback = std::function<void(ApiCallStatus)>;
  * @brief Move callback function. Receives the call status.
  */
 using MoveCallback = std::function<void(ApiCallStatus)>;
+
+/**
+ * @brief Is directory callback function. Receives the call status and if the provided path reffers to a directory.
+ */
+using IsDirCallback = std::function<void(ApiCallStatus, bool)>;
 }  // namespace ApiCallbacks
 
 #endif  // APICALLDEFS_H

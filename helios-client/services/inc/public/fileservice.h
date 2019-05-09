@@ -3,22 +3,29 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "observable.h"
 #include "fileservicelistener.h"
 #include "file.h"
+#include "filetransfer.h"
 
 /**
  * @class FileService
  * @brief Interface for the remote file system management service
  */
-class FileService : public Observable<FileSeriveListener>
+class FileService : public Observable<FileServiceListener, ObservableNotifyMode::ASYNC>
 {
 public:
     /**
      * @brief Destructor
      */
     virtual ~FileService() = default;
+
+    /**
+     * @brief Returns true if the service is enabled (an auth token is present).
+     */
+    virtual bool enabled() const = 0;
 
     /**
      * @brief Set the authentication token of the working user. Having a valid auth token is a precondition for all
@@ -40,15 +47,22 @@ public:
 
     /**
      * @brief Returns the list of files in the current working directory
-     * @return std::vector<File>
+     * @return std::vector<std::shared_ptr<const File>>
      */
-    virtual std::vector<File> files() const = 0;
+    virtual std::vector<std::shared_ptr<const File>> files() const = 0;
+
+    /**
+     * @brief Returns the list of active file transfers
+     * @return std::vector<std::shared_ptr<File>>
+     */
+    virtual std::vector<std::shared_ptr<FileTransfer>> activeTransfers() const = 0;
 
     /**
      * @brief Navigate to another directory
      * @param path - New directory path
+     * @param True if path is relative to the current working directory
      */
-    virtual void changeCurrentDirectory(const std::string& path) = 0;
+    virtual void changeCurrentDirectory(const std::string& path, bool relative) = 0;
 
     /**
      * @brief Create a new directory.
@@ -93,6 +107,6 @@ public:
      * @param relative - True if the path is relative to the current working directory
      */
     virtual void removeFile(const std::string& path, bool relative) = 0;
-}
+};
 
 #endif  // FILESERVICE_H

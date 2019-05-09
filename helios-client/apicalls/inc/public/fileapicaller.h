@@ -118,6 +118,15 @@ public:
      */
     virtual void move(const std::string& authToken, const std::string& source, const std::string& destination,
                       const ApiCallbacks::MoveCallback& callback) const = 0;
+
+    /**
+     * @brief Check if a file is a directory or not.
+     * @param authToken - User authentication token
+     * @param path - File path
+     * @param callback - IsDirCallback
+     */
+    virtual void isDir(const std::string& authToken, const std::string& path,
+                       const ApiCallbacks::IsDirCallback& callback) const = 0;
 };
 
 #endif  // FILEAPICALLER_H

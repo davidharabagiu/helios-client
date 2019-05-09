@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "asyncnotifier.h"
+#include "executor.h"
 
 namespace
 {
@@ -116,7 +116,7 @@ public:
      * @brief Constructor
      */
     Observable()
-        : m_asyncNotifier(new AsyncNotifier())
+        : m_executor(new Executor())
     {
     }
 
@@ -133,23 +133,23 @@ protected:
     {
         for (const auto& listener : ObservableBase<Listener>::m_listeners)
         {
-            m_asyncNotifier->postNotification(std::forward<M>(callback), listener.get(), std::forward<Args>(args)...);
+            m_executor->post(std::forward<M>(callback), listener.get(), std::forward<Args>(args)...);
         }
     }
 
     /**
-     * @brief Cancel all posted notifications that were not yet executed. Only works when notifyMode is ASYNC.
+     * @brief Cancel all posted notifications that were not yet executed.
      */
     void cancelPendingNotifications()
     {
-        m_asyncNotifier->cancelPendingNotifications();
+        m_executor->cancelPendingTasks();
     }
 
 private:
     /**
-     * @brief Async notifier instance (may be null in case m_notifyMode is SYNC)
+     * @brief Executor instance
      */
-    std::shared_ptr<AsyncNotifier> m_asyncNotifier;
+    std::shared_ptr<Executor> m_executor;
 };
 
 #endif  // OBSERVABLE_H

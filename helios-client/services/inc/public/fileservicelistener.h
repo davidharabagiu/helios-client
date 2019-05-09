@@ -12,6 +12,11 @@ class FileServiceListener
 {
 public:
     /**
+     * @brief The file service was enabled as it was provided with a valid auth token.
+     */
+    virtual void fileServiceEnabled() = 0;
+
+    /**
      * @brief The current directory path has changed.
      */
     virtual void currentDirectoryChanged() = 0;

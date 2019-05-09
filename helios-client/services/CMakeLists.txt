@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME}
     "src/userserviceimpl.cpp"
     "inc/public/fileservice.h"
     "inc/private/fileserviceimpl.h"
+    "src/fileserviceimpl.cpp"
     "inc/public/fileservicelistener.h"
 )
 

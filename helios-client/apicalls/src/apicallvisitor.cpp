@@ -89,3 +89,8 @@ void ApiCallVisitor::visit(CheckTokenCall* call) const
 {
     handleGet(call);
 }
+
+void ApiCallVisitor::visit(IsDirCall* call) const
+{
+    handleGet(call);
+}

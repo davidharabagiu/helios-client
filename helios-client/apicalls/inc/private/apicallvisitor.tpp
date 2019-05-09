@@ -17,6 +17,7 @@
 #include "registerusercall.h"
 #include "removecall.h"
 #include "uploadcall.h"
+#include "isdircall.h"
 #include "typeutils.h"
 
 template <typename Call>

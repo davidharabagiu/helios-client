@@ -67,6 +67,7 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
         {
             qCritical() << "JSON parse error: " << jsonError.errorString();
             m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, {});
+            return;
         }
 
         std::vector<std::tuple<std::string, bool>> files;
@@ -91,16 +92,19 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
         }
 
         m_callback(ApiCallStatus::SUCCESS, files);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED, {});
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorInvalidPath)
         {
             m_callback(ApiCallStatus::INVALID_PATH, {});
+            return;
         }
     }
 

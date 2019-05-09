@@ -40,7 +40,7 @@ bool UserServiceImpl::loggedIn() const
 void UserServiceImpl::login(const UserAccount& account, bool persist)
 {
     m_apiCaller->login(account.username(), account.password(),
-                       [this, &account, &persist](ApiCallStatus status, const std::string& authToken) {
+                       [this, account, persist](ApiCallStatus status, const std::string& authToken) {
                            handleLoggedIn(status, UserSession(account.username(), authToken), persist);
                        });
 }
@@ -56,7 +56,7 @@ void UserServiceImpl::restoreSession()
         auto        token    = varToken.toString().toStdString();
         UserSession session(username, token);
         m_apiCaller->checkToken(username, token,
-                                [this, &session](ApiCallStatus status) { handleCheckToken(status, session); });
+                                [this, session](ApiCallStatus status) { handleCheckToken(status, session); });
     }
 }
 
