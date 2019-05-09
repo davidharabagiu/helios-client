@@ -5,6 +5,8 @@
 #include <QJsonParseError>
 #include <QDebug>
 #include <tuple>
+#include <optional>
+#include <cstdint>
 
 #include "listcall.h"
 #include "single.h"
@@ -21,6 +23,7 @@ const std::string ListCall::s_kTokenParam        = "token";
 const std::string ListCall::s_kPathParam         = "path";
 const QString     ListCall::s_kFileNameJsonField = "name";
 const QString     ListCall::s_kIsDirJsonField    = "isDir";
+const QString     ListCall::s_kSizeJsonField     = "size";
 const std::string ListCall::s_kErrorInvalidPath  = "Invalid path";
 
 ListCall::ListCall(const std::string& authToken, const std::string& path, const ApiCallbacks::ListCallback& callback)
@@ -70,7 +73,7 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
             return;
         }
 
-        std::vector<std::tuple<std::string, bool>> files;
+        std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>> files;
 
         auto jsonArray = json.array();
         for (const auto& jsonArrayElement : jsonArray)
@@ -83,12 +86,17 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
             auto jsonObject     = jsonArrayElement.toObject();
             auto jsonFileField  = jsonObject[s_kFileNameJsonField];
             auto jsonIsDirField = jsonObject[s_kIsDirJsonField];
-            if (jsonFileField.type() != QJsonValue::String || jsonIsDirField.type() != QJsonValue::Bool)
+            auto jsonSizeField  = jsonObject[s_kSizeJsonField];
+            if (jsonFileField.type() != QJsonValue::String || jsonIsDirField.type() != QJsonValue::Bool ||
+                (!jsonIsDirField.toBool() && jsonSizeField.type() != QJsonValue::Double))
             {
                 qCritical() << "Invalid json reply received: " << replyStr.c_str();
                 m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, {});
             }
-            files.emplace_back(jsonFileField.toString().toStdString(), jsonIsDirField.toBool());
+            files.emplace_back(jsonFileField.toString().toStdString(), jsonIsDirField.toBool(),
+                               jsonIsDirField.toBool() ?
+                                   std::nullopt :
+                                   std::optional<uint64_t>(static_cast<uint64_t>(jsonSizeField.toDouble())));
         }
 
         m_callback(ApiCallStatus::SUCCESS, files);

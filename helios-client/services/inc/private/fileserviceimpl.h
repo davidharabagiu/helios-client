@@ -67,7 +67,7 @@ private:
      * @brief Collect a list of files returned from an API list call in m_files
      * @param files - List of files
      */
-    void collectApiFileList(const std::vector<std::tuple<std::string, bool>>& files);
+    void collectApiFileList(const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files);
 
     /**
      * @brief Concatenate a base with a relative path to obtain the full path

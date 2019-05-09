@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdint>
 #include <tuple>
+#include <optional>
 
 /**
  * @brief Status codes for service API calls
@@ -84,9 +85,10 @@ using GetFileSizeCallback = std::function<void(ApiCallStatus, uint64_t)>;
 
 /**
  * @brief List callback function. Receives the call status and a list of files and directories names, along with a
- * boolean indicating if the file is a directory.
+ * boolean indicating if the file is a directory and the size of the file if it's not a directory.
  */
-using ListCallback = std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, bool>>&)>;
+using ListCallback =
+    std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>&)>;
 
 /**
  * @brief Remove callback function. Receives the call status.

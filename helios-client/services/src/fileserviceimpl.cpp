@@ -3,6 +3,9 @@
 #include <QDebug>
 #include <fstream>
 #include <utility>
+#include <optional>
+#include <cstdint>
+#include <cassert>
 
 #include "fileserviceimpl.h"
 #include "apicalldefs.h"
@@ -28,7 +31,8 @@ void FileServiceImpl::setAuthToken(const std::string& authToken)
 
     m_apiCaller->list(
         authToken, "",
-        [this, authToken](ApiCallStatus status, const std::vector<std::tuple<std::string, bool>>& files) {
+        [this, authToken](ApiCallStatus                                                              status,
+                          const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files) {
             if (status == ApiCallStatus::SUCCESS)
             {
                 {
@@ -119,31 +123,33 @@ void FileServiceImpl::changeCurrentDirectory(const std::string& path, bool relat
         removeTrailingSlash(fullPath);
     }
 
-    m_apiCaller->list(m_authToken, fullPath,
-                      [this, fullPath](ApiCallStatus status, const std::vector<std::tuple<std::string, bool>>& files) {
-                          if (status == ApiCallStatus::SUCCESS)
-                          {
-                              {
-                                  std::lock_guard<std::mutex> lock(m_mutex);
-                                  m_currentDirectory = fullPath;
-                                  collectApiFileList(files);
-                              }
-                              Observable::notifyAll(&FileServiceListener::currentDirectoryChanged);
-                          }
-                          else if (status == ApiCallStatus::INVALID_PATH)
-                          {
-                              std::ostringstream ss("Path ");
-                              ss << fullPath;
-                              ss << " is invalid.";
-                              Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                          }
-                          else
-                          {
-                              std::ostringstream ss("Error while listing files. ApiCallStatus = ");
-                              ss << static_cast<int>(status);
-                              Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                          }
-                      });
+    m_apiCaller->list(
+        m_authToken, fullPath,
+        [this, fullPath](ApiCallStatus                                                              status,
+                         const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files) {
+            if (status == ApiCallStatus::SUCCESS)
+            {
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_currentDirectory = fullPath;
+                    collectApiFileList(files);
+                }
+                Observable::notifyAll(&FileServiceListener::currentDirectoryChanged);
+            }
+            else if (status == ApiCallStatus::INVALID_PATH)
+            {
+                std::ostringstream ss("Path ");
+                ss << fullPath;
+                ss << " is invalid.";
+                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            }
+            else
+            {
+                std::ostringstream ss("Error while listing files. ApiCallStatus = ");
+                ss << static_cast<int>(status);
+                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            }
+        });
 }
 
 void FileServiceImpl::createDirectory(const std::string& path, bool relative)
@@ -486,13 +492,19 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
     });
 }
 
-void FileServiceImpl::collectApiFileList(const std::vector<std::tuple<std::string, bool>>& files)
+void FileServiceImpl::collectApiFileList(
+    const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files)
 {
     m_files.clear();
     for (const auto& apiFile : files)
     {
+        bool isDir = std::get<1>(apiFile);
+        auto size  = std::get<2>(apiFile);
+        assert(isDir || (!isDir && size.has_value()));
+        assert(!isDir || (isDir && !size.has_value()));
+
         m_files.emplace(m_currentDirectory,
-                        std::make_shared<File>(std::get<0>(apiFile), m_currentDirectory, std::get<1>(apiFile)));
+                        std::make_shared<File>(std::get<0>(apiFile), m_currentDirectory, isDir, isDir ? 0 : *size));
     }
 }
 

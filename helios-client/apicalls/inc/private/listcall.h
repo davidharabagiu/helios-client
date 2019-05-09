@@ -66,6 +66,11 @@ private:
     static const QString s_kIsDirJsonField;
 
     /**
+     * @brief Name of the JSON field representing the file size in the reply
+     */
+    static const QString s_kSizeJsonField;
+
+    /**
      * @brief Invalid path error message
      */
     static const std::string s_kErrorInvalidPath;
