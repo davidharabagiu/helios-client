@@ -19,6 +19,8 @@ add_library(${PROJECT_NAME}
     "inc/observable.h"
     "inc/timer.h"
     "src/timer.cpp"
+    "inc/autoresetevent.h"
+    "src/autoresetevent.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

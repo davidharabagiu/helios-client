@@ -40,6 +40,13 @@ ConfigImpl::ConfigImpl()
     }
     m_valuesRegistry.emplace(ConfigKeys::kSettingsAutoSaveIntervalKey,
                              safe_integral_cast<uint>(settingsAutoSaveIntervalObj.toInt()));
+
+    auto uploadChunkSizeObj = json[QString::fromStdString(ConfigKeys::kUploadChunkSize)];
+    if (uploadChunkSizeObj.type() != QJsonValue::Double)
+    {
+        qFatal("%s not found in %s", ConfigKeys::kUploadChunkSize.c_str(), Paths::kConfigFile.c_str());
+    }
+    m_valuesRegistry.emplace(ConfigKeys::kUploadChunkSize, safe_integral_cast<uint>(uploadChunkSizeObj.toInt()));
 }
 
 QVariant ConfigImpl::operator[](const std::string& key) const

@@ -5,13 +5,15 @@
 #include <map>
 #include <mutex>
 #include <memory>
-#include <ios>
 
 #include "fileservice.h"
 #include "fileapicaller.h"
 #include "file.h"
 #include "filetransfer.h"
 #include "executor.h"
+
+// Forward declarations
+class Config;
 
 /**
  * @class FileServiceImpl
@@ -22,7 +24,7 @@ class FileServiceImpl : public FileService
 private:
     /**
      * @struct FileTransferInternal
-     * @brief A file transfer with an associated file stream and mutexs
+     * @brief A file transfer with an associated file stream
      */
     struct FileTransferInternal
     {
@@ -32,22 +34,18 @@ private:
         std::shared_ptr<FileTransfer> transfer;
 
         /**
-         * @brief File stream (can be either std::ifstream or std::ofstream)
+         * @brief Input file stream. Can be either std::ofstream or std::ifstream.
          */
-        std::shared_ptr<std::ios> stream;
-
-        /**
-         * @brief Mutex
-         */
-        std::shared_ptr<std::mutex> mutex;
+        std::shared_ptr<void> stream;
     };
 
 public:
     /**
      * @brief Constructor
+     * @param config - Config instance
      * @param fileApiCaller - File API caller instance
      */
-    FileServiceImpl(std::unique_ptr<FileApiCaller> fileApiCaller);
+    FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller);
 
 public:  // from FileService
     bool                                       enabled() const override;
@@ -100,6 +98,11 @@ private:
     std::unique_ptr<FileApiCaller> m_apiCaller;
 
     /**
+     * @brief Config instance
+     */
+    std::shared_ptr<Config> m_config;
+
+    /**
      * @brief Authentication token
      */
     std::string m_authToken;
@@ -117,7 +120,7 @@ private:
     /**
      * @brief Currently active file transfers mapped by the remote file path
      */
-    std::map<std::string, std::unique_ptr<FileTransferInternal>> m_activeTransfers;
+    std::map<std::string, std::shared_ptr<FileTransferInternal>> m_activeTransfers;
 
     /**
      * @brief Executor for async file transfers

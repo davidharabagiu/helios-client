@@ -7,9 +7,13 @@
 #include "fileserviceimpl.h"
 #include "apicalldefs.h"
 #include "typeconversions.h"
+#include "config.h"
+#include "configkeys.h"
+#include "autoresetevent.h"
 
-FileServiceImpl::FileServiceImpl(std::unique_ptr<FileApiCaller> fileApiCaller)
+FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller)
     : m_apiCaller(std::move(fileApiCaller))
+    , m_config(config)
 {
 }
 
@@ -215,25 +219,117 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
         removeTrailingSlash(fullRemotePath);
     }
 
-    // Obtain the file size
-    uint64_t fileSize;
+    // Check if there is already an active transfer on this file
     {
-        std::ifstream stream(localPath, std::ifstream::ate | std::ifstream::binary);
-        if (!stream.good())
+        bool shouldFail = false;
         {
-            std::ostringstream ss("Error while reading ");
-            ss << localPath;
-            Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            std::lock_guard<std::mutex> lock(m_mutex);
+            shouldFail = m_activeTransfers.find(fullRemotePath) != m_activeTransfers.end();
         }
-        fileSize = safe_integral_cast<uint64_t>(static_cast<long long>(stream.tellg()));
+        if (shouldFail)
+        {
+            std::ostringstream ss("There is already an active transfer on file ");
+            ss << fullRemotePath;
+            Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            return;
+        }
     }
 
-    auto transfer = std::unique_ptr<FileTransferInternal>(new FileTransferInternal{
-        std::make_shared<FileTransfer>(localPath, fullRemotePath, FileTransfer::TransferMode::UPLOAD, fileSize),
-        std::make_shared<std::ifstream>(localPath, std::ios::binary), std::make_shared<std::mutex>()});
-    m_activeTransfers.emplace(fullRemotePath, std::move(transfer));
+    m_apiCaller->beginUpload(
+        m_authToken, fullRemotePath,
+        [this, localPath, fullRemotePath](ApiCallStatus status, const std::string& transferId) {
+            if (status == ApiCallStatus::SUCCESS)
+            {
+                // Obtain the file size
+                uint64_t fileSize;
+                {
+                    std::ifstream stream(localPath, std::ifstream::ate | std::ifstream::binary);
+                    if (!stream.good())
+                    {
+                        std::ostringstream ss("Error while reading ");
+                        ss << localPath;
+                        Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                    }
+                    fileSize = safe_integral_cast<uint64_t>(static_cast<long long>(stream.tellg()));
+                }
 
-    // Post transfer execution
+                auto transfer      = std::make_shared<FileTransferInternal>();
+                transfer->transfer = std::make_shared<FileTransfer>(localPath, fullRemotePath,
+                                                                    FileTransfer::TransferMode::UPLOAD, fileSize);
+                transfer->stream   = std::make_shared<std::ifstream>(localPath, std::ios::binary);
+                m_activeTransfers.emplace(fullRemotePath, transfer);
+
+                // Post transfer execution
+                m_transfersExecutor.post([this, transfer, transferId, fullRemotePath] {
+                    Observable::notifyAll(&FileServiceListener::fileUploadStarted, fullRemotePath);
+
+                    uint64_t chunkSize =
+                        safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
+                    auto                       stream = std::static_pointer_cast<std::ifstream>(transfer->stream);
+                    std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize]);
+
+                    auto     fileSize    = transfer->transfer->fileSize();
+                    uint64_t transferred = transfer->transfer->transferredBytes();
+
+                    AutoResetEvent chunkDone;
+
+                    while (transferred < fileSize)
+                    {
+                        uint64_t read = (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
+                        stream->read(reinterpret_cast<char*>(buffer.get()), safe_integral_cast<std::streamsize>(read));
+
+                        ApiCallStatus lastStatus;
+                        m_apiCaller->upload(m_authToken, transferId, transferred,
+                                            std::vector<uint8_t>(buffer.get(), buffer.get() + read),
+                                            [&chunkDone, &lastStatus](ApiCallStatus status) {
+                                                lastStatus = status;
+                                                chunkDone.set();
+                                            });
+
+                        chunkDone.wait();
+
+                        if (lastStatus == ApiCallStatus::SUCCESS)
+                        {
+                            transferred += read;
+                            transfer->transfer->setTransferredBytes(transferred);
+                            Observable::notifyAll(&FileServiceListener::fileOperationProgressChanged, fullRemotePath);
+                        }
+                        else
+                        {
+                            // Upload failure
+                            Observable::notifyAll(&FileServiceListener::fileOperationAborted, fullRemotePath);
+                            std::ostringstream ss("Error while uploading. ApiCallStatus = ");
+                            ss << static_cast<int>(lastStatus);
+                            Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                            break;
+                        }
+                    }
+
+                    // Cleanup
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_activeTransfers.erase(fullRemotePath);
+
+                    if (transferred == fileSize)
+                    {
+                        // Notify completion
+                        Observable::notifyAll(&FileServiceListener::fileOperationCompleted, fullRemotePath);
+                    }
+                });
+            }
+            else if (status == ApiCallStatus::INVALID_PATH)
+            {
+                std::ostringstream ss("Path ");
+                ss << fullRemotePath;
+                ss << " is invalid.";
+                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            }
+            else
+            {
+                std::ostringstream ss("Error while starting upload. ApiCallStatus = ");
+                ss << static_cast<int>(status);
+                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+            }
+        });
 }
 
 void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string& destinationPath)
