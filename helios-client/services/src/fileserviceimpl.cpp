@@ -40,7 +40,6 @@ void FileServiceImpl::setAuthToken(const std::string& authToken)
                     m_authToken = authToken;
                     collectApiFileList(files);
                 }
-                Observable::notifyAll(&FileServiceListener::fileServiceEnabled);
                 Observable::notifyAll(&FileServiceListener::currentDirectoryChanged);
             }
             else if (status == ApiCallStatus::UNAUTHORIZED)
@@ -177,15 +176,18 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
             std::string dirName;
             std::string dirParent;
             getFileNameAndParentDir(fullPath, dirName, dirParent);
+
+            auto dir = std::make_shared<File>(dirName, dirParent, true);
+
             {
                 std::lock_guard<std::mutex> lock(m_mutex);
                 if (dirParent == m_currentDirectory)
                 {
-                    m_files.emplace(dirName, std::make_shared<File>(dirName, dirParent, true));
+                    m_files.emplace(dirName, dir);
                 }
             }
 
-            Observable::notifyAll(&FileServiceListener::directoryCreated, fullPath);
+            Observable::notifyAll(&FileServiceListener::directoryCreated, dir);
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {
@@ -455,6 +457,11 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
         });
 }
 
+void FileServiceImpl::cancelOperation(const std::string& /*path*/)
+{
+    // TODO: Implement transfer cancelation
+}
+
 void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string& destinationPath)
 {
     if (!enabled())
@@ -615,12 +622,13 @@ void FileServiceImpl::collectApiFileList(
     m_files.clear();
     for (const auto& apiFile : files)
     {
+        auto name  = std::get<0>(apiFile);
         bool isDir = std::get<1>(apiFile);
         auto size  = std::get<2>(apiFile);
         assert(isDir || (!isDir && size.has_value()));
         assert(!isDir || (isDir && !size.has_value()));
 
-        m_files.emplace(m_currentDirectory,
+        m_files.emplace(name,
                         std::make_shared<File>(std::get<0>(apiFile), m_currentDirectory, isDir, isDir ? 0 : *size));
     }
 }

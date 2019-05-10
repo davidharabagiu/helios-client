@@ -88,15 +88,24 @@ void ListCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
             auto jsonIsDirField = jsonObject[s_kIsDirJsonField];
             auto jsonSizeField  = jsonObject[s_kSizeJsonField];
             if (jsonFileField.type() != QJsonValue::String || jsonIsDirField.type() != QJsonValue::Bool ||
-                (!jsonIsDirField.toBool() && jsonSizeField.type() != QJsonValue::Double))
+                (!jsonIsDirField.toBool() && jsonSizeField.type() != QJsonValue::String))
             {
                 qCritical() << "Invalid json reply received: " << replyStr.c_str();
                 m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, {});
             }
-            files.emplace_back(jsonFileField.toString().toStdString(), jsonIsDirField.toBool(),
-                               jsonIsDirField.toBool() ?
-                                   std::nullopt :
-                                   std::optional<uint64_t>(static_cast<uint64_t>(jsonSizeField.toDouble())));
+
+            try
+            {
+                files.emplace_back(jsonFileField.toString().toStdString(), jsonIsDirField.toBool(),
+                                   jsonIsDirField.toBool() ?
+                                       std::nullopt :
+                                       std::optional<uint64_t>(std::stoull(jsonSizeField.toString().toStdString())));
+            }
+            catch (const std::exception& exception)
+            {
+                qCritical() << "Exception while converting" << jsonSizeField.toString()
+                            << "to number:" << exception.what();
+            }
         }
 
         m_callback(ApiCallStatus::SUCCESS, files);

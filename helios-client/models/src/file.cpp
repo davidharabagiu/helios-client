@@ -19,6 +19,11 @@ std::string File::name() const
     return m_name;
 }
 
+std::string File::parentDirectory() const
+{
+    return m_parentDirectory;
+}
+
 std::string File::fullPath() const
 {
     return m_fullPath;

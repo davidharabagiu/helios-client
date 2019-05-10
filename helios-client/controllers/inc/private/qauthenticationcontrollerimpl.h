@@ -46,6 +46,7 @@ public:  // forwarded from QAuthenticationController
     void    setPersistLogin(bool newVal);
     bool    loggedIn() const;
     QString username() const;
+    QString authenticationToken() const;
 
 private:
     /**

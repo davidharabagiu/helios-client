@@ -1,6 +1,9 @@
 #ifndef QREMOTEFILESYSTEMCONTROLLERIMPL_H
 #define QREMOTEFILESYSTEMCONTROLLERIMPL_H
 
+#include <QString>
+#include <QList>
+#include <QVariant>
 #include <memory>
 #include "fileservicelistener.h"
 
@@ -32,10 +35,17 @@ public:
      */
     void unregisterFromNotifications();
 
+public:  // forwarded from QRemoteFileSystemController
+    void         setAuthenticationToken(const QString& newVal);
+    void         resetAuthenticationToken();
+    QString      cwd() const;
+    QVariantList files() const;
+    QVariantList transfers() const;
+    void         openDirectory(const QString& dirName);
+
 public:  // from FileServiceListener
-    void fileServiceEnabled() override;
     void currentDirectoryChanged() override;
-    void directoryCreated(const std::string& path) override;
+    void directoryCreated(std::shared_ptr<const File> directory) override;
     void fileMoved(const std::string& sourcePath, const std::string& destinationPath) override;
     void fileRemoved(const std::string& path) override;
     void fileDownloadStarted(const std::string& path) override;
@@ -50,6 +60,16 @@ private:
      * @brief Public implementation
      */
     QRemoteFileSystemController* m_publicImpl;
+
+    /**
+     * @brief Current list of files
+     */
+    QVariantList m_files;
+
+    /**
+     * @brief Current list of file transfers
+     */
+    QVariantList m_transfers;
 
     /**
      * @brief File service instance

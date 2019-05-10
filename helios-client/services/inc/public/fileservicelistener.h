@@ -4,6 +4,9 @@
 #include <string>
 #include <cstdint>
 
+// Forward declarations
+class File;
+
 /**
  * @class FileServiceListener
  * @brief Interface for listening on FileService async operations
@@ -17,20 +20,15 @@ public:
     virtual ~FileServiceListener() = default;
 
     /**
-     * @brief The file service was enabled as it was provided with a valid auth token.
-     */
-    virtual void fileServiceEnabled() = 0;
-
-    /**
      * @brief The current directory path has changed.
      */
     virtual void currentDirectoryChanged() = 0;
 
     /**
      * @brief A directory was created
-     * @param path - Directory path
+     * @param directory - Created directory
      */
-    virtual void directoryCreated(const std::string& path) = 0;
+    virtual void directoryCreated(std::shared_ptr<const File> directory) = 0;
 
     /**
      * @brief A file or directory was moved

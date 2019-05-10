@@ -34,6 +34,7 @@ void QAuthenticationControllerImpl::loginCompleted(bool success, const std::stri
     {
         QMetaObject::invokeMethod(m_publicImpl, "loggedInChanged", Qt::QueuedConnection);
         QMetaObject::invokeMethod(m_publicImpl, "usernameChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "authenticationTokenChanged", Qt::QueuedConnection);
     }
 
     QMetaObject::invokeMethod(m_publicImpl, "loginCompleted", Qt::QueuedConnection, Q_ARG(bool, success),
@@ -111,6 +112,15 @@ QString QAuthenticationControllerImpl::username() const
     if (m_userService->loggedIn())
     {
         return QString::fromStdString(m_userService->session().username());
+    }
+    return QString();
+}
+
+QString QAuthenticationControllerImpl::authenticationToken() const
+{
+    if (m_userService->loggedIn())
+    {
+        return QString::fromStdString(m_userService->session().authToken());
     }
     return QString();
 }

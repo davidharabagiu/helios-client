@@ -47,3 +47,8 @@ QString QAuthenticationController::username() const
 {
     return m_privateImpl->username();
 }
+
+QString QAuthenticationController::authenticationToken() const
+{
+    return m_privateImpl->authenticationToken();
+}

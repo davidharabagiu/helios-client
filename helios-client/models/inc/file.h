@@ -27,6 +27,12 @@ public:
     std::string name() const;
 
     /**
+     * @brief Getter for m_parentDirectory
+     * @return std::string
+     */
+    std::string parentDirectory() const;
+
+    /**
      * @brief Getter for m_fullPath
      * @return std::string
      */
