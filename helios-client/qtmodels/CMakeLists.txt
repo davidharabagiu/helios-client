@@ -12,6 +12,10 @@ add_library(${PROJECT_NAME}
     "src/qheliosfile.cpp"
     "inc/qfiletransfer.h"
     "src/qfiletransfer.cpp"
+    "inc/qfilelisting.h"
+    "src/qfilelisting.cpp"
+    "inc/qtransferslist.h"
+    "src/qtransferslist.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
