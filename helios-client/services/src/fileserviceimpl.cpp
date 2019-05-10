@@ -48,7 +48,8 @@ void FileServiceImpl::setAuthToken(const std::string& authToken)
             }
             else
             {
-                std::ostringstream ss("Error while listing files in the root directory. ApiCallStatus = ");
+                std::ostringstream ss;
+                ss << "Error while listing files in the root directory. ApiCallStatus = ";
                 ss << static_cast<int>(status);
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
@@ -137,14 +138,16 @@ void FileServiceImpl::changeCurrentDirectory(const std::string& path, bool relat
             }
             else if (status == ApiCallStatus::INVALID_PATH)
             {
-                std::ostringstream ss("Path ");
+                std::ostringstream ss;
+                ss << "Path ";
                 ss << fullPath;
                 ss << " is invalid.";
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
             else
             {
-                std::ostringstream ss("Error while listing files. ApiCallStatus = ");
+                std::ostringstream ss;
+                ss << "Error while listing files. ApiCallStatus = ";
                 ss << static_cast<int>(status);
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
@@ -191,21 +194,24 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {
-            std::ostringstream ss("Path ");
+            std::ostringstream ss;
+            ss << "Path ";
             ss << fullPath;
             ss << " is invalid.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
         else if (status == ApiCallStatus::FILE_ALREADY_EXISTS)
         {
-            std::ostringstream ss("Directory ");
+            std::ostringstream ss;
+            ss << "Directory ";
             ss << fullPath;
             ss << " already exists.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
         else
         {
-            std::ostringstream ss("Error while creating directory. ApiCallStatus = ");
+            std::ostringstream ss;
+            ss << "Error while creating directory. ApiCallStatus = ";
             ss << static_cast<int>(status);
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
@@ -236,7 +242,8 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
         }
         if (shouldFail)
         {
-            std::ostringstream ss("There is already an active transfer on file ");
+            std::ostringstream ss;
+            ss << "There is already an active transfer on file ";
             ss << fullRemotePath;
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             return;
@@ -254,7 +261,8 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     std::ifstream stream(localPath, std::ifstream::ate | std::ifstream::binary);
                     if (!stream.good())
                     {
-                        std::ostringstream ss("Error while reading ");
+                        std::ostringstream ss;
+                        ss << "Error while reading ";
                         ss << localPath;
                         Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
                     }
@@ -306,7 +314,8 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         {
                             // Upload failure
                             Observable::notifyAll(&FileServiceListener::fileOperationAborted, fullRemotePath);
-                            std::ostringstream ss("Error while uploading. ApiCallStatus = ");
+                            std::ostringstream ss;
+                            ss << "Error while uploading. ApiCallStatus = ";
                             ss << static_cast<int>(lastStatus);
                             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
                             break;
@@ -326,14 +335,16 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
             }
             else if (status == ApiCallStatus::INVALID_PATH)
             {
-                std::ostringstream ss("Path ");
+                std::ostringstream ss;
+                ss << "Path ";
                 ss << fullRemotePath;
                 ss << " is invalid.";
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
             else
             {
-                std::ostringstream ss("Error while starting upload. ApiCallStatus = ");
+                std::ostringstream ss;
+                ss << "Error while starting upload. ApiCallStatus = ";
                 ss << static_cast<int>(status);
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
@@ -364,7 +375,8 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
         }
         if (shouldFail)
         {
-            std::ostringstream ss("There is already an active transfer on file ");
+            std::ostringstream ss;
+            ss << "There is already an active transfer on file ";
             ss << fullRemotePath;
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             return;
@@ -423,7 +435,8 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                         {
                             // Upload failure
                             Observable::notifyAll(&FileServiceListener::fileOperationAborted, fullRemotePath);
-                            std::ostringstream ss("Error while downloading. ApiCallStatus = ");
+                            std::ostringstream ss;
+                            ss << "Error while downloading. ApiCallStatus = ";
                             ss << static_cast<int>(lastStatus);
                             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
                             break;
@@ -443,14 +456,16 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
             }
             else if (status == ApiCallStatus::INVALID_PATH)
             {
-                std::ostringstream ss("Path ");
+                std::ostringstream ss;
+                ss << "Path ";
                 ss << fullRemotePath;
                 ss << " is invalid.";
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
             else
             {
-                std::ostringstream ss("Error while starting download. ApiCallStatus = ");
+                std::ostringstream ss;
+                ss << "Error while starting download. ApiCallStatus = ";
                 ss << static_cast<int>(status);
                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
             }
@@ -477,7 +492,8 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
         if (m_activeTransfers.find(source) != m_activeTransfers.end())
         {
             lock.release();
-            std::ostringstream ss("File ");
+            std::ostringstream ss;
+            ss << "File ";
             ss << source;
             ss << " is in use.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
@@ -522,8 +538,8 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
                             }
                             else
                             {
-                                std::ostringstream ss(
-                                    "Error while checking if a file is a directory. ApiCallStatus = ");
+                                std::ostringstream ss;
+                                ss << "Error while checking if a file is a directory. ApiCallStatus = ";
                                 ss << static_cast<int>(status);
                                 Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
                             }
@@ -533,21 +549,24 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {
-            std::ostringstream ss("Path ");
+            std::ostringstream ss;
+            ss << "Path ";
             ss << source;
             ss << " is invalid.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
         else if (status == ApiCallStatus::FILE_ALREADY_EXISTS)
         {
-            std::ostringstream ss("File ");
+            std::ostringstream ss;
+            ss << "File ";
             ss << destination;
             ss << " already exists.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
         else
         {
-            std::ostringstream ss("Error while moving file. ApiCallStatus = ");
+            std::ostringstream ss;
+            ss << "Error while moving file. ApiCallStatus = ";
             ss << static_cast<int>(status);
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
@@ -578,7 +597,8 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
         if (m_activeTransfers.find(fullPath) != m_activeTransfers.end())
         {
             lock.release();
-            std::ostringstream ss("File ");
+            std::ostringstream ss;
+            ss << "File ";
             ss << fullPath;
             ss << " is in use.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
@@ -602,14 +622,16 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {
-            std::ostringstream ss("Path ");
+            std::ostringstream ss;
+            ss << "Path ";
             ss << fullPath;
             ss << " is invalid.";
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
         else
         {
-            std::ostringstream ss("Error while removing file. ApiCallStatus = ");
+            std::ostringstream ss;
+            ss << "Error while removing file. ApiCallStatus = ";
             ss << static_cast<int>(status);
             Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
         }
@@ -635,7 +657,8 @@ void FileServiceImpl::collectApiFileList(
 
 std::string FileServiceImpl::concatenatePaths(const std::string& base, const std::string& relativePath)
 {
-    std::ostringstream sstream(base);
+    std::ostringstream sstream;
+    sstream << base;
 
     if (base.length() > 0 && base[base.length() - 1] != '/')
     {
