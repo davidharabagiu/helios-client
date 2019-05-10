@@ -16,6 +16,10 @@ add_library(${PROJECT_NAME}
     "src/qsettingscontroller.cpp"
     "inc/private/qsettingscontrollerimpl.h"
     "src/qsettingscontrollerimpl.cpp"
+    "inc/public/qremotefilesystemcontroller.h"
+    "src/qremotefilesystemcontroller.cpp"
+    "inc/private/qremotefilesystemcontrollerimpl.h"
+    "src/qremotefilesystemcontrollerimpl.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

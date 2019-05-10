@@ -12,6 +12,11 @@ class FileServiceListener
 {
 public:
     /**
+     * @brief Destructor
+     */
+    virtual ~FileServiceListener() = default;
+
+    /**
      * @brief The file service was enabled as it was provided with a valid auth token.
      */
     virtual void fileServiceEnabled() = 0;
