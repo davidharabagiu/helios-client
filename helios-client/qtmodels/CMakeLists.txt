@@ -8,8 +8,10 @@ include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 add_library(${PROJECT_NAME}
     "inc/qtmodels.h"
     "src/qtmodels.cpp"
-    "inc/quseraccount.h"
-    "src/quseraccount.cpp"
+    "inc/qheliosfile.h"
+    "src/qheliosfile.cpp"
+    "inc/qfiletransfer.h"
+    "src/qfiletransfer.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
