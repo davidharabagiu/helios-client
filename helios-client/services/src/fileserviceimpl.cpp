@@ -522,34 +522,27 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
             m_apiCaller->isDir(m_authToken, destination, [this, source, destination](ApiCallStatus status, bool isDir) {
                 if (status == ApiCallStatus::SUCCESS)
                 {
-                    std::string sourceName;
-                    std::string sourceParent;
-                    getFileNameAndParentDir(source, sourceName, sourceParent);
-
+                    if (isDir)
                     {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        if (sourceParent == m_currentDirectory)
-                        {
-                            m_files.erase(sourceName);
-                        }
+                        completeMove(source, destination, isDir);
                     }
-
-                    std::string destinationName;
-                    std::string destinationParent;
-                    getFileNameAndParentDir(destination, destinationName, destinationParent);
-
-                    auto oldFile = std::make_shared<File>(sourceName, sourceParent, isDir);
-                    auto file    = std::make_shared<File>(destinationName, destinationParent, isDir);
-
+                    else
                     {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        if (destinationParent == m_currentDirectory)
-                        {
-                            m_files.emplace(destinationName, file);
-                        }
+                        m_apiCaller->getFileSize(
+                            m_authToken, destination, [this, source, destination](ApiCallStatus status, uint64_t size) {
+                                if (status == ApiCallStatus::SUCCESS)
+                                {
+                                    completeMove(source, destination, false, size);
+                                }
+                                else
+                                {
+                                    std::ostringstream ss;
+                                    ss << "Error while querying file size. ApiCallStatus = ";
+                                    ss << static_cast<int>(status);
+                                    Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                                }
+                            });
                     }
-
-                    Observable::notifyAll(&FileServiceListener::fileMoved, oldFile, file);
                 }
                 else
                 {
@@ -670,6 +663,38 @@ void FileServiceImpl::collectApiFileList(
         m_files.emplace(name,
                         std::make_shared<File>(std::get<0>(apiFile), m_currentDirectory, isDir, isDir ? 0 : *size));
     }
+}
+
+void FileServiceImpl::completeMove(const std::string& source, const std::string& destination, bool isDir, uint64_t size)
+{
+    std::string sourceName;
+    std::string sourceParent;
+    getFileNameAndParentDir(source, sourceName, sourceParent);
+
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (sourceParent == m_currentDirectory)
+        {
+            m_files.erase(sourceName);
+        }
+    }
+
+    std::string destinationName;
+    std::string destinationParent;
+    getFileNameAndParentDir(destination, destinationName, destinationParent);
+
+    auto oldFile = std::make_shared<File>(sourceName, sourceParent, isDir, size);
+    auto file    = std::make_shared<File>(destinationName, destinationParent, isDir, size);
+
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (destinationParent == m_currentDirectory)
+        {
+            m_files.emplace(destinationName, file);
+        }
+    }
+
+    Observable::notifyAll(&FileServiceListener::fileMoved, oldFile, file);
 }
 
 std::string FileServiceImpl::concatenatePaths(const std::string& base, const std::string& relativePath)

@@ -71,6 +71,15 @@ private:
     void collectApiFileList(const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files);
 
     /**
+     * @brief Move operation completion
+     * @param source - Source path
+     * @param destination - Destination path
+     * @param isDir - isDirectory
+     * @param size - Size in bytes if it's not a directory
+     */
+    void completeMove(const std::string& source, const std::string& destination, bool isDir, uint64_t size = 0);
+
+    /**
      * @brief Concatenate a base with a relative path to obtain the full path
      * @param base - Base path
      * @param relativePath - Relative path
