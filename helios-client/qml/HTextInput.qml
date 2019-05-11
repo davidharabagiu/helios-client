@@ -9,6 +9,8 @@ Rectangle {
     property bool password: false
     property bool highlightFocus: false
 
+    signal accepted()
+
     width: 140
     height: 25
     color: darkMode ? (input.focus && highlightFocus ? "#013670" : "#202020") :
@@ -49,6 +51,13 @@ Rectangle {
             rightMargin: 3
             verticalCenter: parent.verticalCenter
         }
+        onAccepted: {
+            root.accepted();
+        }
+    }
+
+    function setText(t) {
+        input.text = t;
     }
 
     function clear() {

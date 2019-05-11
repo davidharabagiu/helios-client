@@ -111,6 +111,20 @@ public:
      */
     Q_INVOKABLE void remove(const QString& fileName);
 
+    /**
+     * @brief Move a file or directory with the given name from cwd to another directory
+     * @param fileName - File name / relative path
+     * @param destinationDirName - Destination dir absolute path
+     */
+    Q_INVOKABLE void move(const QString& fileName, const QString& destinationDirPath);
+
+    /**
+     * @brief Rename a file or directory from cwd
+     * @param fileName - Name of the file
+     * @param newName - New name of the file
+     */
+    Q_INVOKABLE void rename(const QString& fileName, const QString& newName);
+
 signals:
     /**
      * @brief SIGNAL emitted when files changes
@@ -138,6 +152,12 @@ signals:
      * @param file - Removed file / directory name
      */
     void fileRemovedFromCwd(const QString& fileName);
+
+    /**
+     * @brief SIGNAL emitted when an error occured
+     * @param message - Error message
+     */
+    void error(const QString& message);
 
 private:
     /**

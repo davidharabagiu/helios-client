@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <algorithm>
+#include <cassert>
 
 #include "qremotefilesystemcontrollerimpl.h"
 #include "qremotefilesystemcontroller.h"
@@ -89,6 +91,32 @@ void QRemoteFileSystemControllerImpl::remove(const QString& fileName)
     }
 }
 
+void QRemoteFileSystemControllerImpl::move(const QString& fileName, const QString& destinationDirPath)
+{
+    if (fileName.length() > 0)
+    {
+        m_fileService->moveFile((m_fileService->currentDirectory() == "") ?
+                                    fileName.toStdString() :
+                                    (m_fileService->currentDirectory() + "/" + fileName.toStdString()),
+                                (destinationDirPath.toStdString() == "") ?
+                                    fileName.toStdString() :
+                                    (destinationDirPath.toStdString() + "/" + fileName.toStdString()));
+    }
+}
+
+void QRemoteFileSystemControllerImpl::rename(const QString& fileName, const QString& newName)
+{
+    if (fileName.length() > 0 && newName.length() > 0)
+    {
+        m_fileService->moveFile((m_fileService->currentDirectory() == "") ?
+                                    fileName.toStdString() :
+                                    (m_fileService->currentDirectory() + "/" + fileName.toStdString()),
+                                (m_fileService->currentDirectory() == "") ?
+                                    newName.toStdString() :
+                                    (m_fileService->currentDirectory() + "/" + newName.toStdString()));
+    }
+}
+
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
 {
     auto files = m_fileService->files();
@@ -110,20 +138,56 @@ void QRemoteFileSystemControllerImpl::directoryCreated(std::shared_ptr<const Fil
         m_files.push_back(QVariant::fromValue(newDirectory));
 
         QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd", Q_ARG(const QHeliosFile&, newDirectory));
+        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd", Qt::QueuedConnection,
+                                  Q_ARG(const QHeliosFile&, newDirectory));
     }
 }
 
-void QRemoteFileSystemControllerImpl::fileMoved(const std::string& /*sourcePath*/,
-                                                const std::string& /*destinationPath*/)
+void QRemoteFileSystemControllerImpl::fileMoved(std::shared_ptr<const File> oldFile, std::shared_ptr<const File> file)
 {
+    if (oldFile->parentDirectory() == m_fileService->currentDirectory())
+    {
+        auto it = std::find_if(m_files.begin(), m_files.end(), [&oldFile](const QVariant& el) {
+            return qvariant_cast<QHeliosFile>(el).name().toStdString() == oldFile->name();
+        });
+
+        assert(it != m_files.end());
+        if (it != m_files.end())
+        {
+            m_files.erase(it);
+        }
+
+        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
+                                  Q_ARG(const QString&, QString::fromStdString(oldFile->name())));
+    }
+    if (file->parentDirectory() == m_fileService->currentDirectory())
+    {
+        QHeliosFile newFile(file);
+        m_files.push_back(QVariant::fromValue(newFile));
+
+        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd", Qt::QueuedConnection,
+                                  Q_ARG(const QHeliosFile&, newFile));
+    }
 }
 
 void QRemoteFileSystemControllerImpl::fileRemoved(std::shared_ptr<const File> file)
 {
     if (file->parentDirectory() == m_fileService->currentDirectory())
     {
-        QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd",
+        auto it = std::find_if(m_files.begin(), m_files.end(), [&file](const QVariant& el) {
+            return qvariant_cast<QHeliosFile>(el).name().toStdString() == file->name();
+        });
+
+        assert(it != m_files.end());
+        if (it != m_files.end())
+        {
+            m_files.erase(it);
+        }
+
+        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
                                   Q_ARG(const QString&, QString::fromStdString(file->name())));
     }
 }
@@ -148,6 +212,8 @@ void QRemoteFileSystemControllerImpl::fileOperationAborted(const std::string& /*
 {
 }
 
-void QRemoteFileSystemControllerImpl::errorOccured(const std::string& /*errorString*/)
+void QRemoteFileSystemControllerImpl::errorOccured(const std::string& errorString)
 {
+    QMetaObject::invokeMethod(m_publicImpl, "error", Qt::QueuedConnection,
+                              Q_ARG(const QString&, QString::fromStdString(errorString)));
 }

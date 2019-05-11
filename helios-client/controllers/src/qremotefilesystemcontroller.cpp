@@ -62,3 +62,13 @@ void QRemoteFileSystemController::remove(const QString& fileName)
 {
     m_privateImpl->remove(fileName);
 }
+
+void QRemoteFileSystemController::move(const QString& fileName, const QString& destinationDirPath)
+{
+    m_privateImpl->move(fileName, destinationDirPath);
+}
+
+void QRemoteFileSystemController::rename(const QString& fileName, const QString& newName)
+{
+    m_privateImpl->rename(fileName, newName);
+}

@@ -32,10 +32,10 @@ public:
 
     /**
      * @brief A file or directory was moved
-     * @param sourcePath - Source path
-     * @param destinationPath - Destination path
+     * @param oldFile - Old file. Contains only information about name and path.
+     * @param file - File or directory that was moved
      */
-    virtual void fileMoved(const std::string& sourcePath, const std::string& destinationPath) = 0;
+    virtual void fileMoved(std::shared_ptr<const File> oldFile, std::shared_ptr<const File> file) = 0;
 
     /**
      * @brief A file or directory was removed

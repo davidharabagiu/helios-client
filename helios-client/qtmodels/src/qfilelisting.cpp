@@ -19,8 +19,9 @@ void QFileListing::setFiles(const QVariantList& files)
         m_files.push_back(qvariant_cast<QHeliosFile>(file));
     }
 
-    std::sort(m_files.begin(), m_files.end(),
-              [](const QHeliosFile& file1, const QHeliosFile& file2) { return file1.name() < file2.name(); });
+    std::sort(m_files.begin(), m_files.end(), [](const QHeliosFile& file1, const QHeliosFile& file2) {
+        return file1.name().toLower() < file2.name().toLower();
+    });
 
     endResetModel();
 }
@@ -28,7 +29,7 @@ void QFileListing::setFiles(const QVariantList& files)
 void QFileListing::insertFile(const QHeliosFile& file)
 {
     auto it    = std::find_if(m_files.begin(), m_files.end(),
-                           [&file](const QHeliosFile& el) { return file.name() < el.name(); });
+                           [&file](const QHeliosFile& el) { return file.name().toLower() < el.name().toLower(); });
     int  index = safe_integral_cast<int>(std::distance(m_files.begin(), it));
 
     beginInsertRows(QModelIndex(), index, index);

@@ -56,20 +56,24 @@ void MoveCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED);
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorInvalidSourcePath)
         {
             m_callback(ApiCallStatus::INVALID_PATH);
+            return;
         }
         else if (replyStr == s_kErrorDestinationExists)
         {
             m_callback(ApiCallStatus::FILE_ALREADY_EXISTS);
+            return;
         }
     }
 

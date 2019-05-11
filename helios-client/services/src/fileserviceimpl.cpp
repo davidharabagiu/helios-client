@@ -519,46 +519,46 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
     m_apiCaller->move(m_authToken, source, destination, [this, source, destination](ApiCallStatus status) {
         if (status == ApiCallStatus::SUCCESS)
         {
-            std::string sourceName;
-            std::string sourceParent;
-            getFileNameAndParentDir(source, sourceName, sourceParent);
-            {
-                std::lock_guard<std::mutex> lock(m_mutex);
-                if (sourceParent == m_currentDirectory)
+            m_apiCaller->isDir(m_authToken, destination, [this, source, destination](ApiCallStatus status, bool isDir) {
+                if (status == ApiCallStatus::SUCCESS)
                 {
-                    m_files.erase(sourceName);
-                }
-            }
+                    std::string sourceName;
+                    std::string sourceParent;
+                    getFileNameAndParentDir(source, sourceName, sourceParent);
 
-            std::string destinationName;
-            std::string destinationParent;
-            getFileNameAndParentDir(destination, destinationName, destinationParent);
-            {
-                std::unique_lock<std::mutex> lock(m_mutex);
-                if (destinationParent == m_currentDirectory)
-                {
-                    lock.release();
-                    m_apiCaller->isDir(
-                        m_authToken, destination,
-                        [this, source, destination, destinationName, destinationParent](ApiCallStatus status,
-                                                                                        bool          isDir) {
-                            if (status == ApiCallStatus::SUCCESS)
-                            {
-                                std::lock_guard<std::mutex> lock(m_mutex);
-                                m_files.emplace(destinationName,
-                                                std::make_shared<File>(destinationName, destinationParent, isDir));
-                                Observable::notifyAll(&FileServiceListener::fileMoved, source, destination);
-                            }
-                            else
-                            {
-                                std::ostringstream ss;
-                                ss << "Error while checking if a file is a directory. ApiCallStatus = ";
-                                ss << static_cast<int>(status);
-                                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                            }
-                        });
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        if (sourceParent == m_currentDirectory)
+                        {
+                            m_files.erase(sourceName);
+                        }
+                    }
+
+                    std::string destinationName;
+                    std::string destinationParent;
+                    getFileNameAndParentDir(destination, destinationName, destinationParent);
+
+                    auto oldFile = std::make_shared<File>(sourceName, sourceParent, isDir);
+                    auto file    = std::make_shared<File>(destinationName, destinationParent, isDir);
+
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        if (destinationParent == m_currentDirectory)
+                        {
+                            m_files.emplace(destinationName, file);
+                        }
+                    }
+
+                    Observable::notifyAll(&FileServiceListener::fileMoved, oldFile, file);
                 }
-            }
+                else
+                {
+                    std::ostringstream ss;
+                    ss << "Error while checking if a file is a directory. ApiCallStatus = ";
+                    ss << static_cast<int>(status);
+                    Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                }
+            });
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {

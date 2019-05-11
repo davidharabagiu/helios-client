@@ -1,4 +1,5 @@
 import QtQuick 2.12
+import QtQuick.Dialogs 1.2
 import helios 1.0
 
 Rectangle {
@@ -38,6 +39,11 @@ Rectangle {
         }
     }
 
+    MessageDialog {
+        id: errorDialog
+        title: "Error"
+    }
+
     RemoteFileSystemController {
         id: rfsCtl
 
@@ -45,6 +51,7 @@ Rectangle {
 
         onCwdChanged: {
             fileListing.files = files;
+            pathInput.setText(cwd);
         }
 
         onDirectoryCreatedInCwd: {
@@ -54,10 +61,34 @@ Rectangle {
         onFileRemovedFromCwd: {
             fileListing.removeFile(fileName);
         }
+
+        onError: {
+            errorDialog.text = message;
+            errorDialog.visible = true;
+        }
     }
 
     FileListing {
         id: fileListing
+    }
+
+    HTextInput {
+        id: pathInput
+
+        darkMode: root.darkMode
+
+        anchors {
+            left: parent.left
+            leftMargin: 5
+            top: welcomeLabel.bottom
+            topMargin: 20
+            right: parent.right
+            rightMargin: 5
+        }
+
+        onAccepted: {
+            rfsCtl.cwd = text;
+        }
     }
 
     Row {
@@ -66,8 +97,8 @@ Rectangle {
         anchors {
             left: parent.left
             leftMargin: 5
-            top: welcomeLabel.bottom
-            topMargin: 20
+            top: pathInput.bottom
+            topMargin: 5
             right: parent.right
             rightMargin: 5
         }
@@ -109,6 +140,33 @@ Rectangle {
 
             onClicked: {
                 rfsCtl.remove(fileNameInput.text);
+            }
+        }
+
+        HTextInput {
+            id: destinationDirInput
+            darkMode: root.darkMode
+            hint: "Destination"
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "Move"
+
+            onClicked: {
+                rfsCtl.move(fileNameInput.text, destinationDirInput.text);
+            }
+        }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "Rename"
+
+            onClicked: {
+                rfsCtl.rename(fileNameInput.text, destinationDirInput.text);
             }
         }
     }
