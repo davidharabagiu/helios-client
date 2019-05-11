@@ -39,9 +39,12 @@ public:  // forwarded from QRemoteFileSystemController
     void         setAuthenticationToken(const QString& newVal);
     void         resetAuthenticationToken();
     QString      cwd() const;
+    void         setCwd(const QString& newValue);
     QVariantList files() const;
     QVariantList transfers() const;
     void         openDirectory(const QString& dirName);
+    void         goBack();
+    void         createDirectory(const QString& dirName);
 
 public:  // from FileServiceListener
     void currentDirectoryChanged() override;

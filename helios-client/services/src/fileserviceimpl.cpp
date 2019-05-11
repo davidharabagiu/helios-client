@@ -154,6 +154,19 @@ void FileServiceImpl::changeCurrentDirectory(const std::string& path, bool relat
         });
 }
 
+void FileServiceImpl::navigateBack()
+{
+    if (m_currentDirectory == "")
+    {
+        return;
+    }
+
+    std::string dir;
+    std::string parent;
+    getFileNameAndParentDir(m_currentDirectory, dir, parent);
+    changeCurrentDirectory(parent, false);
+}
+
 void FileServiceImpl::createDirectory(const std::string& path, bool relative)
 {
     if (!enabled())

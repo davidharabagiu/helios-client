@@ -48,6 +48,11 @@ QString QRemoteFileSystemControllerImpl::cwd() const
     return QString::fromStdString(m_fileService->currentDirectory());
 }
 
+void QRemoteFileSystemControllerImpl::setCwd(const QString& newValue)
+{
+    m_fileService->changeCurrentDirectory(newValue.toStdString(), false);
+}
+
 QVariantList QRemoteFileSystemControllerImpl::files() const
 {
     return m_files;
@@ -61,6 +66,19 @@ QVariantList QRemoteFileSystemControllerImpl::transfers() const
 void QRemoteFileSystemControllerImpl::openDirectory(const QString& dirName)
 {
     m_fileService->changeCurrentDirectory(dirName.toStdString(), true);
+}
+
+void QRemoteFileSystemControllerImpl::goBack()
+{
+    m_fileService->navigateBack();
+}
+
+void QRemoteFileSystemControllerImpl::createDirectory(const QString& dirName)
+{
+    if (dirName.length() > 0)
+    {
+        m_fileService->createDirectory(dirName.toStdString(), true);
+    }
 }
 
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
@@ -80,10 +98,11 @@ void QRemoteFileSystemControllerImpl::directoryCreated(std::shared_ptr<const Fil
 {
     if (directory->parentDirectory() == m_fileService->currentDirectory())
     {
-        m_files.push_back(QVariant::fromValue(QHeliosFile(directory)));
+        QHeliosFile newDirectory(directory);
+        m_files.push_back(QVariant::fromValue(newDirectory));
+
         QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd",
-                                  Q_ARG(const QVariant&, m_files.at(m_files.length() - 1)));
+        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd", Q_ARG(const QHeliosFile&, newDirectory));
     }
 }
 

@@ -7,6 +7,7 @@
 
 // Forward declarations
 class QRemoteFileSystemControllerImpl;
+class QHeliosFile;
 
 /**
  * @class QRemoteFileSystemController
@@ -26,7 +27,7 @@ class QRemoteFileSystemController : public QObject
      * @property cwd
      * @brief Current working directory
      */
-    Q_PROPERTY(QString cwd READ cwd NOTIFY cwdChanged)
+    Q_PROPERTY(QString cwd READ cwd WRITE setCwd NOTIFY cwdChanged)
 
     /**
      * @property files
@@ -70,6 +71,12 @@ public:
     QString cwd() const;
 
     /**
+     * @brief Setter for cwd
+     * @param newValue - QString
+     */
+    void setCwd(const QString& newValue);
+
+    /**
      * @brief Getter for files
      * @return QVariantList
      */
@@ -86,6 +93,17 @@ public:
      * @param dirName - Directory name
      */
     Q_INVOKABLE void openDirectory(const QString& dirName);
+
+    /**
+     * @brief Navigate to the parent directory of the cwd
+     */
+    Q_INVOKABLE void goBack();
+
+    /**
+     * @brief Create a new directory with the given name cwd
+     * @param dirName - Directory name / relative path
+     */
+    Q_INVOKABLE void createDirectory(const QString& dirName);
 
 signals:
     /**
@@ -105,9 +123,9 @@ signals:
 
     /**
      * @brief SIGNAL emitted when a directory was created in the current working directory
-     * @param directory - Created directory (QHeliosFile)
+     * @param directory - Created directory
      */
-    void directoryCreatedInCwd(const QVariant& directory);
+    void directoryCreatedInCwd(const QHeliosFile& directory);
 
 private:
     /**

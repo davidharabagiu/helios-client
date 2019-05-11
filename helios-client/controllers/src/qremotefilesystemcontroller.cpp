@@ -28,6 +28,11 @@ QString QRemoteFileSystemController::cwd() const
     return m_privateImpl->cwd();
 }
 
+void QRemoteFileSystemController::setCwd(const QString& newValue)
+{
+    m_privateImpl->setCwd(newValue);
+}
+
 QVariantList QRemoteFileSystemController::files() const
 {
     return m_privateImpl->files();
@@ -41,4 +46,14 @@ QVariantList QRemoteFileSystemController::transfers() const
 void QRemoteFileSystemController::openDirectory(const QString& dirName)
 {
     m_privateImpl->openDirectory(dirName);
+}
+
+void QRemoteFileSystemController::goBack()
+{
+    m_privateImpl->goBack();
+}
+
+void QRemoteFileSystemController::createDirectory(const QString& dirName)
+{
+    m_privateImpl->createDirectory(dirName);
 }

@@ -55,6 +55,7 @@ public:  // from FileService
     std::vector<std::shared_ptr<const File>>   files() const override;
     std::vector<std::shared_ptr<FileTransfer>> activeTransfers() const override;
     void                                       changeCurrentDirectory(const std::string& path, bool relative) override;
+    void                                       navigateBack() override;
     void                                       createDirectory(const std::string& path, bool relative) override;
     void uploadFile(const std::string& localPath, const std::string& remotePath, bool relative) override;
     void downloadFile(const std::string& remotePath, bool relative, const std::string& localPath) override;

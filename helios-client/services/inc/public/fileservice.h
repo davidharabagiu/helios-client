@@ -65,6 +65,11 @@ public:
     virtual void changeCurrentDirectory(const std::string& path, bool relative) = 0;
 
     /**
+     * @brief Navigate to the parent directory of the current working directory
+     */
+    virtual void navigateBack() = 0;
+
+    /**
      * @brief Create a new directory.
      * @param name - Path of the new directory
      * @param relative - True if path is relative to the current working directory

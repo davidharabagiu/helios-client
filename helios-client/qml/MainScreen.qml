@@ -46,18 +46,65 @@ Rectangle {
         onCwdChanged: {
             fileListing.files = files;
         }
+
+        onDirectoryCreatedInCwd: {
+            fileListing.insertFile(directory);
+        }
     }
 
     FileListing {
         id: fileListing
     }
 
+    Row {
+        id: fileControls
+
+        anchors {
+            left: parent.left
+            leftMargin: 5
+            top: welcomeLabel.bottom
+            topMargin: 20
+            right: parent.right
+            rightMargin: 5
+        }
+
+        height: 40
+        spacing: 5
+
+        HTextInput {
+            id: newDirInput
+            darkMode: root.darkMode
+            hint: "Dir name"
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "New Dir"
+
+            onClicked: {
+                rfsCtl.createDirectory(newDirInput.text);
+            }
+        }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "Back"
+
+            onClicked: {
+                rfsCtl.goBack();
+            }
+        }
+    }
+
     Rectangle {
         anchors {
             left: parent.left
-            top: welcomeLabel.bottom
+            top: fileControls.bottom
             leftMargin: 5
-            topMargin: 20
+            topMargin: 5
             right: parent.right
             rightMargin: 5
             bottom: parent.bottom

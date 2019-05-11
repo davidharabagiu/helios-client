@@ -3,7 +3,8 @@
 
 #include <QAbstractListModel>
 
-#include "qheliosfile.h"
+// Forward declarations
+class QHeliosFile;
 
 /**
  * @class QFileListing
@@ -37,6 +38,12 @@ public:
      * @param files - QVariantList
      */
     void setFiles(const QVariantList& files);
+
+    /**
+     * @brief Insert a file in the list
+     * @param file - QHeliosFile
+     */
+    Q_INVOKABLE void insertFile(const QHeliosFile& file);
 
 public:  // from QAbstractListModel
     int                    rowCount(const QModelIndex& parent = QModelIndex()) const override;
