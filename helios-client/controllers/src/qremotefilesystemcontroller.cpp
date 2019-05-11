@@ -57,3 +57,8 @@ void QRemoteFileSystemController::createDirectory(const QString& dirName)
 {
     m_privateImpl->createDirectory(dirName);
 }
+
+void QRemoteFileSystemController::remove(const QString& fileName)
+{
+    m_privateImpl->remove(fileName);
+}

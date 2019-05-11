@@ -39,9 +39,9 @@ public:
 
     /**
      * @brief A file or directory was removed
-     * @param path - Path
+     * @param path - Removed file / directory. It only contains information about name / path.
      */
-    virtual void fileRemoved(const std::string& path) = 0;
+    virtual void fileRemoved(std::shared_ptr<const File> directory) = 0;
 
     /**
      * @brief A file download operation has started

@@ -45,6 +45,12 @@ public:
      */
     Q_INVOKABLE void insertFile(const QHeliosFile& file);
 
+    /**
+     * @brief Remove a file from the list
+     * @param fileName - QString
+     */
+    Q_INVOKABLE void removeFile(const QString& fileName);
+
 public:  // from QAbstractListModel
     int                    rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant               data(const QModelIndex& index, int role) const override;

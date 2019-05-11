@@ -21,9 +21,11 @@ add_library(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
     PRIVATE $<TARGET_PROPERTY:models,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
     ${QT5_LIBS}
     models
+    utils
 )

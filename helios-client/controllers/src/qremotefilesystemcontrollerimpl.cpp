@@ -81,6 +81,14 @@ void QRemoteFileSystemControllerImpl::createDirectory(const QString& dirName)
     }
 }
 
+void QRemoteFileSystemControllerImpl::remove(const QString& fileName)
+{
+    if (fileName.length() > 0)
+    {
+        m_fileService->removeFile(fileName.toStdString(), true);
+    }
+}
+
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
 {
     auto files = m_fileService->files();
@@ -111,8 +119,13 @@ void QRemoteFileSystemControllerImpl::fileMoved(const std::string& /*sourcePath*
 {
 }
 
-void QRemoteFileSystemControllerImpl::fileRemoved(const std::string& /*path*/)
+void QRemoteFileSystemControllerImpl::fileRemoved(std::shared_ptr<const File> file)
 {
+    if (file->parentDirectory() == m_fileService->currentDirectory())
+    {
+        QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd",
+                                  Q_ARG(const QString&, QString::fromStdString(file->name())));
+    }
 }
 
 void QRemoteFileSystemControllerImpl::fileDownloadStarted(const std::string& /*path*/)

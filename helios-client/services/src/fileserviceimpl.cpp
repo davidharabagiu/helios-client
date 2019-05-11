@@ -624,6 +624,9 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
             std::string name;
             std::string parent;
             getFileNameAndParentDir(fullPath, name, parent);
+
+            auto file = std::make_shared<File>(name, parent, false);
+
             {
                 std::lock_guard<std::mutex> lock(m_mutex);
                 if (parent == m_currentDirectory)
@@ -631,7 +634,8 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
                     m_files.erase(name);
                 }
             }
-            Observable::notifyAll(&FileServiceListener::fileRemoved, fullPath);
+
+            Observable::notifyAll(&FileServiceListener::fileRemoved, file);
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {

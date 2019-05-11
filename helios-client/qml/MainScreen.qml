@@ -50,6 +50,10 @@ Rectangle {
         onDirectoryCreatedInCwd: {
             fileListing.insertFile(directory);
         }
+
+        onFileRemovedFromCwd: {
+            fileListing.removeFile(fileName);
+        }
     }
 
     FileListing {
@@ -72,9 +76,9 @@ Rectangle {
         spacing: 5
 
         HTextInput {
-            id: newDirInput
+            id: fileNameInput
             darkMode: root.darkMode
-            hint: "Dir name"
+            hint: "File name"
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -84,7 +88,7 @@ Rectangle {
             label: "New Dir"
 
             onClicked: {
-                rfsCtl.createDirectory(newDirInput.text);
+                rfsCtl.createDirectory(fileNameInput.text);
             }
         }
 
@@ -95,6 +99,16 @@ Rectangle {
 
             onClicked: {
                 rfsCtl.goBack();
+            }
+        }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "Delete"
+
+            onClicked: {
+                rfsCtl.remove(fileNameInput.text);
             }
         }
     }

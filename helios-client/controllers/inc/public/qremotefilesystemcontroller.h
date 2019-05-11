@@ -105,6 +105,12 @@ public:
      */
     Q_INVOKABLE void createDirectory(const QString& dirName);
 
+    /**
+     * @brief Remove a file or directory with the given name from cwd
+     * @param fileName - File name / relative path
+     */
+    Q_INVOKABLE void remove(const QString& fileName);
+
 signals:
     /**
      * @brief SIGNAL emitted when files changes
@@ -122,10 +128,16 @@ signals:
     void transfersChanged();
 
     /**
-     * @brief SIGNAL emitted when a directory was created in the current working directory
+     * @brief SIGNAL emitted when a directory was created in cwd
      * @param directory - Created directory
      */
     void directoryCreatedInCwd(const QHeliosFile& directory);
+
+    /**
+     * @brief SIGNAL emitted when a file or directory from cwd was removed
+     * @param file - Removed file / directory name
+     */
+    void fileRemovedFromCwd(const QString& fileName);
 
 private:
     /**

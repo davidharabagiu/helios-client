@@ -2,6 +2,7 @@
 
 #include "qfilelisting.h"
 #include "qheliosfile.h"
+#include "typeconversions.h"
 
 QFileListing::QFileListing(QObject* parent)
     : QAbstractListModel(parent)
@@ -26,19 +27,26 @@ void QFileListing::setFiles(const QVariantList& files)
 
 void QFileListing::insertFile(const QHeliosFile& file)
 {
-    int  idx = 0;
-    auto it  = std::find_if(m_files.begin(), m_files.end(), [&file, &idx](const QHeliosFile& el) {
-        if (file.name() < el.name())
-        {
-            return true;
-        }
-        ++idx;
-        return false;
-    });
+    auto it    = std::find_if(m_files.begin(), m_files.end(),
+                           [&file](const QHeliosFile& el) { return file.name() < el.name(); });
+    int  index = safe_integral_cast<int>(std::distance(m_files.begin(), it));
 
-    beginInsertRows(QModelIndex(), idx, idx);
+    beginInsertRows(QModelIndex(), index, index);
     m_files.insert(it, file);
     endInsertRows();
+}
+
+void QFileListing::removeFile(const QString& fileName)
+{
+    auto it = std::find_if(m_files.begin(), m_files.end(),
+                           [&fileName](const QHeliosFile& el) { return el.name() == fileName; });
+    if (it != m_files.end())
+    {
+        int index = safe_integral_cast<int>(std::distance(m_files.begin(), it));
+        beginRemoveRows(QModelIndex(), index, index);
+        m_files.removeAt(index);
+        endRemoveRows();
+    }
 }
 
 int QFileListing::rowCount(const QModelIndex& /*parent*/) const

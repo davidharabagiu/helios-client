@@ -53,16 +53,19 @@ void RemoveCall::receive(HttpStatus status, const std::vector<uint8_t>& reply)
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED);
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorInvalidPath)
         {
             m_callback(ApiCallStatus::INVALID_PATH);
+            return;
         }
     }
 
