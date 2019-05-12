@@ -128,6 +128,11 @@ void QRemoteFileSystemControllerImpl::upload(const QUrl& localPath)
     m_fileService->uploadFile(_localPath.toStdString(), fileName, true);
 }
 
+void QRemoteFileSystemControllerImpl::cancelTransfer(const QFileTransfer& transfer)
+{
+    m_fileService->cancelOperation(transfer.remotePath().toStdString());
+}
+
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
 {
     auto files = m_fileService->files();

@@ -6,6 +6,7 @@
 #include <optional>
 #include <cstdint>
 #include <cassert>
+#include <condition_variable>
 
 #include "fileserviceimpl.h"
 #include "apicalldefs.h"
@@ -26,6 +27,18 @@ FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr
     {
         m_transferExecutors.push_back(std::make_unique<Executor>());
     }
+}
+
+FileServiceImpl::~FileServiceImpl()
+{
+    for (auto& transfer : m_activeTransfers)
+    {
+        transfer.second->canceled = true;
+    }
+
+    // Wait for executors to complete
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_transfersCompletedCondVar.wait(lock, [this] { return m_activeTransfers.empty(); });
 }
 
 bool FileServiceImpl::enabled() const
@@ -310,7 +323,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
 
                     AutoResetEvent chunkDone;
 
-                    while (transferred < fileSize)
+                    while (transferred < fileSize && !transfer->canceled)
                     {
                         uint64_t read = (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
                         stream->read(reinterpret_cast<char*>(buffer.get()), safe_integral_cast<std::streamsize>(read));
@@ -352,6 +365,12 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         // Notify completion
                         Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
                     }
+                    else
+                    {
+                        Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
+                    }
+
+                    m_transfersCompletedCondVar.notify_one();
                 });
             }
             else if (status == ApiCallStatus::INVALID_PATH)
@@ -429,7 +448,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
 
                     AutoResetEvent chunkDone;
 
-                    while (transferred < fileSize)
+                    while (transferred < fileSize && !transfer->canceled)
                     {
                         ApiCallStatus lastStatus;
                         m_apiCaller->download(m_authToken, transferId, transferred, chunkSize,
@@ -455,7 +474,6 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                         else
                         {
                             // Upload failure
-                            Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
                             std::ostringstream ss;
                             ss << "Error while downloading. ApiCallStatus = ";
                             ss << static_cast<int>(lastStatus);
@@ -473,6 +491,12 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                         // Notify completion
                         Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
                     }
+                    else
+                    {
+                        Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
+                    }
+
+                    m_transfersCompletedCondVar.notify_one();
                 });
             }
             else if (status == ApiCallStatus::INVALID_PATH)
@@ -493,9 +517,13 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
         });
 }
 
-void FileServiceImpl::cancelOperation(const std::string& /*path*/)
+void FileServiceImpl::cancelOperation(const std::string& path)
 {
-    // TODO: Implement transfer cancelation
+    auto it = m_activeTransfers.find(path);
+    if (it != m_activeTransfers.end())
+    {
+        it->second->canceled = true;
+    }
 }
 
 void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string& destinationPath)

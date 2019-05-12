@@ -133,6 +133,12 @@ public:
      */
     Q_INVOKABLE void upload(const QUrl& localPath);
 
+    /**
+     * @brief Cancel a file transfer
+     * @param transfer - File transfer
+     */
+    Q_INVOKABLE void cancelTransfer(const QFileTransfer& transfer);
+
 signals:
     /**
      * @brief SIGNAL emitted when files changes

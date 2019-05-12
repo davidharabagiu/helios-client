@@ -10,6 +10,7 @@
 // Forward declarations
 class QRemoteFileSystemController;
 class FileService;
+class QFileTransfer;
 
 /**
  * @class QRemoteFileSystemControllerImpl
@@ -49,6 +50,7 @@ public:  // forwarded from QRemoteFileSystemController
     void         move(const QString& fileName, const QString& destinationDirPath);
     void         rename(const QString& fileName, const QString& newName);
     void         upload(const QUrl& localPath);
+    void         cancelTransfer(const QFileTransfer& transfer);
 
 public:  // from FileServiceListener
     void currentDirectoryChanged() override;

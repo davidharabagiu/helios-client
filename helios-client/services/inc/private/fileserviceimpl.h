@@ -38,6 +38,11 @@ private:
          * @brief Input file stream. Can be either std::ofstream or std::ifstream.
          */
         std::shared_ptr<void> stream;
+
+        /**
+         * @brief Set this to true in order to cancel a transfer
+         */
+        bool canceled = false;
     };
 
 public:
@@ -47,6 +52,11 @@ public:
      * @param fileApiCaller - File API caller instance
      */
     FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller);
+
+    /**
+     * @brief Destructor
+     */
+    ~FileServiceImpl();
 
 public:  // from FileService
     bool                                       enabled() const override;
@@ -136,6 +146,11 @@ private:
      * @brief Operations mutex
      */
     mutable std::mutex m_mutex;
+
+    /**
+     * @brief Condition variable for waiting for transfers to complete
+     */
+    std::condition_variable m_transfersCompletedCondVar;
 };
 
 #endif  // FILESERVICEIMPL_H

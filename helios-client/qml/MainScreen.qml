@@ -83,7 +83,7 @@ Rectangle {
         }
 
         onTransferRemoved: {
-            transferList.deleteLater(transfer);
+            transferList.removeTransfer(transfer);
         }
 
         onError: {
@@ -267,6 +267,7 @@ Rectangle {
                 height: 100
                 Column {
                     anchors.fill: parent
+                    spacing: 3
 
                     HLabel {
                         darkMode: root.darkMode
@@ -276,6 +277,14 @@ Rectangle {
                     HLabel {
                         darkMode: root.darkMode
                         text: model.transferData.transferredBytes
+                    }
+
+                    HButton {
+                        darkMode: root.darkMode
+                        label: "Cancel"
+                        onClicked: {
+                            rfsCtl.cancelTransfer(model.transferData);
+                        }
                     }
                 }
             }
