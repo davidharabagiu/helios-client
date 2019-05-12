@@ -11,10 +11,34 @@ class QFileTransfer
 {
     Q_GADGET
 
+    /**
+     * @property localPath
+     * @brief Local path of the transferred file
+     */
     Q_PROPERTY(QString localPath READ localPath)
+
+    /**
+     * @property remotePath
+     * @brief Local path of the transferred file
+     */
     Q_PROPERTY(QString remotePath READ remotePath)
+
+    /**
+     * @property transferMode
+     * @brief Upload / download
+     */
     Q_PROPERTY(QTransferMode mode READ mode)
+
+    /**
+     * @property fileSize
+     * @brief File size in bytes
+     */
     Q_PROPERTY(quint64 fileSize READ fileSize)
+
+    /**
+     * @property transferredBytes
+     * @brief Number of transferred bytes
+     */
     Q_PROPERTY(quint64 transferredBytes READ transferredBytes)
 
 public:  // Enums

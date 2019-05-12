@@ -18,7 +18,14 @@
 FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller)
     : m_apiCaller(std::move(fileApiCaller))
     , m_config(config)
+    , m_lastUsedExecutorIndex(0)
 {
+    m_numberOfTransferExecutors = m_config->get(ConfigKeys::kNumberOfTransferExecutors).toUInt();
+
+    for (unsigned int i = 0; i < m_numberOfTransferExecutors; ++i)
+    {
+        m_transferExecutors.push_back(std::make_unique<Executor>());
+    }
 }
 
 bool FileServiceImpl::enabled() const
@@ -289,10 +296,10 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                 transfer->stream   = std::make_shared<std::ifstream>(localPath, std::ios::binary);
                 m_activeTransfers.emplace(fullRemotePath, transfer);
 
-                // Post transfer execution
-                m_transfersExecutor.post([this, transfer, transferId, fullRemotePath] {
-                    Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
+                Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
 
+                // Post transfer execution
+                m_transferExecutors[nextExecutorIndex()]->post([this, transfer, transferId, fullRemotePath] {
                     uint64_t chunkSize =
                         safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
                     auto                       stream = std::static_pointer_cast<std::ifstream>(transfer->stream);
@@ -408,10 +415,10 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                 transfer->stream   = std::make_shared<std::ofstream>(localPath, std::ios::binary);
                 m_activeTransfers.emplace(fullRemotePath, transfer);
 
-                // Post transfer execution
-                m_transfersExecutor.post([this, transfer, transferId, fullRemotePath] {
-                    Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
+                Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
 
+                // Post transfer execution
+                m_transferExecutors[nextExecutorIndex()]->post([this, transfer, transferId, fullRemotePath] {
                     uint64_t chunkSize =
                         safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
                     auto                       stream = std::static_pointer_cast<std::ofstream>(transfer->stream);
@@ -696,4 +703,11 @@ void FileServiceImpl::completeMove(const std::string& source, const std::string&
     }
 
     Observable::notifyAll(&FileServiceListener::fileMoved, oldFile, file);
+}
+
+unsigned FileServiceImpl::nextExecutorIndex()
+{
+    unsigned index          = m_lastUsedExecutorIndex;
+    m_lastUsedExecutorIndex = (m_lastUsedExecutorIndex + 1) % m_numberOfTransferExecutors;
+    return index;
 }

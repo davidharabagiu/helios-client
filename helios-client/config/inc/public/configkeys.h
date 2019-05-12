@@ -22,6 +22,12 @@ const std::string kSettingsAutoSaveIntervalKey = "settingsAutoSaveInterval";
  * @note Type = uint
  */
 const std::string kUploadChunkSize = "uploadChunkSize";
+
+/**
+ * @brief Number of file transfers that can run in parallel
+ * @note Type = uint
+ */
+const std::string kNumberOfTransferExecutors = "numberOfTransferExecutors";
 }  // namespace ConfigKeys
 
 #endif  // CONFIGKEYS_H

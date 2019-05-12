@@ -5,6 +5,7 @@
 #include <map>
 #include <mutex>
 #include <memory>
+#include <vector>
 
 #include "fileservice.h"
 #include "fileapicaller.h"
@@ -79,6 +80,12 @@ private:
      */
     void completeMove(const std::string& source, const std::string& destination, bool isDir, uint64_t size = 0);
 
+    /**
+     * @brief Retrurns the next file transfer executor index
+     * @return unsigned
+     */
+    unsigned nextExecutorIndex();
+
 private:
     /**
      * @brief File operations API caller instance
@@ -111,9 +118,19 @@ private:
     std::map<std::string, std::shared_ptr<FileTransferInternal>> m_activeTransfers;
 
     /**
-     * @brief Executor for async file transfers
+     * @brief Executors for async file transfers
      */
-    Executor m_transfersExecutor;
+    std::vector<std::unique_ptr<Executor>> m_transferExecutors;
+
+    /**
+     * @brief Index of the last used transfer executor
+     */
+    unsigned m_lastUsedExecutorIndex;
+
+    /**
+     * @brief Number of transfer executors
+     */
+    unsigned m_numberOfTransferExecutors;
 
     /**
      * @brief Operations mutex

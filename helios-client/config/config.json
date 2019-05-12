@@ -1,5 +1,6 @@
 {
     "serverUrl": "http://127.0.0.1:8000",
     "settingsAutoSaveInterval": 0,
-    "uploadChunkSize": 4096
+    "uploadChunkSize": 4096,
+    "numberOfTransferExecutors": 4
 }
