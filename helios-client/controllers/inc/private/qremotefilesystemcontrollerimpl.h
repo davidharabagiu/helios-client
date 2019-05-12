@@ -48,17 +48,17 @@ public:  // forwarded from QRemoteFileSystemController
     void         remove(const QString& fileName);
     void         move(const QString& fileName, const QString& destinationDirPath);
     void         rename(const QString& fileName, const QString& newName);
+    void         upload(const QUrl& localPath);
 
 public:  // from FileServiceListener
     void currentDirectoryChanged() override;
     void directoryCreated(std::shared_ptr<const File> directory) override;
     void fileMoved(std::shared_ptr<const File> oldFile, std::shared_ptr<const File> file) override;
     void fileRemoved(std::shared_ptr<const File> file) override;
-    void fileDownloadStarted(const std::string& path) override;
-    void fileUploadStarted(const std::string& path) override;
-    void fileOperationProgressChanged(const std::string& path) override;
-    void fileOperationCompleted(const std::string& path) override;
-    void fileOperationAborted(const std::string& path) override;
+    void transferStarted(std::shared_ptr<FileTransfer> transfer) override;
+    void transferProgressChanged(std::shared_ptr<FileTransfer> transfer) override;
+    void transferCompleted(std::shared_ptr<FileTransfer> transfer) override;
+    void transferAborted(std::shared_ptr<FileTransfer> transfer) override;
     void errorOccured(const std::string& errorString) override;
 
 private:

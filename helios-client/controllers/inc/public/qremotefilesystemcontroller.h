@@ -3,11 +3,13 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QUrl>
 #include <memory>
 
 // Forward declarations
 class QRemoteFileSystemControllerImpl;
 class QHeliosFile;
+class QFileTransfer;
 
 /**
  * @class QRemoteFileSystemController
@@ -125,6 +127,12 @@ public:
      */
     Q_INVOKABLE void rename(const QString& fileName, const QString& newName);
 
+    /**
+     * @brief Upload a file in the cwd under the same name
+     * @param localPath - Local file path
+     */
+    Q_INVOKABLE void upload(const QUrl& localPath);
+
 signals:
     /**
      * @brief SIGNAL emitted when files changes
@@ -152,6 +160,24 @@ signals:
      * @param file - Removed file / directory name
      */
     void fileRemovedFromCwd(const QString& fileName);
+
+    /**
+     * @brief SIGNAL emitted when a transfer was added in the list
+     * @param transfer - File transfer
+     */
+    void transferAdded(const QFileTransfer& transfer);
+
+    /**
+     * @brief SIGNAL emitted when a transfer was updated (progress changed)
+     * @param transfer - File transfer
+     */
+    void transferUpdated(const QFileTransfer& transfer);
+
+    /**
+     * @brief SIGNAL emitted when a transfer was removed from the list
+     * @param transfer - File transfer
+     */
+    void transferRemoved(const QFileTransfer& transfer);
 
     /**
      * @brief SIGNAL emitted when an error occured

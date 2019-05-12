@@ -6,6 +6,7 @@
 
 // Forward declarations
 class File;
+class FileTransfer;
 
 /**
  * @class FileServiceListener
@@ -44,35 +45,29 @@ public:
     virtual void fileRemoved(std::shared_ptr<const File> directory) = 0;
 
     /**
-     * @brief A file download operation has started
-     * @param path - File path
+     * @brief A file transfer has started
+     * @param transfer - File transfer
      */
-    virtual void fileDownloadStarted(const std::string& path) = 0;
+    virtual void transferStarted(std::shared_ptr<FileTransfer> transfer) = 0;
 
     /**
-     * @brief A file upload operation has started
-     * @param path - File path
+     * @brief Progress has changed for a file transfer.
+     * @param transfer - File transfer
      */
-    virtual void fileUploadStarted(const std::string& path) = 0;
+    virtual void transferProgressChanged(std::shared_ptr<FileTransfer> transfer) = 0;
 
     /**
-     * @brief Progress has changed for a file download or upload operation.
+     * @brief A file transfer has completed.
      * @param path - File path
      */
-    virtual void fileOperationProgressChanged(const std::string& path) = 0;
+    virtual void transferCompleted(std::shared_ptr<FileTransfer> transfer) = 0;
 
     /**
-     * @brief A file download or upload operation has completed.
+     * @brief A file transfer was aborted by the user or due to an error. If it was aborted due to an error, an
+     * errorOccured callback will follow with the reason.
      * @param path - File path
      */
-    virtual void fileOperationCompleted(const std::string& path) = 0;
-
-    /**
-     * @brief A file download or upload operation was aborted by the user or due to an error. If it was aborted due to
-     * an error, an errorOccured callback will follow with the reason.
-     * @param path - File path
-     */
-    virtual void fileOperationAborted(const std::string& path) = 0;
+    virtual void transferAborted(std::shared_ptr<FileTransfer> transfer) = 0;
 
     /**
      * @brief An operation has failed.

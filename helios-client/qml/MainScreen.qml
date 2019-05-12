@@ -44,6 +44,18 @@ Rectangle {
         title: "Error"
     }
 
+    FileDialog {
+        id: fileDialog
+        title: "Please choose a file"
+        folder: shortcuts.home
+        selectExisting: true
+        selectFolder: false
+        selectMultiple: false
+        onAccepted: {
+            rfsCtl.upload(fileUrl);
+        }
+    }
+
     RemoteFileSystemController {
         id: rfsCtl
 
@@ -62,6 +74,18 @@ Rectangle {
             fileListing.removeFile(fileName);
         }
 
+        onTransferAdded: {
+            transferList.addTranfer(transfer);
+        }
+
+        onTransferUpdated: {
+            transferList.updateTransfer(transfer);
+        }
+
+        onTransferRemoved: {
+            transferList.deleteLater(transfer);
+        }
+
         onError: {
             errorDialog.text = message;
             errorDialog.visible = true;
@@ -70,6 +94,10 @@ Rectangle {
 
     FileListing {
         id: fileListing
+    }
+
+    TransfersList {
+        id: transferList
     }
 
     HTextInput {
@@ -169,6 +197,16 @@ Rectangle {
                 rfsCtl.rename(fileNameInput.text, destinationDirInput.text);
             }
         }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "Upload"
+
+            onClicked: {
+                fileDialog.visible = true;
+            }
+        }
     }
 
     Rectangle {
@@ -177,7 +215,7 @@ Rectangle {
             top: fileControls.bottom
             leftMargin: 5
             topMargin: 5
-            right: parent.right
+            right: transfersPane.left
             rightMargin: 5
             bottom: parent.bottom
             bottomMargin: 5
@@ -201,6 +239,43 @@ Rectangle {
                         if (model.fileData.isDirectory) {
                             rfsCtl.openDirectory(model.fileData.name);
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: transfersPane
+
+        anchors {
+            right: parent.right
+            top: fileControls.bottom
+            bottom: parent.bottom
+            leftMargin: 5
+            topMargin: 5
+            bottomMargin: 5
+        }
+
+        width: 300
+
+        ListView {
+            anchors.fill: parent
+            model: transferList
+            delegate: Rectangle {
+                width: transfersPane.width
+                height: 100
+                Column {
+                    anchors.fill: parent
+
+                    HLabel {
+                        darkMode: root.darkMode
+                        text: model.transferData.remotePath
+                    }
+
+                    HLabel {
+                        darkMode: root.darkMode
+                        text: model.transferData.transferredBytes
                     }
                 }
             }

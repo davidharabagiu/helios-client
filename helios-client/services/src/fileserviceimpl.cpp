@@ -13,6 +13,7 @@
 #include "config.h"
 #include "configkeys.h"
 #include "autoresetevent.h"
+#include "pathutils.h"
 
 FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller)
     : m_apiCaller(std::move(fileApiCaller))
@@ -115,12 +116,12 @@ void FileServiceImpl::changeCurrentDirectory(const std::string& path, bool relat
     if (relative)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        fullPath = concatenatePaths(m_currentDirectory, path);
+        fullPath = PathUtils::concatenatePaths(m_currentDirectory, path);
     }
     else
     {
         fullPath = path;
-        removeTrailingSlash(fullPath);
+        PathUtils::removeTrailingSlash(fullPath);
     }
 
     m_apiCaller->list(
@@ -163,7 +164,7 @@ void FileServiceImpl::navigateBack()
 
     std::string dir;
     std::string parent;
-    getFileNameAndParentDir(m_currentDirectory, dir, parent);
+    PathUtils::getFileNameAndParentDir(m_currentDirectory, dir, parent);
     changeCurrentDirectory(parent, false);
 }
 
@@ -178,12 +179,12 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
     if (relative)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        fullPath = concatenatePaths(m_currentDirectory, path);
+        fullPath = PathUtils::concatenatePaths(m_currentDirectory, path);
     }
     else
     {
         fullPath = path;
-        removeTrailingSlash(fullPath);
+        PathUtils::removeTrailingSlash(fullPath);
     }
 
     m_apiCaller->createDirectory(m_authToken, fullPath, [this, fullPath](ApiCallStatus status) {
@@ -191,7 +192,7 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
         {
             std::string dirName;
             std::string dirParent;
-            getFileNameAndParentDir(fullPath, dirName, dirParent);
+            PathUtils::getFileNameAndParentDir(fullPath, dirName, dirParent);
 
             auto dir = std::make_shared<File>(dirName, dirParent, true);
 
@@ -238,12 +239,12 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
     if (relative)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        fullRemotePath = concatenatePaths(m_currentDirectory, remotePath);
+        fullRemotePath = PathUtils::concatenatePaths(m_currentDirectory, remotePath);
     }
     else
     {
         fullRemotePath = remotePath;
-        removeTrailingSlash(fullRemotePath);
+        PathUtils::removeTrailingSlash(fullRemotePath);
     }
 
     // Check if there is already an active transfer on this file
@@ -290,7 +291,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
 
                 // Post transfer execution
                 m_transfersExecutor.post([this, transfer, transferId, fullRemotePath] {
-                    Observable::notifyAll(&FileServiceListener::fileUploadStarted, fullRemotePath);
+                    Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
 
                     uint64_t chunkSize =
                         safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
@@ -321,12 +322,12 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         {
                             transferred += read;
                             transfer->transfer->setTransferredBytes(transferred);
-                            Observable::notifyAll(&FileServiceListener::fileOperationProgressChanged, fullRemotePath);
+                            Observable::notifyAll(&FileServiceListener::transferProgressChanged, transfer->transfer);
                         }
                         else
                         {
                             // Upload failure
-                            Observable::notifyAll(&FileServiceListener::fileOperationAborted, fullRemotePath);
+                            Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
                             std::ostringstream ss;
                             ss << "Error while uploading. ApiCallStatus = ";
                             ss << static_cast<int>(lastStatus);
@@ -342,7 +343,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     if (transferred == fileSize)
                     {
                         // Notify completion
-                        Observable::notifyAll(&FileServiceListener::fileOperationCompleted, fullRemotePath);
+                        Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
                     }
                 });
             }
@@ -371,12 +372,12 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
     if (relative)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        fullRemotePath = concatenatePaths(m_currentDirectory, remotePath);
+        fullRemotePath = PathUtils::concatenatePaths(m_currentDirectory, remotePath);
     }
     else
     {
         fullRemotePath = remotePath;
-        removeTrailingSlash(fullRemotePath);
+        PathUtils::removeTrailingSlash(fullRemotePath);
     }
 
     // Check if there is already an active transfer on this file
@@ -409,7 +410,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
 
                 // Post transfer execution
                 m_transfersExecutor.post([this, transfer, transferId, fullRemotePath] {
-                    Observable::notifyAll(&FileServiceListener::fileDownloadStarted, fullRemotePath);
+                    Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
 
                     uint64_t chunkSize =
                         safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
@@ -442,12 +443,12 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                         if (lastStatus == ApiCallStatus::SUCCESS)
                         {
                             transfer->transfer->setTransferredBytes(transferred);
-                            Observable::notifyAll(&FileServiceListener::fileOperationProgressChanged, fullRemotePath);
+                            Observable::notifyAll(&FileServiceListener::transferProgressChanged, transfer->transfer);
                         }
                         else
                         {
                             // Upload failure
-                            Observable::notifyAll(&FileServiceListener::fileOperationAborted, fullRemotePath);
+                            Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
                             std::ostringstream ss;
                             ss << "Error while downloading. ApiCallStatus = ";
                             ss << static_cast<int>(lastStatus);
@@ -463,7 +464,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                     if (transferred == fileSize)
                     {
                         // Notify completion
-                        Observable::notifyAll(&FileServiceListener::fileOperationCompleted, fullRemotePath);
+                        Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
                     }
                 });
             }
@@ -498,7 +499,7 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
     }
 
     std::string source(sourcePath);
-    removeTrailingSlash(source);
+    PathUtils::removeTrailingSlash(source);
 
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -514,7 +515,7 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
     }
 
     std::string destination(destinationPath);
-    removeTrailingSlash(destination);
+    PathUtils::removeTrailingSlash(destination);
 
     m_apiCaller->move(m_authToken, source, destination, [this, source, destination](ApiCallStatus status) {
         if (status == ApiCallStatus::SUCCESS)
@@ -590,12 +591,12 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
     if (relative)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        fullPath = concatenatePaths(m_currentDirectory, path);
+        fullPath = PathUtils::concatenatePaths(m_currentDirectory, path);
     }
     else
     {
         fullPath = path;
-        removeTrailingSlash(fullPath);
+        PathUtils::removeTrailingSlash(fullPath);
     }
 
     {
@@ -616,7 +617,7 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
         {
             std::string name;
             std::string parent;
-            getFileNameAndParentDir(fullPath, name, parent);
+            PathUtils::getFileNameAndParentDir(fullPath, name, parent);
 
             auto file = std::make_shared<File>(name, parent, false);
 
@@ -669,7 +670,7 @@ void FileServiceImpl::completeMove(const std::string& source, const std::string&
 {
     std::string sourceName;
     std::string sourceParent;
-    getFileNameAndParentDir(source, sourceName, sourceParent);
+    PathUtils::getFileNameAndParentDir(source, sourceName, sourceParent);
 
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -681,7 +682,7 @@ void FileServiceImpl::completeMove(const std::string& source, const std::string&
 
     std::string destinationName;
     std::string destinationParent;
-    getFileNameAndParentDir(destination, destinationName, destinationParent);
+    PathUtils::getFileNameAndParentDir(destination, destinationName, destinationParent);
 
     auto oldFile = std::make_shared<File>(sourceName, sourceParent, isDir, size);
     auto file    = std::make_shared<File>(destinationName, destinationParent, isDir, size);
@@ -695,44 +696,4 @@ void FileServiceImpl::completeMove(const std::string& source, const std::string&
     }
 
     Observable::notifyAll(&FileServiceListener::fileMoved, oldFile, file);
-}
-
-std::string FileServiceImpl::concatenatePaths(const std::string& base, const std::string& relativePath)
-{
-    std::ostringstream sstream;
-    sstream << base;
-
-    if (base.length() > 0 && base[base.length() - 1] != '/')
-    {
-        sstream << '/';
-    }
-
-    std::string relative(relativePath);
-    removeTrailingSlash(relative);
-    sstream << relative;
-
-    return sstream.str();
-}
-
-void FileServiceImpl::getFileNameAndParentDir(const std::string& path, std::string& name, std::string& parent)
-{
-    auto idx = path.rfind('/', path.length() - 2);
-    if (idx != std::string::npos)
-    {
-        parent = path.substr(0, idx);
-        name   = path.substr(idx + 1);
-    }
-    else
-    {
-        parent = "";
-        name   = path;
-    }
-}
-
-void FileServiceImpl::removeTrailingSlash(std::string& path)
-{
-    if (path.length() > 0 && path[path.length() - 1] == '/')
-    {
-        path.erase(path.length() - 1);
-    }
 }

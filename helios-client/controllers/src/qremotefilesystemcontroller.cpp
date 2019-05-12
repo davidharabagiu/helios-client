@@ -72,3 +72,8 @@ void QRemoteFileSystemController::rename(const QString& fileName, const QString&
 {
     m_privateImpl->rename(fileName, newName);
 }
+
+void QRemoteFileSystemController::upload(const QUrl& localPath)
+{
+    m_privateImpl->upload(localPath);
+}

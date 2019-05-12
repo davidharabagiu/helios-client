@@ -53,16 +53,19 @@ void BeginUploadCall::receive(HttpStatus status, const std::vector<uint8_t>& rep
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS, replyStr);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED, std::string());
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorInvalidPath)
         {
             m_callback(ApiCallStatus::INVALID_PATH, std::string());
+            return;
         }
     }
 

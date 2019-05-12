@@ -11,6 +11,12 @@ class QFileTransfer
 {
     Q_GADGET
 
+    Q_PROPERTY(QString localPath READ localPath)
+    Q_PROPERTY(QString remotePath READ remotePath)
+    Q_PROPERTY(QTransferMode mode READ mode)
+    Q_PROPERTY(quint64 fileSize READ fileSize)
+    Q_PROPERTY(quint64 transferredBytes READ transferredBytes)
+
 public:  // Enums
     /**
      * @brief File transfer mode
@@ -39,6 +45,12 @@ public:
      * @return bool
      */
     bool isValid() const;
+
+    /**
+     * @brief Returns a pointer to the internal data
+     * @return std::shared_ptr<const FileTransfer>
+     */
+    std::shared_ptr<const FileTransfer> data() const;
 
 public:  // Wrappers over FileTransfer methods
     QString       localPath() const;

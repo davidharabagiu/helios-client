@@ -10,6 +10,11 @@ bool QFileTransfer::isValid() const
     return static_cast<bool>(m_data);
 }
 
+std::shared_ptr<const FileTransfer> QFileTransfer::data() const
+{
+    return m_data;
+}
+
 QString QFileTransfer::localPath() const
 {
     return isValid() ? QString::fromStdString(m_data->localPath()) : QString();

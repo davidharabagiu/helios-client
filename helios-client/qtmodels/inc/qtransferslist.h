@@ -38,6 +38,24 @@ public:
      */
     void setTransfers(const QVariantList& transfers);
 
+    /**
+     * @brief Add a transfer in the list
+     * @param transfer - QFileTransfer
+     */
+    Q_INVOKABLE void addTranfer(const QFileTransfer& transfer);
+
+    /**
+     * @brief Update the transfer progress info
+     * @param transfer - QFileTransfer
+     */
+    Q_INVOKABLE void updateTransfer(const QFileTransfer& transfer);
+
+    /**
+     * @brief removeTransfer - Remove a file transfer
+     * @param transfer - QFileTransfer
+     */
+    Q_INVOKABLE void removeTransfer(const QFileTransfer& transfer);
+
 public:  // from QAbstractListModel
     int                    rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant               data(const QModelIndex& index, int role) const override;

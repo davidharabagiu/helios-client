@@ -21,6 +21,10 @@ add_library(${PROJECT_NAME}
     "src/timer.cpp"
     "inc/autoresetevent.h"
     "src/autoresetevent.cpp"
+    "inc/pathutils.h"
+    "src/pathutils.cpp"
+    "inc/customactionevent.h"
+    "src/customactionevent.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

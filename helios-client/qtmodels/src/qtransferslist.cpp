@@ -1,4 +1,7 @@
+#include <algorithm>
+
 #include "qtransferslist.h"
+#include "typeconversions.h"
 
 QTransfersList::QTransfersList(QObject* parent)
     : QAbstractListModel(parent)
@@ -16,6 +19,39 @@ void QTransfersList::setTransfers(const QVariantList& transfers)
     }
 
     endResetModel();
+}
+
+void QTransfersList::addTranfer(const QFileTransfer& transfer)
+{
+    beginInsertRows(QModelIndex(), m_transfers.length(), m_transfers.length());
+    m_transfers.push_back(transfer);
+    endInsertRows();
+}
+
+void QTransfersList::updateTransfer(const QFileTransfer& transfer)
+{
+    auto it = std::find_if(m_transfers.begin(), m_transfers.end(),
+                           [&transfer](const QFileTransfer& el) { return el.data() == transfer.data(); });
+    assert(it != m_transfers.end());
+    if (it != m_transfers.end())
+    {
+        int  idx = safe_integral_cast<int>(std::distance(m_transfers.begin(), it));
+        emit dataChanged(index(idx), index(idx), {static_cast<int>(Roles::TRANSFER_DATA)});
+    }
+}
+
+void QTransfersList::removeTransfer(const QFileTransfer& transfer)
+{
+    auto it = std::find_if(m_transfers.begin(), m_transfers.end(),
+                           [&transfer](const QFileTransfer& el) { return el.data() == transfer.data(); });
+    assert(it != m_transfers.end());
+    if (it != m_transfers.end())
+    {
+        int idx = safe_integral_cast<int>(std::distance(m_transfers.begin(), it));
+        beginRemoveRows(QModelIndex(), idx, idx);
+        m_transfers.erase(it);
+        endRemoveRows();
+    }
 }
 
 int QTransfersList::rowCount(const QModelIndex& /*parent*/) const

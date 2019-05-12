@@ -9,8 +9,10 @@
 #include "userservice.h"
 #include "fileservice.h"
 #include "qheliosfile.h"
+#include "qfiletransfer.h"
 #include "typeconversions.h"
 #include "file.h"
+#include "pathutils.h"
 
 QRemoteFileSystemControllerImpl::QRemoteFileSystemControllerImpl(QRemoteFileSystemController* publicImpl)
     : m_publicImpl(publicImpl)
@@ -117,6 +119,15 @@ void QRemoteFileSystemControllerImpl::rename(const QString& fileName, const QStr
     }
 }
 
+void QRemoteFileSystemControllerImpl::upload(const QUrl& localPath)
+{
+    const auto& _localPath = localPath.url(QUrl::PreferLocalFile);
+    std::string fileName;
+    std::string filePath;
+    PathUtils::getFileNameAndParentDir(_localPath.toStdString(), fileName, filePath);
+    m_fileService->uploadFile(_localPath.toStdString(), fileName, true);
+}
+
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
 {
     auto files = m_fileService->files();
@@ -155,11 +166,10 @@ void QRemoteFileSystemControllerImpl::fileMoved(std::shared_ptr<const File> oldF
         if (it != m_files.end())
         {
             m_files.erase(it);
+            QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
+                                      Q_ARG(const QString&, QString::fromStdString(oldFile->name())));
         }
-
-        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
-                                  Q_ARG(const QString&, QString::fromStdString(oldFile->name())));
     }
     if (file->parentDirectory() == m_fileService->currentDirectory())
     {
@@ -184,32 +194,64 @@ void QRemoteFileSystemControllerImpl::fileRemoved(std::shared_ptr<const File> fi
         if (it != m_files.end())
         {
             m_files.erase(it);
+            QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
+                                      Q_ARG(const QString&, QString::fromStdString(file->name())));
         }
-
-        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
-                                  Q_ARG(const QString&, QString::fromStdString(file->name())));
     }
 }
 
-void QRemoteFileSystemControllerImpl::fileDownloadStarted(const std::string& /*path*/)
+void QRemoteFileSystemControllerImpl::transferStarted(std::shared_ptr<FileTransfer> transfer)
 {
+    QFileTransfer newTransfer(transfer);
+    m_transfers.push_back(QVariant::fromValue(newTransfer));
+    QMetaObject::invokeMethod(m_publicImpl, "transfersChanged", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_publicImpl, "transferAdded", Qt::QueuedConnection,
+                              Q_ARG(const QFileTransfer&, newTransfer));
 }
 
-void QRemoteFileSystemControllerImpl::fileUploadStarted(const std::string& /*path*/)
+void QRemoteFileSystemControllerImpl::transferProgressChanged(std::shared_ptr<FileTransfer> transfer)
 {
+    auto it = std::find_if(m_transfers.begin(), m_transfers.end(), [&transfer](const QVariant& el) {
+        return qvariant_cast<QFileTransfer>(el).data() == transfer;
+    });
+    assert(it != m_transfers.end());
+    if (it != m_transfers.end())
+    {
+        QMetaObject::invokeMethod(m_publicImpl, "transfersChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "transferUpdated", Qt::QueuedConnection,
+                                  Q_ARG(const QFileTransfer&, qvariant_cast<QFileTransfer>(*it)));
+    }
 }
 
-void QRemoteFileSystemControllerImpl::fileOperationProgressChanged(const std::string& /*path*/)
+void QRemoteFileSystemControllerImpl::transferCompleted(std::shared_ptr<FileTransfer> transfer)
 {
+    auto it = std::find_if(m_transfers.begin(), m_transfers.end(), [&transfer](const QVariant& el) {
+        return qvariant_cast<QFileTransfer>(el).data() == transfer;
+    });
+    assert(it != m_transfers.end());
+    if (it != m_transfers.end())
+    {
+        QMetaObject::invokeMethod(m_publicImpl, "transferRemoved", Qt::QueuedConnection,
+                                  Q_ARG(const QFileTransfer&, qvariant_cast<QFileTransfer>(*it)));
+        m_transfers.erase(it);
+        QMetaObject::invokeMethod(m_publicImpl, "transfersChanged", Qt::QueuedConnection);
+    }
 }
 
-void QRemoteFileSystemControllerImpl::fileOperationCompleted(const std::string& /*path*/)
+void QRemoteFileSystemControllerImpl::transferAborted(std::shared_ptr<FileTransfer> transfer)
 {
-}
-
-void QRemoteFileSystemControllerImpl::fileOperationAborted(const std::string& /*path*/)
-{
+    auto it = std::find_if(m_transfers.begin(), m_transfers.end(), [&transfer](const QVariant& el) {
+        return qvariant_cast<QFileTransfer>(el).data() == transfer;
+    });
+    assert(it != m_transfers.end());
+    if (it != m_transfers.end())
+    {
+        QMetaObject::invokeMethod(m_publicImpl, "transferRemoved", Qt::QueuedConnection,
+                                  Q_ARG(const QFileTransfer&, qvariant_cast<QFileTransfer>(*it)));
+        m_transfers.erase(it);
+        QMetaObject::invokeMethod(m_publicImpl, "transfersChanged", Qt::QueuedConnection);
+    }
 }
 
 void QRemoteFileSystemControllerImpl::errorOccured(const std::string& errorString)
