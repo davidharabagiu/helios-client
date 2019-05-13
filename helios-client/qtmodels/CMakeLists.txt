@@ -8,16 +8,24 @@ include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 add_library(${PROJECT_NAME}
     "inc/qtmodels.h"
     "src/qtmodels.cpp"
-    "inc/quseraccount.h"
-    "src/quseraccount.cpp"
+    "inc/qheliosfile.h"
+    "src/qheliosfile.cpp"
+    "inc/qfiletransfer.h"
+    "src/qfiletransfer.cpp"
+    "inc/qfilelisting.h"
+    "src/qfilelisting.cpp"
+    "inc/qtransferslist.h"
+    "src/qtransferslist.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
     PRIVATE $<TARGET_PROPERTY:models,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
     ${QT5_LIBS}
     models
+    utils
 )

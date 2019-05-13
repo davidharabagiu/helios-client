@@ -53,16 +53,19 @@ void EndTransferCall::receive(HttpStatus status, const std::vector<uint8_t>& rep
     if (status == HttpStatus::OK)
     {
         m_callback(ApiCallStatus::SUCCESS);
+        return;
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED);
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorInvalidTransferId)
         {
             m_callback(ApiCallStatus::INVALID_TRANSFER_ID);
+            return;
         }
     }
 

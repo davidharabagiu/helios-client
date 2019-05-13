@@ -18,6 +18,7 @@ class GetFileSizeCall;
 class ListCall;
 class RemoveCall;
 class MoveCall;
+class IsDirCall;
 
 /**
  * @class ApiCallVisitor
@@ -115,6 +116,12 @@ public:
      * @param call - CheckTokenCall
      */
     void visit(CheckTokenCall* call) const;
+
+    /**
+     * @brief Visit IsDirCall
+     * @param call - IsDirCall
+     */
+    void visit(IsDirCall* call) const;
 
 private:
     /**

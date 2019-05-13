@@ -7,10 +7,13 @@ include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
     "inc/public/userservicelistener.h"
-    "inc/public/serviceinterface.h"
     "inc/public/userservice.h"
     "inc/private/userserviceimpl.h"
     "src/userserviceimpl.cpp"
+    "inc/public/fileservice.h"
+    "inc/private/fileserviceimpl.h"
+    "src/fileserviceimpl.cpp"
+    "inc/public/fileservicelistener.h"
 )
 
 target_include_directories(${PROJECT_NAME}

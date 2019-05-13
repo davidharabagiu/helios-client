@@ -15,6 +15,7 @@
 #include "listcall.h"
 #include "removecall.h"
 #include "movecall.h"
+#include "isdircall.h"
 
 FileApiCallerImpl::FileApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
@@ -88,5 +89,12 @@ void FileApiCallerImpl::move(const std::string& authToken, const std::string& so
                              const ApiCallbacks::MoveCallback& callback) const
 {
     auto call = new MoveCall(authToken, source, destination, callback);
+    call->send(m_visitor);
+}
+
+void FileApiCallerImpl::isDir(const std::string& authToken, const std::string& path,
+                              const ApiCallbacks::IsDirCallback& callback) const
+{
+    auto call = new IsDirCall(authToken, path, callback);
     call->send(m_visitor);
 }

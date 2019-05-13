@@ -45,6 +45,8 @@ add_library(${PROJECT_NAME}
     "src/movecall.cpp"
     "inc/private/checktokencall.h"
     "src/checktokencall.cpp"
+    "inc/private/isdircall.h"
+    "src/isdircall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

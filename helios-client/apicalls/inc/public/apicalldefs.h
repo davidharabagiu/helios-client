@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdint>
 #include <tuple>
+#include <optional>
 
 /**
  * @brief Status codes for service API calls
@@ -63,9 +64,9 @@ using BeginUploadCallback = std::function<void(ApiCallStatus, const std::string&
 using UploadCallback = std::function<void(ApiCallStatus)>;
 
 /**
- * @brief Begin download callback function. Receives the call status and the id of the transfer.
+ * @brief Begin download callback function. Receives the call status, the id of the transfer and the size of the file.
  */
-using BeginDownloadCallback = std::function<void(ApiCallStatus, const std::string&)>;
+using BeginDownloadCallback = std::function<void(ApiCallStatus, const std::string&, uint64_t)>;
 
 /**
  * @brief Download callback function. Receives the call status and the requested file bytes.
@@ -84,9 +85,10 @@ using GetFileSizeCallback = std::function<void(ApiCallStatus, uint64_t)>;
 
 /**
  * @brief List callback function. Receives the call status and a list of files and directories names, along with a
- * boolean indicating if the file is a directory.
+ * boolean indicating if the file is a directory and the size of the file if it's not a directory.
  */
-using ListCallback = std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, bool>>&)>;
+using ListCallback =
+    std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>&)>;
 
 /**
  * @brief Remove callback function. Receives the call status.
@@ -97,6 +99,11 @@ using RemoveCallback = std::function<void(ApiCallStatus)>;
  * @brief Move callback function. Receives the call status.
  */
 using MoveCallback = std::function<void(ApiCallStatus)>;
+
+/**
+ * @brief Is directory callback function. Receives the call status and if the provided path reffers to a directory.
+ */
+using IsDirCallback = std::function<void(ApiCallStatus, bool)>;
 }  // namespace ApiCallbacks
 
 #endif  // APICALLDEFS_H

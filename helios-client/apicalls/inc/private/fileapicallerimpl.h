@@ -42,6 +42,8 @@ public:  // from FileApiCaller
                 const ApiCallbacks::RemoveCallback& callback) const override;
     void move(const std::string& authToken, const std::string& source, const std::string& destination,
               const ApiCallbacks::MoveCallback& callback) const override;
+    void isDir(const std::string& authToken, const std::string& path,
+               const ApiCallbacks::IsDirCallback& callback) const override;
 
 private:
     /**

@@ -9,7 +9,9 @@
 #include "single.h"
 #include "dependencyinjector.h"
 #include "userserviceimpl.h"
+#include "fileserviceimpl.h"
 #include "userapicallerimpl.h"
+#include "fileapicallerimpl.h"
 #include "settingsmanagerimpl.h"
 #include "defaultsettingsproviderimpl.h"
 #include "httprequestmanagerimpl.h"
@@ -34,7 +36,10 @@ void registerInstances()
     std::shared_ptr<UserService> userService(
         new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));
     Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
-    userService->start();
+
+    std::shared_ptr<FileService> fileService(
+        new FileServiceImpl(config, std::make_unique<FileApiCallerImpl>(httpRequestManager)));
+    Single<DependencyInjector>::instance().registerInstance<FileService>(fileService);
 }
 
 int main(int argc, char* argv[])

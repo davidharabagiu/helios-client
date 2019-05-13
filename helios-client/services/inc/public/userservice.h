@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 
-#include "serviceinterface.h"
 #include "observable.h"
 
 class UserServiceListener;
@@ -15,7 +14,7 @@ class UserSession;
  * @class UserService
  * @brief User management service
  */
-class UserService : public ServiceInterface, public Observable<UserServiceListener, ObservableNotifyMode::ASYNC>
+class UserService : public Observable<UserServiceListener, ObservableNotifyMode::ASYNC>
 {
 public:
     /**

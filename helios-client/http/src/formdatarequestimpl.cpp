@@ -33,19 +33,21 @@ void FormDataRequestImpl::setPart(const std::string& name, HttpPartType type, co
 {
     QHttpPart httpPart;
 
-    httpPart.setHeader(QNetworkRequest::ContentDispositionHeader, ("form-data; name=\"" + name + "\"").c_str());
-
     auto bytes = new QByteArray(reinterpret_cast<const char*>(value.data()), safe_integral_cast<int>(value.size()));
 
     if (type == HttpPartType::TEXT)
     {
+        httpPart.setHeader(QNetworkRequest::ContentDispositionHeader, ("form-data; name=\"" + name + "\"").c_str());
         httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
         httpPart.setBody(*bytes);
         delete bytes;
     }
     else if (type == HttpPartType::FILE)
     {
-        httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+        httpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                           ("form-data; name=\"" + name + "\"; filename=\"" + name + "\"").c_str());
+        httpPart.setHeader(QNetworkRequest::ContentTypeHeader, "application/zip");
+        httpPart.setHeader(QNetworkRequest::ContentLengthHeader, bytes->length());
 
         auto buffer = new QBuffer(bytes);
         buffer->open(QBuffer::ReadOnly);

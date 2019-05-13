@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "asyncnotifier.h"
+#include "executor.h"
 
 namespace
 {
@@ -39,7 +39,8 @@ public:
      */
     void unregisterListener(const std::shared_ptr<Listener>& listener)
     {
-        auto it = std::find(m_listeners.begin(), m_listeners.end(), listener);
+        auto it = std::find_if(m_listeners.begin(), m_listeners.end(),
+                               [&listener](const std::weak_ptr<Listener>& el) { return el.lock() == listener; });
         if (it != m_listeners.end())
         {
             m_listeners.erase(it);
@@ -50,7 +51,7 @@ protected:
     /**
      * @brief Listeners / observers
      */
-    std::vector<std::shared_ptr<Listener>> m_listeners;
+    std::vector<std::weak_ptr<Listener>> m_listeners;
 };
 }  // namespace
 
@@ -96,9 +97,18 @@ protected:
     template <typename M, typename... Args>
     void notifyAll(M&& callback, Args&&... args)
     {
-        for (const auto& listener : ObservableBase<Listener>::m_listeners)
+        auto& listeners = ObservableBase<Listener>::m_listeners;
+        for (auto it = listeners.cbegin(); it != listeners.cend();)
         {
-            listener.get()->*callback(std::forward<Args>(args)...);
+            if (it->expired())
+            {
+                listeners.erase(it);
+            }
+            else
+            {
+                it->lock().get()->*callback(std::forward<Args>(args)...);
+                ++it;
+            }
         }
     }
 };
@@ -116,7 +126,7 @@ public:
      * @brief Constructor
      */
     Observable()
-        : m_asyncNotifier(new AsyncNotifier())
+        : m_executor(new Executor())
     {
     }
 
@@ -131,25 +141,34 @@ protected:
     template <typename M, typename... Args>
     void notifyAll(M&& callback, Args&&... args)
     {
-        for (const auto& listener : ObservableBase<Listener>::m_listeners)
+        auto& listeners = ObservableBase<Listener>::m_listeners;
+        for (auto it = listeners.cbegin(); it != listeners.cend();)
         {
-            m_asyncNotifier->postNotification(std::forward<M>(callback), listener.get(), std::forward<Args>(args)...);
+            if (it->expired())
+            {
+                listeners.erase(it);
+            }
+            else
+            {
+                m_executor->post(std::forward<M>(callback), it->lock().get(), std::forward<Args>(args)...);
+                ++it;
+            }
         }
     }
 
     /**
-     * @brief Cancel all posted notifications that were not yet executed. Only works when notifyMode is ASYNC.
+     * @brief Cancel all posted notifications that were not yet executed.
      */
     void cancelPendingNotifications()
     {
-        m_asyncNotifier->cancelPendingNotifications();
+        m_executor->cancelPendingTasks();
     }
 
 private:
     /**
-     * @brief Async notifier instance (may be null in case m_notifyMode is SYNC)
+     * @brief Executor instance
      */
-    std::shared_ptr<AsyncNotifier> m_asyncNotifier;
+    std::shared_ptr<Executor> m_executor;
 };
 
 #endif  // OBSERVABLE_H

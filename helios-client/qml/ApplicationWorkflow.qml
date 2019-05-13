@@ -109,6 +109,7 @@ StackView {
         MainScreen {
             darkMode: settingsCtl.darkMode
             username: authCtl.username
+            authToken: authCtl.authenticationToken
 
             onLogoutButtonActivated: {
                 authCtl.logout();

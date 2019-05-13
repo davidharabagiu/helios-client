@@ -1,9 +1,16 @@
+#include <QMetaType>
 #include <QtQml>
 
 #include "qtmodels.h"
-#include "quseraccount.h"
+#include "qheliosfile.h"
+#include "qfiletransfer.h"
+#include "qfilelisting.h"
+#include "qtransferslist.h"
 
-void QtModels::registerQmlTypes(const char* /*uri*/)
+void QtModels::registerQmlTypes(const char* uri)
 {
-    // qmlRegisterType<QUserAccount>(uri, 1, 0, "UserAccount");
+    qRegisterMetaType<QHeliosFile>();
+    qRegisterMetaType<QFileTransfer>();
+    qmlRegisterType<QFileListing>(uri, 1, 0, "FileListing");
+    qmlRegisterType<QTransfersList>(uri, 1, 0, "TransfersList");
 }

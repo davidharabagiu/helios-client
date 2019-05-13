@@ -27,11 +27,20 @@ class QAuthenticationController : public QObject
      */
     Q_PROPERTY(bool loggedIn READ loggedIn NOTIFY loggedInChanged)
 
+    // TODO: Create Qt wrapper over UserSession and expose the session as a property instead of exposing username and
+    // authenticationToken directly
+
     /**
      * @property username
      * @brief Name of the current logged in user. Valid only when logged in.
      */
     Q_PROPERTY(QString username READ username NOTIFY usernameChanged)
+
+    /**
+     * @property authenticationToken
+     * @brief Current authenticationToken. Valid only when logged in.
+     */
+    Q_PROPERTY(QString authenticationToken READ authenticationToken NOTIFY authenticationTokenChanged)
 
 public:
     /**
@@ -90,6 +99,12 @@ public:
      */
     QString username() const;
 
+    /**
+     * @brief Getter for authenticationToken
+     * @return QString
+     */
+    QString authenticationToken() const;
+
 signals:
     /**
      * @brief SIGNAL emitted when a login operation completed
@@ -121,6 +136,11 @@ signals:
      * @brief SIGNAL emitted when username changes
      */
     void usernameChanged();
+
+    /**
+     * @brief SIGNAL emitted when authenticationToken changes
+     */
+    void authenticationTokenChanged();
 
 private:
     /**

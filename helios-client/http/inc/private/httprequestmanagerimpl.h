@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 #include <QNetworkAccessManager>
+#include <QObject>
+#include <QEvent>
 
 #include "httprequestmanager.h"
 
@@ -20,7 +22,7 @@ class FormDataRequest;
  * @class HttpRequestManager
  * @brief Provides a way to send http requests to a server and get back replies
  */
-class HttpRequestManagerImpl : public HttpRequestManager
+class HttpRequestManagerImpl : public HttpRequestManager, public QObject
 {
 public:
     /**
@@ -32,6 +34,9 @@ public:  // from HttpRequestManager
     void post(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
     void post(std::shared_ptr<FormDataRequest> request, const HttpReplyCallback& callback) override;
     void get(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) override;
+
+public:  // from QObject
+    bool event(QEvent* event) override;
 
 private:
     /**
@@ -69,6 +74,12 @@ private:
      * @brief Last assigned request id
      */
     int m_lastAssignedRequestId;
+
+public:
+    /**
+     * @brief Event type for submitting a request
+     */
+    static const QEvent::Type SendRequestEventType;
 };
 
 #endif  // HTTPREQUESTMANAGERIMPL_H

@@ -56,22 +56,26 @@ void GetFileSizeCall::receive(HttpStatus status, const std::vector<uint8_t>& rep
         try
         {
             m_callback(ApiCallStatus::SUCCESS, std::stoull(replyStr));
+            return;
         }
         catch (const std::exception& exception)
         {
             qCritical() << "Exception while parsing reply " << replyStr.c_str() << ": " << exception.what();
             m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, 0);
+            return;
         }
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
         m_callback(ApiCallStatus::UNAUTHORIZED, 0);
+        return;
     }
     else if (status == HttpStatus::BAD_REQUEST)
     {
         if (replyStr == s_kErrorInvalidPath)
         {
             m_callback(ApiCallStatus::INVALID_PATH, 0);
+            return;
         }
     }
 

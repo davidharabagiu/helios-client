@@ -16,6 +16,18 @@ const std::string kServerUrlKey = "serverUrl";
  * @note Type = uint
  */
 const std::string kSettingsAutoSaveIntervalKey = "settingsAutoSaveInterval";
+
+/**
+ * @brief File upload chunk size in KB
+ * @note Type = uint
+ */
+const std::string kUploadChunkSize = "uploadChunkSize";
+
+/**
+ * @brief Number of file transfers that can run in parallel
+ * @note Type = uint
+ */
+const std::string kNumberOfTransferExecutors = "numberOfTransferExecutors";
 }  // namespace ConfigKeys
 
 #endif  // CONFIGKEYS_H

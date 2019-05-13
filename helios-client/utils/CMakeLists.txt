@@ -12,13 +12,19 @@ add_library(${PROJECT_NAME}
     "inc/dependencyinjector.tpp"
     "src/dependencyinjector.cpp"
     "inc/typeconversions.h"
-    "inc/asyncnotifier.h"
-    "inc/asyncnotifier.tpp"
-    "src/asyncnotifier.cpp"
+    "inc/executor.h"
+    "inc/executor.tpp"
+    "src/executor.cpp"
     "inc/typeutils.h"
     "inc/observable.h"
     "inc/timer.h"
     "src/timer.cpp"
+    "inc/autoresetevent.h"
+    "src/autoresetevent.cpp"
+    "inc/pathutils.h"
+    "src/pathutils.cpp"
+    "inc/customactionevent.h"
+    "src/customactionevent.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
