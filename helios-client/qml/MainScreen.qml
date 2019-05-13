@@ -56,6 +56,21 @@ Rectangle {
         }
     }
 
+    FileDialog {
+        id: downloadDirPickDlg
+
+        property string fileToDownload
+
+        title: "Chose a destination directory"
+        folder: shortcuts.home
+        selectExisting: true
+        selectFolder: true
+        selectMultiple: false
+        onAccepted: {
+            rfsCtl.download(fileToDownload, fileUrl);
+        }
+    }
+
     RemoteFileSystemController {
         id: rfsCtl
 
@@ -238,6 +253,9 @@ Rectangle {
                     onClicked: {
                         if (model.fileData.isDirectory) {
                             rfsCtl.openDirectory(model.fileData.name);
+                        } else {
+                            downloadDirPickDlg.fileToDownload = model.fileData.name;
+                            downloadDirPickDlg.visible = true;
                         }
                     }
                 }

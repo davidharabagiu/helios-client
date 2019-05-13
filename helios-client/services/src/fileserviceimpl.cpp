@@ -465,8 +465,11 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
 
                     while (transferred < fileSize && !transfer->canceled)
                     {
+                        uint64_t actualChunkSize =
+                            (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
+
                         ApiCallStatus lastStatus;
-                        m_apiCaller->download(m_authToken, transferId, transferred, chunkSize,
+                        m_apiCaller->download(m_authToken, transferId, transferred, actualChunkSize,
                                               [&chunkDone, &lastStatus, &transferred, &stream](
                                                   ApiCallStatus status, const std::vector<uint8_t>& bytes) {
                                                   lastStatus = status;

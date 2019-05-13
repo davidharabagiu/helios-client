@@ -50,6 +50,7 @@ public:  // forwarded from QRemoteFileSystemController
     void         move(const QString& fileName, const QString& destinationDirPath);
     void         rename(const QString& fileName, const QString& newName);
     void         upload(const QUrl& localPath);
+    void         download(const QString& filename, const QUrl& destinationDir);
     void         cancelTransfer(const QFileTransfer& transfer);
 
 public:  // from FileServiceListener

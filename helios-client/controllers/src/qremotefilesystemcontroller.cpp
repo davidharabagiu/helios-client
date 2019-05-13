@@ -78,6 +78,11 @@ void QRemoteFileSystemController::upload(const QUrl& localPath)
     m_privateImpl->upload(localPath);
 }
 
+void QRemoteFileSystemController::download(const QString& fileName, const QUrl& destinationDir)
+{
+    m_privateImpl->download(fileName, destinationDir);
+}
+
 void QRemoteFileSystemController::cancelTransfer(const QFileTransfer& transfer)
 {
     m_privateImpl->cancelTransfer(transfer);

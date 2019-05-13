@@ -134,6 +134,13 @@ public:
     Q_INVOKABLE void upload(const QUrl& localPath);
 
     /**
+     * @brief Download a file from the cwd with the given name
+     * @param fileName - Name of the file to download
+     * @param destinationDir - Local path of the destination directory
+     */
+    Q_INVOKABLE void download(const QString& fileName, const QUrl& destinationDir);
+
+    /**
      * @brief Cancel a file transfer
      * @param transfer - File transfer
      */
