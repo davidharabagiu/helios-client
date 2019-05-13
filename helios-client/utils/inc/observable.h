@@ -97,9 +97,18 @@ protected:
     template <typename M, typename... Args>
     void notifyAll(M&& callback, Args&&... args)
     {
-        for (const auto& listener : ObservableBase<Listener>::m_listeners)
+        auto& listeners = ObservableBase<Listener>::m_listeners;
+        for (auto it = listeners.cbegin(); it != listeners.cend();)
         {
-            listener.get()->*callback(std::forward<Args>(args)...);
+            if (it->expired())
+            {
+                listeners.erase(it);
+            }
+            else
+            {
+                it->lock().get()->*callback(std::forward<Args>(args)...);
+                ++it;
+            }
         }
     }
 };
