@@ -45,11 +45,11 @@ public:
     virtual void fileRemoved(std::shared_ptr<const File> directory) = 0;
 
     /**
-     * @brief A new file was uploaded in the current directory
+     * @brief A file was uploaded in the current directory
      * @note transferCompleted or transferAborted will also be called
      * @param file - File
      */
-    virtual void uploadedNewFileInCurrentDir(std::shared_ptr<const File> file) = 0;
+    virtual void uploadedFileInCurrentDir(std::shared_ptr<const File> file) = 0;
 
     /**
      * @brief A file transfer has started

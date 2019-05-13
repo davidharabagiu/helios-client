@@ -58,7 +58,7 @@ public:  // from FileServiceListener
     void directoryCreated(std::shared_ptr<const File> directory) override;
     void fileMoved(std::shared_ptr<const File> oldFile, std::shared_ptr<const File> file) override;
     void fileRemoved(std::shared_ptr<const File> file) override;
-    void uploadedNewFileInCurrentDir(std::shared_ptr<const File> file) override;
+    void uploadedFileInCurrentDir(std::shared_ptr<const File> file) override;
     void transferStarted(std::shared_ptr<FileTransfer> transfer) override;
     void transferProgressChanged(std::shared_ptr<FileTransfer> transfer) override;
     void transferCompleted(std::shared_ptr<FileTransfer> transfer) override;

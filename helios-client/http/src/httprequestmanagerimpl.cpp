@@ -57,7 +57,6 @@ void HttpRequestManagerImpl::post(std::shared_ptr<FormDataRequest> request, cons
             collectHeaderValues(_request->header(), networkRequest);
 
             auto reply = m_networkAccessManager->post(networkRequest, _request->multiPart());
-            // _request->multiPart()->setParent(reply);
             addPendingReply(reply, callback);
         },
         SendRequestEventType);

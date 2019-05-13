@@ -377,11 +377,11 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         std::string remoteFileParent;
                         PathUtils::getFileNameAndParentDir(fullRemotePath, remoteFileName, remoteFileParent);
                         std::lock_guard<std::mutex> lock(m_mutex);
-                        if (remoteFileParent == m_currentDirectory && m_files.find(remoteFileName) == m_files.end())
+                        if (remoteFileParent == m_currentDirectory)
                         {
-                            auto newFile = std::make_shared<File>(remoteFileName, remoteFileParent, false, transferred);
-                            m_files.emplace(remoteFileName, newFile);
-                            Observable::notifyAll(&FileServiceListener::uploadedNewFileInCurrentDir, newFile);
+                            auto file = std::make_shared<File>(remoteFileName, remoteFileParent, false, transferred);
+                            m_files[remoteFileName] = file;
+                            Observable::notifyAll(&FileServiceListener::uploadedFileInCurrentDir, file);
                         }
                     }
 
