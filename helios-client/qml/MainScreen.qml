@@ -294,7 +294,8 @@ Rectangle {
 
                     HLabel {
                         darkMode: root.darkMode
-                        text: model.transferData.transferredBytes
+                        text: String(model.transferData.transferredBytes) + " (" +
+                              String(Math.round(model.transferData.transferredBytes / model.transferData.fileSize * 100)) + "%)"
                     }
 
                     HButton {
