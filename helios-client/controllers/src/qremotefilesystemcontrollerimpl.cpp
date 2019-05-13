@@ -154,7 +154,7 @@ void QRemoteFileSystemControllerImpl::directoryCreated(std::shared_ptr<const Fil
         m_files.push_back(QVariant::fromValue(newDirectory));
 
         QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd", Qt::QueuedConnection,
+        QMetaObject::invokeMethod(m_publicImpl, "fileAddedInCwd", Qt::QueuedConnection,
                                   Q_ARG(const QHeliosFile&, newDirectory));
     }
 }
@@ -182,7 +182,7 @@ void QRemoteFileSystemControllerImpl::fileMoved(std::shared_ptr<const File> oldF
         m_files.push_back(QVariant::fromValue(newFile));
 
         QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "directoryCreatedInCwd", Qt::QueuedConnection,
+        QMetaObject::invokeMethod(m_publicImpl, "fileAddedInCwd", Qt::QueuedConnection,
                                   Q_ARG(const QHeliosFile&, newFile));
     }
 }
@@ -203,6 +203,19 @@ void QRemoteFileSystemControllerImpl::fileRemoved(std::shared_ptr<const File> fi
             QMetaObject::invokeMethod(m_publicImpl, "fileRemovedFromCwd", Qt::QueuedConnection,
                                       Q_ARG(const QString&, QString::fromStdString(file->name())));
         }
+    }
+}
+
+void QRemoteFileSystemControllerImpl::uploadedNewFileInCurrentDir(std::shared_ptr<const File> file)
+{
+    if (file->parentDirectory() == m_fileService->currentDirectory())
+    {
+        QHeliosFile newFile(file);
+        m_files.push_back(QVariant::fromValue(newFile));
+
+        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "fileAddedInCwd", Qt::QueuedConnection,
+                                  Q_ARG(const QHeliosFile&, newFile));
     }
 }
 
@@ -234,6 +247,7 @@ void QRemoteFileSystemControllerImpl::transferCompleted(std::shared_ptr<FileTran
     auto it = std::find_if(m_transfers.begin(), m_transfers.end(), [&transfer](const QVariant& el) {
         return qvariant_cast<QFileTransfer>(el).data() == transfer;
     });
+
     assert(it != m_transfers.end());
     if (it != m_transfers.end())
     {

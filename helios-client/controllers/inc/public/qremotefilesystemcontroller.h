@@ -156,10 +156,10 @@ signals:
     void transfersChanged();
 
     /**
-     * @brief SIGNAL emitted when a directory was created in cwd
-     * @param directory - Created directory
+     * @brief SIGNAL emitted when a file was added in cwd
+     * @param directory - New file
      */
-    void directoryCreatedInCwd(const QHeliosFile& directory);
+    void fileAddedInCwd(const QHeliosFile& file);
 
     /**
      * @brief SIGNAL emitted when a file or directory from cwd was removed

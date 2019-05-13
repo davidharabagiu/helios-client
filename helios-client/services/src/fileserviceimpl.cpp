@@ -357,8 +357,10 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     }
 
                     // Cleanup
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    m_activeTransfers.erase(fullRemotePath);
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_activeTransfers.erase(fullRemotePath);
+                    }
 
                     if (transferred == fileSize)
                     {
@@ -368,6 +370,19 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     else
                     {
                         Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
+                    }
+
+                    {
+                        std::string remoteFileName;
+                        std::string remoteFileParent;
+                        PathUtils::getFileNameAndParentDir(fullRemotePath, remoteFileName, remoteFileParent);
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        if (remoteFileParent == m_currentDirectory && m_files.find(remoteFileName) == m_files.end())
+                        {
+                            auto newFile = std::make_shared<File>(remoteFileName, remoteFileParent, false, transferred);
+                            m_files.emplace(remoteFileName, newFile);
+                            Observable::notifyAll(&FileServiceListener::uploadedNewFileInCurrentDir, newFile);
+                        }
                     }
 
                     m_transfersCompletedCondVar.notify_one();
@@ -483,8 +498,10 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                     }
 
                     // Cleanup
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    m_activeTransfers.erase(fullRemotePath);
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_activeTransfers.erase(fullRemotePath);
+                    }
 
                     if (transferred == fileSize)
                     {

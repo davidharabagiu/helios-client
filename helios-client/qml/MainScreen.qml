@@ -66,8 +66,8 @@ Rectangle {
             pathInput.setText(cwd);
         }
 
-        onDirectoryCreatedInCwd: {
-            fileListing.insertFile(directory);
+        onFileAddedInCwd: {
+            fileListing.insertFile(file);
         }
 
         onFileRemovedFromCwd: {
