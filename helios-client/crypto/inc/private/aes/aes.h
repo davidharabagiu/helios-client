@@ -21,33 +21,43 @@ class Aes
 public:
     /**
      * @brief Constructor
+     * @param variant - AES cypher variant
      * @param numThreads - Number of threads
      */
-    Aes(int numThreads);
+    Aes(AesVariant variant, int numThreads);
 
     /**
      * @brief Run the AES encryption cypher asynchronously
-     * @param variant - AES cypher variant
      * @param key - Key, its length depends on variant
-     * @param in - Input stream of data
-     * @param out - Output stream of data
+     * @param in - Input stream
+     * @param out - Output stream
      * @param callback - Callback
      */
-    void encryptAsync(AesVariant variant, uint8_t* key, std::istream& in, std::ostream& out,
-                      std::function<void()> callback);
+    void encryptAsync(const uint8_t* key, std::istream& in, std::ostream& out, std::function<void()> callback);
 
     /**
      * @brief Run the AES decryption cypher asynchronously
-     * @param variant - AES cypher variant
      * @param key - Key, its length depends on variant
-     * @param in - Input stream of data
-     * @param out - Output stream of data
+     * @param in - Input stream
+     * @param out - Output stream
      * @param callback - Callback
      */
-    void decryptAsync(AesVariant variant, uint8_t* key, std::istream& in, std::ostream& out,
-                      std::function<void()> callback);
+    void decryptAsync(const uint8_t* key, std::istream& in, std::ostream& out, std::function<void()> callback);
 
 private:
+    /**
+     * @brief Generate subkeys for each round
+     * @param key - Input - key
+     * @param subkeys - Output - subkeys
+     */
+    void generateSubkeys(const uint8_t* key, uint8_t** subkeys);
+
+private:
+    /**
+     * @brief AES cypher variant
+     */
+    const AesVariant m_variant;
+
     /**
      * @brief Executors
      */
