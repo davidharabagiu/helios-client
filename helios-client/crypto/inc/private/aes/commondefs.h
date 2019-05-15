@@ -4,10 +4,6 @@
 #include <cstddef>
 #include <cassert>
 
-/**
- * @namespace AesDefs
- * @brief Common definitions for AES-128 Implementation
- */
 namespace Aes
 {
 /**
