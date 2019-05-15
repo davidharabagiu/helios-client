@@ -1,4 +1,4 @@
-#include <cstring>
+#include <algorithm>
 
 #include "aes128blockencryptionwork.h"
 #include "aes128defs.h"
@@ -15,7 +15,7 @@ void Aes128BlockEncryptionWork::operator()()
     using namespace Aes128Tables;
 
     uint8_t state[kBlockSize];
-    std::memcpy(state, m_input, kBlockSize);
+    std::copy_n(m_input, kBlockSize, state);
 
     // AddRoundKey
     addSubkey(state, m_subkeys[0]);
@@ -44,7 +44,7 @@ void Aes128BlockEncryptionWork::operator()()
             nextState[14] = kSbox[state[12]] ^ kSbox[state[1]] ^ kXtimes2Sbox[state[6]] ^ kXtimes3Sbox[state[11]];
             nextState[15] = kXtimes3Sbox[state[12]] ^ kSbox[state[1]] ^ kSbox[state[6]] ^ kXtimes2Sbox[state[11]];
 
-            std::memcpy(state, nextState, kBlockSize);
+            std::copy_n(nextState, kBlockSize, state);
         }
         else
         {
@@ -84,5 +84,5 @@ void Aes128BlockEncryptionWork::operator()()
         addSubkey(state, m_subkeys[round]);
     }
 
-    std::memcpy(m_output, state, kBlockSize);
+    std::copy_n(state, kBlockSize, m_output);
 }

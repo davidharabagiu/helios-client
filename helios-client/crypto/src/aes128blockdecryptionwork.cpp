@@ -1,4 +1,4 @@
-#include <cstring>
+#include <algorithm>
 
 #include "aes128blockdecryptionwork.h"
 #include "aes128defs.h"
@@ -15,7 +15,7 @@ void Aes128BlockDecryptionWork::operator()()
     using namespace Aes128Tables;
 
     uint8_t state[kBlockSize];
-    std::memcpy(state, m_input, kBlockSize);
+    std::copy_n(m_input, kBlockSize, state);
 
     size_t round = kNumberOfRounds;
 
@@ -93,5 +93,5 @@ void Aes128BlockDecryptionWork::operator()()
         }
     }
 
-    std::memcpy(m_output, state, kBlockSize);
+    std::copy_n(state, kBlockSize, m_output);
 }
