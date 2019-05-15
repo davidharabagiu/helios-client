@@ -1,21 +1,22 @@
 #include "aes/work.h"
+#include "aes/commondefs.h"
 
 using namespace Aes;
 
-Work::Work(AesVariant variant, const uint8_t* input, const uint8_t** subKeys, uint8_t* output)
-    : m_numberOfRounds(numberOfRounds(variant))
+Work::Work(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output)
+    : m_kRounds(rounds)
     , m_input(input)
-    , m_subkeys(subKeys)
+    , m_roundKeys(roundKeys)
     , m_output(output)
 {
 }
 
-void Work::addSubkey(uint8_t* state, const uint8_t* subkey) const
+void Work::addRoundKey(uint8_t* state, size_t roundKeyIndex) const
 {
-    auto _state  = reinterpret_cast<uint64_t*>(state);
-    auto _subkey = reinterpret_cast<const uint64_t*>(subkey);
-    for (size_t i = 0; i < kBlockSize / sizeof(uint8_t) * sizeof(uint64_t); ++i)
+    auto _state    = reinterpret_cast<uint64_t*>(state);
+    auto _roundKey = reinterpret_cast<const uint64_t*>(m_roundKeys + roundKeyIndex * kBlockSize);
+    for (size_t i = 0; i < kBlockSize / sizeof(uint64_t); ++i)
     {
-        _state[i] ^= _subkey[i];
+        _state[i] ^= _roundKey[i];
     }
 }

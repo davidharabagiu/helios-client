@@ -15,7 +15,7 @@ public:
     /**
      * @brief Constructor. Forwards arguments to Work.
      */
-    EncryptionWork(AesVariant variant, const uint8_t* input, const uint8_t** subKeys, uint8_t* output);
+    EncryptionWork(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output);
 
 public:  // from Work
     void operator()() override;

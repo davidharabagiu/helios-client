@@ -5,7 +5,8 @@ project(crypto)
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
-    "inc/private/aes/aes.h"
+    "inc/private/aes/aescipher.h"
+    "src/aes/aescipher.cpp"
     "inc/private/aes/work.h"
     "src/aes/work.cpp"
     "inc/private/aes/encryptionwork.h"

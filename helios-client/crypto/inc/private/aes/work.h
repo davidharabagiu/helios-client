@@ -2,8 +2,7 @@
 #define AES_WORK_H
 
 #include <cstdint>
-
-#include "aes/commondefs.h"
+#include <cstddef>
 
 namespace Aes
 {
@@ -17,12 +16,12 @@ class Work
 public:
     /**
      * @brief Constructor
-     * @param variant - "Flavor" of the AES cypher
      * @param input - Input block of data (kBlockSize bytes)
-     * @param subKeys - One subkey for each round + the initial addition ((kNumberOfRounds + 1) * kBlockSize bytes)
+     * @param rounds - Number of rounds
+     * @param roundKeys - Round keys (numberOfRounds * kBlockSize bytes)
      * @param output - Output block of data (kBlockSize bytes). The output will be stored here once the work is done.
      */
-    Work(AesVariant variant, const uint8_t* input, const uint8_t** subKeys, uint8_t* output);
+    Work(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output);
 
     /**
      * @brief Run work
@@ -31,17 +30,17 @@ public:
 
 protected:
     /**
-     * @brief Add (bitwise XOR) the subkey into the state
+     * @brief Add (bitwise XOR) the round key into the state
      * @param state - State
-     * @param subkey - Subkey
+     * @param roundKeyIndex - Index of the round key int m_roundKeys
      */
-    void addSubkey(uint8_t* state, const uint8_t* subkey) const;
+    void addRoundKey(uint8_t* state, size_t roundKeyIndex) const;
 
 protected:
     /**
      * @brief Number of rounds
      */
-    const int m_numberOfRounds;
+    const size_t m_kRounds;
 
     /**
      * @brief Input block
@@ -49,9 +48,9 @@ protected:
     const uint8_t* m_input;
 
     /**
-     * @brief Subkeys
+     * @brief Round keys
      */
-    const uint8_t** m_subkeys;
+    const uint8_t* m_roundKeys;
 
     /**
      * @brief Output

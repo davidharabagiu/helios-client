@@ -2,11 +2,12 @@
 
 #include "aes/decryptionwork.h"
 #include "aes/tables.h"
+#include "aes/commondefs.h"
 
 using namespace Aes;
 
-DecryptionWork::DecryptionWork(AesVariant variant, const uint8_t* input, const uint8_t** subKeys, uint8_t* output)
-    : Work(variant, input, subKeys, output)
+DecryptionWork::DecryptionWork(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output)
+    : Work(input, rounds, roundKeys, output)
 {
 }
 
@@ -15,10 +16,10 @@ void DecryptionWork::operator()()
     uint8_t state[kBlockSize];
     std::copy_n(m_input, kBlockSize, state);
 
-    int round = m_numberOfRounds;
+    size_t round = m_kRounds;
 
     // AddRoundKey
-    addSubkey(state, m_subkeys[round]);
+    addRoundKey(state, round);
 
     // InvShiftRows + InvSubBytes
     {
@@ -56,7 +57,7 @@ void DecryptionWork::operator()()
     while (round--)
     {
         // AddRoundKey
-        addSubkey(state, m_subkeys[round]);
+        addRoundKey(state, round);
 
         if (round != 0)
         {

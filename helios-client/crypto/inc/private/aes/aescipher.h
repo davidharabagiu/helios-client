@@ -1,5 +1,5 @@
-#ifndef AES_AES_H
-#define AES_AES_H
+#ifndef AES_AESCIPHER_H
+#define AES_AESCIPHER_H
 
 #include <vector>
 #include <istream>
@@ -13,21 +13,21 @@
 namespace Aes
 {
 /**
- * @class Aes
- * @brief Implementation of the AES cypher
+ * @class AesCipher
+ * @brief Implementation of the AES cipher
  */
-class Aes
+class AesCipher
 {
 public:
     /**
      * @brief Constructor
-     * @param variant - AES cypher variant
+     * @param variant - AES cipher variant
      * @param numThreads - Number of threads
      */
-    Aes(AesVariant variant, int numThreads);
+    AesCipher(AesVariant variant, int numThreads);
 
     /**
-     * @brief Run the AES encryption cypher asynchronously
+     * @brief Run the AES encryption cipher asynchronously
      * @param key - Key, its length depends on variant
      * @param in - Input stream
      * @param out - Output stream
@@ -36,7 +36,7 @@ public:
     void encryptAsync(const uint8_t* key, std::istream& in, std::ostream& out, std::function<void()> callback);
 
     /**
-     * @brief Run the AES decryption cypher asynchronously
+     * @brief Run the AES decryption cipher asynchronously
      * @param key - Key, its length depends on variant
      * @param in - Input stream
      * @param out - Output stream
@@ -46,17 +46,22 @@ public:
 
 private:
     /**
-     * @brief Generate subkeys for each round
-     * @param key - Input - key
-     * @param subkeys - Output - subkeys
+     * @brief Generate keys for each round
+     * @param key - Input key
+     * @param roundKeys - Output round keys
      */
-    void generateSubkeys(const uint8_t* key, uint8_t** subkeys);
+    void generateRoundKeys(const uint8_t* key, uint8_t* roundKeys) const;
 
 private:
     /**
-     * @brief AES cypher variant
+     * @brief Number of rounds
      */
-    const AesVariant m_variant;
+    const size_t m_kRounds;
+
+    /**
+     * @brief Key size in bytes
+     */
+    const size_t m_kKeySize;
 
     /**
      * @brief Executors
@@ -65,4 +70,4 @@ private:
 };
 }  // namespace Aes
 
-#endif  // AES_AES_H
+#endif  // AES_AESCIPHER_H

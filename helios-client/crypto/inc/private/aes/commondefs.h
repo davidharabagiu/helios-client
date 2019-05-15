@@ -60,11 +60,11 @@ inline size_t keySize(const AesVariant variant)
 }
 
 /**
- * @brief Number of rounds
+ * @brief Number of rounds (not including the initial round)
  * @param variant - AES variant
  * @return int
  */
-inline int numberOfRounds(const AesVariant variant)
+inline size_t numberOfRounds(const AesVariant variant)
 {
     if (variant == AesVariant::AES128)
     {
