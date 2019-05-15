@@ -1,23 +1,28 @@
-#ifndef AES128BLOCKWORK_H
-#define AES128BLOCKWORK_H
+#ifndef AES_WORK_H
+#define AES_WORK_H
 
 #include <cstdint>
 
+#include "aes/commondefs.h"
+
+namespace Aes
+{
 /**
- * @class Aes128BlockWork
- * @brief Functor class represeting a job for processing a 128-bit block of data in the context of the AES-128
- * algorithm. This is a common interface for both the forward and inverse algorithms.
+ * @class Work
+ * @brief Functor class represeting a job for processing a 128-bit block of data. This is a common interface for both
+ * the forward and inverse algorithms.
  */
-class Aes128BlockWork
+class Work
 {
 public:
     /**
      * @brief Constructor
+     * @param variant - "Flavor" of the AES cypher
      * @param input - Input block of data (kBlockSize bytes)
      * @param subKeys - One subkey for each round + the initial addition ((kNumberOfRounds + 1) * kBlockSize bytes)
      * @param output - Output block of data (kBlockSize bytes). The output will be stored here once the work is done.
      */
-    Aes128BlockWork(const uint8_t* input, const uint8_t** subKeys, uint8_t* output);
+    Work(AesVariant variant, const uint8_t* input, const uint8_t** subKeys, uint8_t* output);
 
     /**
      * @brief Run work
@@ -34,6 +39,11 @@ protected:
 
 protected:
     /**
+     * @brief Number of rounds
+     */
+    const int m_numberOfRounds;
+
+    /**
      * @brief Input block
      */
     const uint8_t* m_input;
@@ -48,5 +58,6 @@ protected:
      */
     uint8_t* m_output;
 };
+}  // namespace Aes
 
-#endif  // AES128BLOCKWORK_H
+#endif  // AES_WORK_H

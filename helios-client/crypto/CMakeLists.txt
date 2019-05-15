@@ -5,16 +5,17 @@ project(crypto)
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
-    "inc/aes128blockwork.h"
-    "src/aes128blockwork.cpp"
-    "inc/aes128blockencryptionwork.h"
-    "src/aes128blockencryptionwork.cpp"
-    "inc/aes128blockdecryptionwork.h"
-    "src/aes128blockdecryptionwork.cpp"
-    "inc/aes128defs.h"
-    "inc/aes128tables.h"
+    "inc/private/aes/work.h"
+    "src/aes/work.cpp"
+    "inc/private/aes/encryptionwork.h"
+    "src/aes/encryptionwork.cpp"
+    "inc/private/aes/decryptionwork.h"
+    "src/aes/decryptionwork.cpp"
+    "inc/private/aes/commondefs.h"
+    "inc/private/aes/tables.h"
 )
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc/public
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc/private
 )

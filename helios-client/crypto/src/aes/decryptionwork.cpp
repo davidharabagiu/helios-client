@@ -1,23 +1,21 @@
 #include <algorithm>
 
-#include "aes128blockdecryptionwork.h"
-#include "aes128defs.h"
-#include "aes128tables.h"
+#include "aes/decryptionwork.h"
+#include "aes/tables.h"
 
-Aes128BlockDecryptionWork::Aes128BlockDecryptionWork(const uint8_t* input, const uint8_t** subKeys, uint8_t* output)
-    : Aes128BlockWork(input, subKeys, output)
+using namespace Aes;
+
+DecryptionWork::DecryptionWork(AesVariant variant, const uint8_t* input, const uint8_t** subKeys, uint8_t* output)
+    : Work(variant, input, subKeys, output)
 {
 }
 
-void Aes128BlockDecryptionWork::operator()()
+void DecryptionWork::operator()()
 {
-    using namespace Aes128Defs;
-    using namespace Aes128Tables;
-
     uint8_t state[kBlockSize];
     std::copy_n(m_input, kBlockSize, state);
 
-    size_t round = kNumberOfRounds;
+    int round = m_numberOfRounds;
 
     // AddRoundKey
     addSubkey(state, m_subkeys[round]);
@@ -59,6 +57,7 @@ void Aes128BlockDecryptionWork::operator()()
     {
         // AddRoundKey
         addSubkey(state, m_subkeys[round]);
+
         if (round != 0)
         {
             // InvMixColumns + InvShiftRows + InvSubBytes
