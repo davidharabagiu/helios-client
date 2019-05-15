@@ -38,20 +38,12 @@ public:
     AesCipher(AesVariant variant, int numThreads);
 
     /**
-     * @brief Run the AES encryption cipher
+     * @brief Run the AES encryption or decryption cipher
      * @param key - Key, its length depends on variant
      * @param in - Input stream
      * @param out - Output stream
      */
-    void encrypt(const uint8_t* key, std::istream& in, std::ostream& out);
-
-    /**
-     * @brief Run the AES decryption cipher
-     * @param key - Key, its length depends on variant
-     * @param in - Input stream
-     * @param out - Output stream
-     */
-    void decrypt(const uint8_t* key, std::istream& in, std::ostream& out);
+    void run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction);
 
 private:
     /**

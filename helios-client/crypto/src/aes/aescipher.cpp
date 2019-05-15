@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <memory>
 #include <cassert>
 
@@ -27,7 +27,7 @@ AesCipher::AesCipher(AesVariant variant, int numThreads)
     }
 }
 
-void AesCipher::encrypt(const uint8_t* key, std::istream& in, std::ostream& out)
+void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction)
 {
     // Generate round keys
     auto roundKeys = new uint8_t[kBlockSize * (m_kRounds + 1)];
@@ -66,8 +66,9 @@ void AesCipher::encrypt(const uint8_t* key, std::istream& in, std::ostream& out)
         events.push_back(std::make_shared<AutoResetEvent>());
 
         m_executors[executorIdx]->post(
-            [this, &in, &out, &events, &readMutex, &writeMutex, roundKeys](size_t idx, uint64_t pos, uint64_t count) {
-                work(in, readMutex, out, writeMutex, CipherDirection::FORWARD, roundKeys, pos, count);
+            [this, &in, &out, &events, &readMutex, &writeMutex, roundKeys, direction](size_t idx, uint64_t pos,
+                                                                                      uint64_t count) {
+                work(in, readMutex, out, writeMutex, direction, roundKeys, pos, count);
                 events[idx]->set();
             },
             executorIdx, pos, count);
@@ -82,10 +83,6 @@ void AesCipher::encrypt(const uint8_t* key, std::istream& in, std::ostream& out)
     }
 
     delete[] roundKeys;
-}
-
-void AesCipher::decrypt(const uint8_t* /*key*/, std::istream& /*in*/, std::ostream& /*out*/)
-{
 }
 
 void AesCipher::generateRoundKeys(const uint8_t* key, uint8_t* roundKeys) const
