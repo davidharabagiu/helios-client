@@ -28,9 +28,11 @@ public:
 
     /**
      * @brief Run the AES encryption or decryption cipher
-     * @param key - Key, its length depends on variant
+     * @param key - Key, its length depends on keySize
      * @param in - Input stream
      * @param out - Output stream
+     * @param keySize - Key size
+     * @param direction - Encryption / decryption
      */
     void run(const uint8_t* key, std::istream& in, std::ostream& out, KeySize keySize, CipherDirection direction);
 
@@ -77,8 +79,9 @@ private:
     void encryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const;
 
     /**
-     * @brief - Perform AES decryption of a block of data
+     * @brief Perform AES decryption of a block of data
      * @param input - Input block of data (kBlockSize bytes)
+     * @param rounds - Number of rounds
      * @param roundKeys - Round keys
      * @param output - Output block of data (kBlockSize bytes). The output will be stored here.
      */
