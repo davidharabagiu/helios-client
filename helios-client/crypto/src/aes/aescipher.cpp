@@ -3,21 +3,20 @@
 #include <cassert>
 
 #include "aes/aescipher.h"
-#include "aes/commondefs.h"
 #include "aes/tables.h"
+#include "aes/utils.h"
 #include "typeconversions.h"
 #include "autoresetevent.h"
 
 using namespace Aes;
 
+const size_t   AesCipher::s_kBlockSize  = 16;
 const uint64_t AesCipher::s_kBufferSize = 16 * 1024 * 1024;  // 16 MB
 
-AesCipher::AesCipher(AesVariant variant, int numThreads)
-    : m_kRounds(numberOfRounds(variant))
-    , m_kKeySize(keySize(variant))
-    , m_executors(safe_integral_cast<size_t>(numThreads))
+AesCipher::AesCipher(int numThreads)
+    : m_executors(safe_integral_cast<size_t>(numThreads))
 {
-    static_assert(s_kBufferSize % kBlockSize == 0);
+    static_assert(s_kBufferSize % s_kBlockSize == 0);
 
     for (auto& executor : m_executors)
     {
@@ -25,11 +24,15 @@ AesCipher::AesCipher(AesVariant variant, int numThreads)
     }
 }
 
-void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction)
+void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, KeySize aKeySize,
+                    CipherDirection direction)
 {
+    size_t rounds  = numberOfRounds(aKeySize);
+    size_t keySize = bytesInKey(aKeySize);
+
     // Generate round keys
-    auto roundKeys = new uint8_t[kBlockSize * (m_kRounds + 1)];
-    generateRoundKeys(key, roundKeys);
+    auto roundKeys = new uint8_t[s_kBlockSize * (rounds + 1)];
+    generateRoundKeys(key, keySize, rounds, roundKeys);
 
     // Get input size
     in.seekg(0, std::ios::end);
@@ -46,10 +49,10 @@ void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, Cip
     uint64_t pos   = 0;
     uint64_t count = size / m_executors.size();
 
-    // We need to divide the work in multiples of kBlockSize bytes
-    if (count % kBlockSize != 0)
+    // We need to divide the work in multiples of s_kBlockSize bytes
+    if (count % s_kBlockSize != 0)
     {
-        count = (count / kBlockSize + 1) * kBlockSize;
+        count = (count / s_kBlockSize + 1) * s_kBlockSize;
     }
 
     // Create works
@@ -64,9 +67,9 @@ void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, Cip
         events.push_back(std::make_shared<AutoResetEvent>());
 
         m_executors[executorIdx]->post(
-            [this, &in, &out, &events, &readMutex, &writeMutex, roundKeys, direction](size_t idx, uint64_t pos,
-                                                                                      uint64_t count) {
-                work(in, readMutex, out, writeMutex, direction, roundKeys, pos, count);
+            [this, &in, &out, &events, &readMutex, &writeMutex, rounds, roundKeys, direction](size_t idx, uint64_t pos,
+                                                                                              uint64_t count) {
+                work(in, readMutex, out, writeMutex, direction, rounds, roundKeys, pos, count);
                 events[idx]->set();
             },
             executorIdx, pos, count);
@@ -83,16 +86,16 @@ void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, Cip
     delete[] roundKeys;
 }
 
-void AesCipher::generateRoundKeys(const uint8_t* key, uint8_t* roundKeys) const
+void AesCipher::generateRoundKeys(const uint8_t* key, size_t keySize, size_t rounds, uint8_t* roundKeys) const
 {
     auto*        _key       = reinterpret_cast<const uint32_t*>(key);
     auto*        _roundKeys = reinterpret_cast<uint32_t*>(roundKeys);
-    const size_t _keySize   = m_kKeySize / sizeof(uint32_t);
+    const size_t _keySize   = keySize / sizeof(uint32_t);
     uint32_t     tmp;
 
     std::copy_n(_key, _keySize, _roundKeys);
 
-    for (size_t i = _keySize; i != 4 * (m_kRounds + 1); ++i)
+    for (size_t i = _keySize; i != 4 * (rounds + 1); ++i)
     {
         if (i % _keySize == 0)
         {
@@ -122,15 +125,16 @@ void AesCipher::generateRoundKeys(const uint8_t* key, uint8_t* roundKeys) const
 void AesCipher::addRoundKey(uint8_t* state, const uint8_t* roundKeys, size_t roundKeyIndex) const
 {
     auto _state    = reinterpret_cast<uint64_t*>(state);
-    auto _roundKey = reinterpret_cast<const uint64_t*>(roundKeys + roundKeyIndex * kBlockSize);
-    for (size_t i = 0; i < kBlockSize / sizeof(uint64_t); ++i)
+    auto _roundKey = reinterpret_cast<const uint64_t*>(roundKeys + roundKeyIndex * s_kBlockSize);
+    for (size_t i = 0; i < s_kBlockSize / sizeof(uint64_t); ++i)
     {
         _state[i] ^= _roundKey[i];
     }
 }
 
 void AesCipher::work(std::istream& in, std::mutex& readMutex, std::ostream& out, std::mutex& writeMutex,
-                     CipherDirection direction, const uint8_t* roundKeys, uint64_t pos, uint64_t count) const
+                     CipherDirection direction, size_t rounds, const uint8_t* roundKeys, uint64_t pos,
+                     uint64_t count) const
 {
     auto inBuffer  = new uint8_t[s_kBufferSize];
     auto outBuffer = new uint8_t[s_kBufferSize];
@@ -147,21 +151,21 @@ void AesCipher::work(std::istream& in, std::mutex& readMutex, std::ostream& out,
         }
 
         // Padding with zero
-        if (lastRead % kBlockSize != 0)
+        if (lastRead % s_kBlockSize != 0)
         {
-            std::fill_n(inBuffer + pos + lastRead, (lastRead / kBlockSize + 1) * kBlockSize, 0);
-            lastRead = (lastRead / kBlockSize + 1) * kBlockSize;
+            std::fill_n(inBuffer + pos + lastRead, (lastRead / s_kBlockSize + 1) * s_kBlockSize, 0);
+            lastRead = (lastRead / s_kBlockSize + 1) * s_kBlockSize;
         }
 
-        for (size_t i = 0; i < lastRead; i += kBlockSize)
+        for (size_t i = 0; i < lastRead; i += s_kBlockSize)
         {
             if (direction == CipherDirection::FORWARD)
             {
-                encryptBlock(inBuffer + i, roundKeys, outBuffer + i);
+                encryptBlock(inBuffer + i, rounds, roundKeys, outBuffer + i);
             }
             else if (direction == CipherDirection::INVERSE)
             {
-                decryptBlock(inBuffer + i, roundKeys, outBuffer + i);
+                decryptBlock(inBuffer + i, rounds, roundKeys, outBuffer + i);
             }
             else
             {
@@ -180,18 +184,18 @@ void AesCipher::work(std::istream& in, std::mutex& readMutex, std::ostream& out,
     delete[] outBuffer;
 }
 
-void AesCipher::encryptBlock(const uint8_t* input, const uint8_t* roundKeys, uint8_t* output) const
+void AesCipher::encryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const
 {
-    uint8_t state[kBlockSize];
-    std::copy_n(input, kBlockSize, state);
+    uint8_t state[s_kBlockSize];
+    std::copy_n(input, s_kBlockSize, state);
 
     // AddRoundKey
     addRoundKey(state, roundKeys, 0);
 
-    for (size_t round = 1; round < m_kRounds; ++round)
+    for (size_t round = 1; round < rounds; ++round)
     {
         // SubBytes + ShiftRows + MixColumns
-        uint8_t nextState[kBlockSize];
+        uint8_t nextState[s_kBlockSize];
 
         nextState[0]  = kXtimes2Sbox[state[0]] ^ kXtimes3Sbox[state[5]] ^ kSbox[state[10]] ^ kSbox[state[15]];
         nextState[1]  = kSbox[state[0]] ^ kXtimes2Sbox[state[5]] ^ kXtimes3Sbox[state[10]] ^ kSbox[state[15]];
@@ -210,7 +214,7 @@ void AesCipher::encryptBlock(const uint8_t* input, const uint8_t* roundKeys, uin
         nextState[14] = kSbox[state[12]] ^ kSbox[state[1]] ^ kXtimes2Sbox[state[6]] ^ kXtimes3Sbox[state[11]];
         nextState[15] = kXtimes3Sbox[state[12]] ^ kSbox[state[1]] ^ kSbox[state[6]] ^ kXtimes2Sbox[state[11]];
 
-        std::copy_n(nextState, kBlockSize, state);
+        std::copy_n(nextState, s_kBlockSize, state);
 
         // AddRoundKey
         addRoundKey(state, roundKeys, round);
@@ -250,17 +254,17 @@ void AesCipher::encryptBlock(const uint8_t* input, const uint8_t* roundKeys, uin
     }
 
     // AddRoundKey
-    addRoundKey(state, roundKeys, m_kRounds);
+    addRoundKey(state, roundKeys, rounds);
 
-    std::copy_n(state, kBlockSize, output);
+    std::copy_n(state, s_kBlockSize, output);
 }
 
-void AesCipher::decryptBlock(const uint8_t* input, const uint8_t* roundKeys, uint8_t* output) const
+void AesCipher::decryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const
 {
-    uint8_t state[kBlockSize];
-    std::copy_n(input, kBlockSize, state);
+    uint8_t state[s_kBlockSize];
+    std::copy_n(input, s_kBlockSize, state);
 
-    size_t round = m_kRounds;
+    size_t round = rounds;
 
     // AddRoundKey
     addRoundKey(state, roundKeys, round);
@@ -306,7 +310,7 @@ void AesCipher::decryptBlock(const uint8_t* input, const uint8_t* roundKeys, uin
         if (round != 0)
         {
             // InvMixColumns + InvShiftRows + InvSubBytes
-            uint8_t nextState[kBlockSize];
+            uint8_t nextState[s_kBlockSize];
 
             // Column 0
             nextState[0]  = kXtimesE[state[0]] ^ kXtimesB[state[1]] ^ kXtimesD[state[2]] ^ kXtimes9[state[3]];
@@ -332,10 +336,10 @@ void AesCipher::decryptBlock(const uint8_t* input, const uint8_t* roundKeys, uin
             nextState[6]  = kXtimesD[state[12]] ^ kXtimes9[state[13]] ^ kXtimesE[state[14]] ^ kXtimesB[state[15]];
             nextState[11] = kXtimesB[state[12]] ^ kXtimesD[state[13]] ^ kXtimes9[state[14]] ^ kXtimesE[state[15]];
 
-            for (size_t i = 0; i < kBlockSize; i++)
+            for (size_t i = 0; i < s_kBlockSize; i++)
                 state[i] = kInvSbox[nextState[i]];
         }
     }
 
-    std::copy_n(state, kBlockSize, output);
+    std::copy_n(state, s_kBlockSize, output);
 }

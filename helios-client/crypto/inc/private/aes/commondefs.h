@@ -1,15 +1,12 @@
 #ifndef AES_COMMONDEFS_H
 #define AES_COMMONDEFS_H
 
-#include <cstddef>
-#include <cassert>
-
 namespace Aes
 {
 /**
- * @brief Variants of the AES algorithm
+ * @brief Available key sizes for the AES algorithm
  */
-enum class AesVariant
+enum class KeySize
 {
     /**
      * @brief AES with 128-bit keys
@@ -28,63 +25,20 @@ enum class AesVariant
 };
 
 /**
- * @brief Number of bytes in a data block or in a subkey
+ * @brief Cipher direction
  */
-const size_t kBlockSize = 16;
-
-/**
- * @brief Number of columns in a data block or in a subkey
- */
-const size_t kBlockColumns = 4;
-
-/**
- * @brief Number of bytes in a key
- * @param variant - AES variant
- * @return size_t
- */
-inline size_t keySize(const AesVariant variant)
+enum class CipherDirection
 {
-    if (variant == AesVariant::AES128)
-    {
-        return 16;
-    }
-    else if (variant == AesVariant::AES192)
-    {
-        return 24;
-    }
-    else if (variant == AesVariant::AES256)
-    {
-        return 32;
-    }
-    assert(false);
-}
+    /**
+     * @brief Encryption
+     */
+    FORWARD,
 
-/**
- * @brief Number of rounds (not including the initial round)
- * @param variant - AES variant
- * @return int
- */
-inline size_t numberOfRounds(const AesVariant variant)
-{
-    if (variant == AesVariant::AES128)
-    {
-        return 10;
-    }
-    else if (variant == AesVariant::AES192)
-    {
-        return 12;
-    }
-    else if (variant == AesVariant::AES256)
-    {
-        return 14;
-    }
-    assert(false);
-}
-
-/**
- * @brief Number of columns in a 128 bit key
- */
-const size_t kKeyColumnSize128 = 4;
+    /**
+     * @brief Decryption
+     */
+    INVERSE
+};
 }  // namespace Aes
 
 #endif  // AES_COMMONDEFS_H

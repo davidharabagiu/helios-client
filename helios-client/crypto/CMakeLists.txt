@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
     "inc/private/aes/aescipher.h"
     "src/aes/aescipher.cpp"
     "inc/private/aes/commondefs.h"
+    "inc/private/aes/utils.h"
     "inc/private/aes/tables.h"
 )
 
