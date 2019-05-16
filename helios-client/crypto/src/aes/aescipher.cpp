@@ -82,13 +82,13 @@ void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, Cip
                 work(in, readMutex, out, writeMutex, direction, rounds, roundKeys, pos, count);
                 events[idx]->set();
             },
-            executorIdx, pos, count);
+            executorIdx, pos, std::min(count, size - pos));
 
         pos += count;
     }
 
     // Wait for completion
-    for (size_t executorIdx = 0; executorIdx != m_executors.size(); ++executorIdx)
+    for (size_t executorIdx = 0; executorIdx != events.size(); ++executorIdx)
     {
         events[executorIdx]->wait();
     }
@@ -156,14 +156,15 @@ void AesCipher::work(std::istream& in, std::mutex& readMutex, std::ostream& out,
         {
             std::lock_guard<std::mutex> lock(readMutex);
             in.seekg(safe_integral_cast<std::__1::streamoff>(pos));
-            in.read(reinterpret_cast<char*>(inBuffer), s_kBufferSize);
+            in.read(reinterpret_cast<char*>(inBuffer),
+                    safe_integral_cast<std::__1::streamsize>(std::min(s_kBufferSize, count)));
             lastRead = safe_integral_cast<uint64_t>(in.gcount());
         }
 
         // Padding with zero
         if (lastRead % s_kBlockSize != 0)
         {
-            std::fill_n(inBuffer + pos + lastRead, (lastRead / s_kBlockSize + 1) * s_kBlockSize, 0);
+            std::fill_n(inBuffer + lastRead, (lastRead / s_kBlockSize + 1) * s_kBlockSize - lastRead, 0);
             lastRead = (lastRead / s_kBlockSize + 1) * s_kBlockSize;
         }
 
@@ -188,6 +189,8 @@ void AesCipher::work(std::istream& in, std::mutex& readMutex, std::ostream& out,
             out.seekp(safe_integral_cast<int64_t>(pos));
             out.write(reinterpret_cast<char*>(outBuffer), safe_integral_cast<std::__1::streamsize>(lastRead));
         }
+
+        count -= lastRead;
     }
 
     delete[] inBuffer;
