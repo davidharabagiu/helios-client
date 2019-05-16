@@ -14,48 +14,68 @@ int main(int argc, char** argv)
                                     0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
                                     0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
 
+    static const uint64_t bufferSize = 16 * 1024 * 1024;
+
     if (argc < 3)
     {
         std::cout << "Invalid arguments\n";
         return 0;
     }
 
+    uint8_t* buffer  = new uint8_t[bufferSize];
+    uint8_t* buffer2 = new uint8_t[bufferSize];
+
     auto aes = CipherFactoryImpl().createCipher(CipherFactory::Algorithm::AES256, 8);
+    aes->setKey(key);
 
-    std::ifstream in(argv[1], std::ios::binary);
-    if (!in.good())
-    {
-        std::cout << "Invalid input file path\n";
-    }
-
-    std::ofstream out(argv[2], std::ios::trunc | std::ios::binary);
-    if (!out.good())
-    {
-        std::cout << "Invalid output file path\n";
-    }
+    std::ifstream fin(argv[1], std::ios::binary);
+    std::ofstream fout(argv[2], std::ios::binary | std::ios::trunc);
 
     auto start = high_resolution_clock::now();
-    aes->encrypt(key, in, out);
+
+    while (!fin.eof())
+    {
+        fin.read(reinterpret_cast<char*>(buffer), static_cast<std::__1::streamsize>(bufferSize));
+        uint64_t lastRead = static_cast<uint64_t>(fin.gcount());
+        aes->encrypt(buffer, lastRead, buffer2);
+        if (lastRead % 16 != 0)
+        {
+            lastRead = (lastRead / 16 + 1) * 16;
+        }
+        fout.write(reinterpret_cast<char*>(buffer2), static_cast<std::__1::streamsize>(lastRead));
+    }
+
     auto stop = high_resolution_clock::now();
 
     auto duration = duration_cast<milliseconds>(stop - start);
     std::cout << duration.count() << '\n';
 
-    in.close();
-    out.close();
+    fin.close();
+    fout.close();
 
-    std::ifstream in2(argv[2], std::ios::binary);
-    std::ofstream out2(std::string("test_") + argv[1]);
+    std::ifstream fin2(argv[2], std::ios::binary);
+    std::ofstream fout2(std::string("test_") + argv[1], std::ios::binary | std::ios::trunc);
 
     start = high_resolution_clock::now();
-    aes->decrypt(key, in2, out2);
+
+    while (!fin2.eof())
+    {
+        fin2.read(reinterpret_cast<char*>(buffer), static_cast<std::__1::streamsize>(bufferSize));
+        uint64_t lastRead = static_cast<uint64_t>(fin2.gcount());
+        aes->decrypt(buffer, lastRead, buffer2);
+        fout2.write(reinterpret_cast<char*>(buffer2), static_cast<std::__1::streamsize>(lastRead));
+    }
+
     stop = high_resolution_clock::now();
 
     duration = duration_cast<milliseconds>(stop - start);
     std::cout << duration.count() << '\n';
 
-    in2.close();
-    out2.close();
+    fin2.close();
+    fout2.close();
+
+    delete[] buffer;
+    delete[] buffer2;
 
     return 0;
 }

@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <functional>
-#include <mutex>
 
 #include "cipher.h"
 #include "aes/commondefs.h"
@@ -25,77 +24,76 @@ public:
      */
     AesCipher(KeySize keySize, int numThreads);
 
+    /**
+     * @brief Destructor
+     */
+    ~AesCipher();
+
 public:  // from Cipher
-    void encrypt(const uint8_t* key, std::istream& in, std::ostream& out) override;
-    void decrypt(const uint8_t* key, std::istream& in, std::ostream& out) override;
+    void setKey(const uint8_t* key) override;
+    void encrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
+    void decrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
 
 public:
     /**
      * @brief Run the AES encryption or decryption cipher
-     * @param key - Key, its length depends on keySize
-     * @param in - Input stream
-     * @param out - Output stream
-     * @param keySize - Key size
+     * @param in - Input buffer
+     * @param count - Number of bytes in input buffer
+     * @param out - Output buffer
      * @param direction - Encryption / decryption
      */
-    void run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction);
+    void run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction);
 
 private:
     /**
      * @brief Generate keys for each round
      * @param key - Input key
-     * @param keySize - Key size in bytes
-     * @param rounds - Number of rounds
-     * @param roundKeys - Output round keys
      */
-    void generateRoundKeys(const uint8_t* key, size_t keySize, size_t rounds, uint8_t* roundKeys) const;
+    void generateRoundKeys(const uint8_t* key);
 
     /**
      * @brief Add (bitwise XOR) the round key into the state
      * @param state - State
-     * @param roundKeys - Round keys
      * @param roundKeyIndex - Index of the round key in roundKeys
      */
-    void addRoundKey(uint8_t* state, const uint8_t* roundKeys, size_t roundKeyIndex) const;
+    void addRoundKey(uint8_t* state, size_t roundKeyIndex) const;
 
     /**
      * @brief Perform an encryption or decryption on a given sequence of bytes
-     * @param in - Input stream
-     * @param readMutex - Input stream mutex
-     * @param out - Output stream
-     * @param writeMutex - Output write mutex
-     * @param direction - Cipher direction
+     * @param in - Input buffer
+     * @param count - Number of bytes in the input buffer
+     * @param out - Output buffer
      * @param rounds - Number of rounds
-     * @param roundKeys - Round keys
-     * @param pos - Starting position of the sequence
-     * @param count - Number of bytes in the sequence
+     * @param direction - Cipher direction
      */
-    void work(std::istream& in, std::mutex& readMutex, std::ostream& out, std::mutex& writeMutex,
-              CipherDirection direction, size_t rounds, const uint8_t* roundKeys, uint64_t pos, uint64_t count) const;
+    void work(const uint8_t* in, uint64_t count, uint8_t* out, size_t rounds, CipherDirection direction) const;
 
     /**
      * @brief Perform AES encryption of a block of data
      * @param input - Input block of data (kBlockSize bytes)
      * @param rounds - Number of rounds
-     * @param roundKeys - Round keys
      * @param output - Output block of data (kBlockSize bytes). The output will be stored here.
      */
-    void encryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const;
+    void encryptBlock(const uint8_t* input, size_t rounds, uint8_t* output) const;
 
     /**
      * @brief Perform AES decryption of a block of data
      * @param input - Input block of data (kBlockSize bytes)
      * @param rounds - Number of rounds
-     * @param roundKeys - Round keys
      * @param output - Output block of data (kBlockSize bytes). The output will be stored here.
      */
-    void decryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const;
+    void decryptBlock(const uint8_t* input, size_t rounds, uint8_t* output) const;
 
 private:
     /**
      * @brief Key size
      */
     const KeySize m_kKeySize;
+
+    /**
+     * @brief Round keys
+     */
+    uint8_t* m_roundKeys;
 
     /**
      * @brief Executors
@@ -106,11 +104,6 @@ private:
      * @brief Number of bytes in a data block or in a subkey
      */
     static const size_t s_kBlockSize;
-
-    /**
-     * @brief Buffer size in bytes for buffered stream read operations
-     */
-    static const uint64_t s_kBufferSize;
 };
 }  // namespace Aes
 

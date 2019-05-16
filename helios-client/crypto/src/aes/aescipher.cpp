@@ -10,66 +10,59 @@
 
 using namespace Aes;
 
-const size_t   AesCipher::s_kBlockSize  = 16;
-const uint64_t AesCipher::s_kBufferSize = 16 * 1024 * 1024;  // 16 MB
+const size_t AesCipher::s_kBlockSize = 16;
 
 AesCipher::AesCipher(KeySize keySize, int numThreads)
     : m_kKeySize(keySize)
+    , m_roundKeys(new uint8_t[s_kBlockSize * (numberOfRounds(keySize) + 1)])
     , m_executors(safe_integral_cast<size_t>(numThreads))
 {
-    static_assert(s_kBufferSize % s_kBlockSize == 0);
-
     for (auto& executor : m_executors)
     {
         executor.reset(new Executor());
     }
 }
 
-void AesCipher::encrypt(const uint8_t* key, std::istream& in, std::ostream& out)
+AesCipher::~AesCipher()
 {
-    run(key, in, out, CipherDirection::FORWARD);
+    delete[] m_roundKeys;
 }
 
-void AesCipher::decrypt(const uint8_t* key, std::istream& in, std::ostream& out)
+void AesCipher::setKey(const uint8_t* key)
 {
-    run(key, in, out, CipherDirection::INVERSE);
+    generateRoundKeys(key);
 }
 
-void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction)
+void AesCipher::encrypt(const uint8_t* in, uint64_t count, uint8_t* out)
 {
-    size_t rounds  = numberOfRounds(m_kKeySize);
-    size_t keySize = bytesInKey(m_kKeySize);
+    run(in, count, out, CipherDirection::FORWARD);
+}
 
-    // Generate round keys
-    auto roundKeys = new uint8_t[s_kBlockSize * (rounds + 1)];
-    generateRoundKeys(key, keySize, rounds, roundKeys);
+void AesCipher::decrypt(const uint8_t* in, uint64_t count, uint8_t* out)
+{
+    run(in, count, out, CipherDirection::INVERSE);
+}
 
-    // Get input size
-    in.seekg(0, std::ios::end);
-    uint64_t size = static_cast<uint64_t>(in.tellg());
-    in.seekg(0);
-
+void AesCipher::run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction)
+{
     // Events for waiting on executors
     std::vector<std::shared_ptr<AutoResetEvent>> events;
 
-    // Mutexes for streams
-    std::mutex readMutex;
-    std::mutex writeMutex;
-
-    uint64_t pos   = 0;
-    uint64_t count = size / m_executors.size();
+    uint64_t pos          = 0;
+    uint64_t countPerWork = count / m_executors.size();
+    size_t   rounds       = numberOfRounds(m_kKeySize);
 
     // We need to divide the work in multiples of s_kBlockSize bytes
-    if (count % s_kBlockSize != 0)
+    if (countPerWork % s_kBlockSize != 0 || countPerWork == 0)
     {
-        count = (count / s_kBlockSize + 1) * s_kBlockSize;
+        countPerWork = (countPerWork / s_kBlockSize + 1) * s_kBlockSize;
     }
 
     // Create works
     for (size_t executorIdx = 0; executorIdx != m_executors.size(); ++executorIdx)
     {
-        // If we reach the end of the stream, there is no need to create more works
-        if (pos >= size)
+        // If we reach the end of the buffer, there is no need to create more works
+        if (pos >= count)
         {
             break;
         }
@@ -77,14 +70,14 @@ void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, Cip
         events.push_back(std::make_shared<AutoResetEvent>());
 
         m_executors[executorIdx]->post(
-            [this, &in, &out, &events, &readMutex, &writeMutex, rounds, roundKeys, direction](size_t idx, uint64_t pos,
-                                                                                              uint64_t count) {
-                work(in, readMutex, out, writeMutex, direction, rounds, roundKeys, pos, count);
+            [this, &events](size_t idx, const uint8_t* in, uint64_t count, uint8_t* out, size_t rounds,
+                            CipherDirection direction) {
+                work(in, count, out, rounds, direction);
                 events[idx]->set();
             },
-            executorIdx, pos, std::min(count, size - pos));
+            executorIdx, in + pos, std::min(countPerWork, count - pos), out + pos, rounds, direction);
 
-        pos += count;
+        pos += countPerWork;
     }
 
     // Wait for completion
@@ -92,15 +85,14 @@ void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, Cip
     {
         events[executorIdx]->wait();
     }
-
-    delete[] roundKeys;
 }
 
-void AesCipher::generateRoundKeys(const uint8_t* key, size_t keySize, size_t rounds, uint8_t* roundKeys) const
+void AesCipher::generateRoundKeys(const uint8_t* key)
 {
     auto*        _key       = reinterpret_cast<const uint32_t*>(key);
-    auto*        _roundKeys = reinterpret_cast<uint32_t*>(roundKeys);
-    const size_t _keySize   = keySize / sizeof(uint32_t);
+    auto*        _roundKeys = reinterpret_cast<uint32_t*>(m_roundKeys);
+    const size_t _keySize   = bytesInKey(m_kKeySize) / sizeof(uint32_t);
+    size_t       rounds     = numberOfRounds(m_kKeySize);
     uint32_t     tmp;
 
     std::copy_n(_key, _keySize, _roundKeys);
@@ -132,78 +124,56 @@ void AesCipher::generateRoundKeys(const uint8_t* key, size_t keySize, size_t rou
     }
 }
 
-void AesCipher::addRoundKey(uint8_t* state, const uint8_t* roundKeys, size_t roundKeyIndex) const
+void AesCipher::addRoundKey(uint8_t* state, size_t roundKeyIndex) const
 {
     auto _state    = reinterpret_cast<uint64_t*>(state);
-    auto _roundKey = reinterpret_cast<const uint64_t*>(roundKeys + roundKeyIndex * s_kBlockSize);
+    auto _roundKey = reinterpret_cast<const uint64_t*>(m_roundKeys + roundKeyIndex * s_kBlockSize);
     for (size_t i = 0; i < s_kBlockSize / sizeof(uint64_t); ++i)
     {
         _state[i] ^= _roundKey[i];
     }
 }
 
-void AesCipher::work(std::istream& in, std::mutex& readMutex, std::ostream& out, std::mutex& writeMutex,
-                     CipherDirection direction, size_t rounds, const uint8_t* roundKeys, uint64_t pos,
-                     uint64_t count) const
+void AesCipher::work(const uint8_t* in, uint64_t count, uint8_t* out, size_t rounds, CipherDirection direction) const
 {
-    auto inBuffer  = new uint8_t[s_kBufferSize];
-    auto outBuffer = new uint8_t[s_kBufferSize];
+    auto blockSize = safe_integral_cast<uint64_t>(s_kBlockSize);
 
-    for (uint64_t right = pos + count; pos < right; pos += s_kBufferSize)
+    if (direction == CipherDirection::FORWARD)
     {
-        uint64_t lastRead;
-
+        for (; count >= blockSize; count -= blockSize, in += blockSize, out += blockSize)
         {
-            std::lock_guard<std::mutex> lock(readMutex);
-            in.seekg(safe_integral_cast<std::__1::streamoff>(pos));
-            in.read(reinterpret_cast<char*>(inBuffer),
-                    safe_integral_cast<std::__1::streamsize>(std::min(s_kBufferSize, count)));
-            lastRead = safe_integral_cast<uint64_t>(in.gcount());
+            encryptBlock(in, rounds, out);
         }
 
-        // Padding with zero
-        if (lastRead % s_kBlockSize != 0)
+        // Padding with zero if there are bytes left
+        if (count > 0)
         {
-            std::fill_n(inBuffer + lastRead, (lastRead / s_kBlockSize + 1) * s_kBlockSize - lastRead, 0);
-            lastRead = (lastRead / s_kBlockSize + 1) * s_kBlockSize;
+            uint8_t temp[s_kBlockSize];
+            std::copy_n(in, count, temp);
+            std::fill_n(temp + count, s_kBlockSize - count, 0);
+            encryptBlock(temp, rounds, out);
         }
-
-        for (size_t i = 0; i < lastRead; i += s_kBlockSize)
-        {
-            if (direction == CipherDirection::FORWARD)
-            {
-                encryptBlock(inBuffer + i, rounds, roundKeys, outBuffer + i);
-            }
-            else if (direction == CipherDirection::INVERSE)
-            {
-                decryptBlock(inBuffer + i, rounds, roundKeys, outBuffer + i);
-            }
-            else
-            {
-                assert(false);
-            }
-        }
-
-        {
-            std::lock_guard<std::mutex> lock(writeMutex);
-            out.seekp(safe_integral_cast<int64_t>(pos));
-            out.write(reinterpret_cast<char*>(outBuffer), safe_integral_cast<std::__1::streamsize>(lastRead));
-        }
-
-        count -= lastRead;
     }
-
-    delete[] inBuffer;
-    delete[] outBuffer;
+    else if (direction == CipherDirection::INVERSE)
+    {
+        for (; count > 0; count -= std::min(count, blockSize), in += blockSize, out += blockSize)
+        {
+            decryptBlock(in, rounds, out);
+        }
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
-void AesCipher::encryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const
+void AesCipher::encryptBlock(const uint8_t* input, size_t rounds, uint8_t* output) const
 {
     uint8_t state[s_kBlockSize];
     std::copy_n(input, s_kBlockSize, state);
 
     // AddRoundKey
-    addRoundKey(state, roundKeys, 0);
+    addRoundKey(state, 0);
 
     for (size_t round = 1; round < rounds; ++round)
     {
@@ -230,7 +200,7 @@ void AesCipher::encryptBlock(const uint8_t* input, size_t rounds, const uint8_t*
         std::copy_n(nextState, s_kBlockSize, state);
 
         // AddRoundKey
-        addRoundKey(state, roundKeys, round);
+        addRoundKey(state, round);
     }
 
     {
@@ -267,12 +237,12 @@ void AesCipher::encryptBlock(const uint8_t* input, size_t rounds, const uint8_t*
     }
 
     // AddRoundKey
-    addRoundKey(state, roundKeys, rounds);
+    addRoundKey(state, rounds);
 
     std::copy_n(state, s_kBlockSize, output);
 }
 
-void AesCipher::decryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const
+void AesCipher::decryptBlock(const uint8_t* input, size_t rounds, uint8_t* output) const
 {
     uint8_t state[s_kBlockSize];
     std::copy_n(input, s_kBlockSize, state);
@@ -280,7 +250,7 @@ void AesCipher::decryptBlock(const uint8_t* input, size_t rounds, const uint8_t*
     size_t round = rounds;
 
     // AddRoundKey
-    addRoundKey(state, roundKeys, round);
+    addRoundKey(state, round);
 
     // InvShiftRows + InvSubBytes
     {
@@ -318,7 +288,7 @@ void AesCipher::decryptBlock(const uint8_t* input, size_t rounds, const uint8_t*
     while (round--)
     {
         // AddRoundKey
-        addRoundKey(state, roundKeys, round);
+        addRoundKey(state, round);
 
         if (round != 0)
         {
