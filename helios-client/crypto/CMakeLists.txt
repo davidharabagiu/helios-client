@@ -7,12 +7,6 @@ include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 add_library(${PROJECT_NAME}
     "inc/private/aes/aescipher.h"
     "src/aes/aescipher.cpp"
-    "inc/private/aes/work.h"
-    "src/aes/work.cpp"
-    "inc/private/aes/encryptionwork.h"
-    "src/aes/encryptionwork.cpp"
-    "inc/private/aes/decryptionwork.h"
-    "src/aes/decryptionwork.cpp"
     "inc/private/aes/commondefs.h"
     "inc/private/aes/tables.h"
 )

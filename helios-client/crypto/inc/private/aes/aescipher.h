@@ -54,6 +54,14 @@ private:
     void generateRoundKeys(const uint8_t* key, uint8_t* roundKeys) const;
 
     /**
+     * @brief Add (bitwise XOR) the round key into the state
+     * @param state - State
+     * @param roundKeys - Round keys
+     * @param roundKeyIndex - Index of the round key in roundKeys
+     */
+    void addRoundKey(uint8_t* state, const uint8_t* roundKeys, size_t roundKeyIndex) const;
+
+    /**
      * @brief Perform an encryption or decryption on a given sequence of bytes
      * @param in - Input stream
      * @param readMutex - Input stream mutex
@@ -66,6 +74,20 @@ private:
      */
     void work(std::istream& in, std::mutex& readMutex, std::ostream& out, std::mutex& writeMutex,
               CipherDirection direction, const uint8_t* roundKeys, uint64_t pos, uint64_t count) const;
+
+    /**
+     * @param input - Input block of data (kBlockSize bytes)
+     * @param roundKeys - Round keys
+     * @param output - Output block of data (kBlockSize bytes). The output will be stored here.
+     */
+    void encryptBlock(const uint8_t* input, const uint8_t* roundKeys, uint8_t* output) const;
+
+    /**
+     * @param input - Input block of data (kBlockSize bytes)
+     * @param roundKeys - Round keys
+     * @param output - Output block of data (kBlockSize bytes). The output will be stored here.
+     */
+    void decryptBlock(const uint8_t* input, const uint8_t* roundKeys, uint8_t* output) const;
 
 private:
     /**
