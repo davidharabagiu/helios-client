@@ -13,8 +13,9 @@ using namespace Aes;
 const size_t   AesCipher::s_kBlockSize  = 16;
 const uint64_t AesCipher::s_kBufferSize = 16 * 1024 * 1024;  // 16 MB
 
-AesCipher::AesCipher(int numThreads)
-    : m_executors(safe_integral_cast<size_t>(numThreads))
+AesCipher::AesCipher(KeySize keySize, int numThreads)
+    : m_kKeySize(keySize)
+    , m_executors(safe_integral_cast<size_t>(numThreads))
 {
     static_assert(s_kBufferSize % s_kBlockSize == 0);
 
@@ -24,11 +25,20 @@ AesCipher::AesCipher(int numThreads)
     }
 }
 
-void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, KeySize aKeySize,
-                    CipherDirection direction)
+void AesCipher::encrypt(const uint8_t* key, std::istream& in, std::ostream& out)
 {
-    size_t rounds  = numberOfRounds(aKeySize);
-    size_t keySize = bytesInKey(aKeySize);
+    run(key, in, out, CipherDirection::FORWARD);
+}
+
+void AesCipher::decrypt(const uint8_t* key, std::istream& in, std::ostream& out)
+{
+    run(key, in, out, CipherDirection::INVERSE);
+}
+
+void AesCipher::run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction)
+{
+    size_t rounds  = numberOfRounds(m_kKeySize);
+    size_t keySize = bytesInKey(m_kKeySize);
 
     // Generate round keys
     auto roundKeys = new uint8_t[s_kBlockSize * (rounds + 1)];

@@ -2,12 +2,10 @@
 #define AES_AESCIPHER_H
 
 #include <vector>
-#include <istream>
-#include <ostream>
 #include <functional>
-#include <cstdint>
 #include <mutex>
 
+#include "cipher.h"
 #include "aes/commondefs.h"
 #include "executor.h"
 
@@ -17,15 +15,21 @@ namespace Aes
  * @class AesCipher
  * @brief Implementation of the AES cipher
  */
-class AesCipher
+class AesCipher : public Cipher
 {
 public:
     /**
      * @brief Constructor
+     * @param keySize - Key size
      * @param numThreads - Number of executor threads
      */
-    AesCipher(int numThreads);
+    AesCipher(KeySize keySize, int numThreads);
 
+public:  // from Cipher
+    void encrypt(const uint8_t* key, std::istream& in, std::ostream& out) override;
+    void decrypt(const uint8_t* key, std::istream& in, std::ostream& out) override;
+
+public:
     /**
      * @brief Run the AES encryption or decryption cipher
      * @param key - Key, its length depends on keySize
@@ -34,7 +38,7 @@ public:
      * @param keySize - Key size
      * @param direction - Encryption / decryption
      */
-    void run(const uint8_t* key, std::istream& in, std::ostream& out, KeySize keySize, CipherDirection direction);
+    void run(const uint8_t* key, std::istream& in, std::ostream& out, CipherDirection direction);
 
 private:
     /**
@@ -88,6 +92,11 @@ private:
     void decryptBlock(const uint8_t* input, size_t rounds, const uint8_t* roundKeys, uint8_t* output) const;
 
 private:
+    /**
+     * @brief Key size
+     */
+    const KeySize m_kKeySize;
+
     /**
      * @brief Executors
      */

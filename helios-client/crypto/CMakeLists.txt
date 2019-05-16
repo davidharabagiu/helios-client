@@ -5,6 +5,10 @@ project(crypto)
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
+    "inc/public/cipher.h"
+    "inc/public/cipherfactory.h"
+    "inc/private/cipherfactoryimpl.h"
+    "src/cipherfactoryimpl.cpp"
     "inc/private/aes/aescipher.h"
     "src/aes/aescipher.cpp"
     "inc/private/aes/commondefs.h"
