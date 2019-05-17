@@ -12,6 +12,7 @@
 #include "file.h"
 #include "filetransfer.h"
 #include "executor.h"
+#include "cipherfactory.h"
 
 // Forward declarations
 class Config;
@@ -50,8 +51,10 @@ public:
      * @brief Constructor
      * @param config - Config instance
      * @param fileApiCaller - File API caller instance
+     * @param cipherFactory - Cipher factory instance
      */
-    FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller);
+    FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
+                    std::unique_ptr<CipherFactory> cipherFactory);
 
     /**
      * @brief Destructor
@@ -151,6 +154,11 @@ private:
      * @brief Condition variable for waiting for transfers to complete
      */
     std::condition_variable m_transfersCompletedCondVar;
+
+    /**
+     * @brief Cipher instace used for encrypting and decrypting files
+     */
+    std::shared_ptr<Cipher> m_cipher;
 };
 
 #endif  // FILESERVICEIMPL_H

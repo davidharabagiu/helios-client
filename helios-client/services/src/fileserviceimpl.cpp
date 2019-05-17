@@ -16,7 +16,8 @@
 #include "autoresetevent.h"
 #include "pathutils.h"
 
-FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller)
+FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
+                                 std::unique_ptr<CipherFactory> cipherFactory)
     : m_apiCaller(std::move(fileApiCaller))
     , m_config(config)
     , m_lastUsedExecutorIndex(0)
@@ -27,6 +28,10 @@ FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr
     {
         m_transferExecutors.push_back(std::make_unique<Executor>());
     }
+
+    uint numberOfCipherExecutors = m_config->get(ConfigKeys::kNumberOfCipherExecutors).toUInt();
+    m_cipher =
+        cipherFactory->createCipher(CipherFactory::Algorithm::AES256, safe_integral_cast<int>(numberOfCipherExecutors));
 }
 
 FileServiceImpl::~FileServiceImpl()

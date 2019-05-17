@@ -23,6 +23,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:settings,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:apicalls,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:models,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:crypto,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -31,4 +32,5 @@ target_link_libraries(${PROJECT_NAME}
     settings
     apicalls
     models
+    crypto
 )
