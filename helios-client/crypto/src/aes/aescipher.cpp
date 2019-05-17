@@ -33,17 +33,18 @@ void AesCipher::setKey(const uint8_t* key)
     generateRoundKeys(key);
 }
 
-void AesCipher::encrypt(const uint8_t* in, uint64_t count, uint8_t* out)
+uint64_t AesCipher::encrypt(const uint8_t* in, uint64_t count, uint8_t* out)
 {
-    run(in, count, out, CipherDirection::FORWARD);
+    return run(in, count, out, CipherDirection::FORWARD);
 }
 
 void AesCipher::decrypt(const uint8_t* in, uint64_t count, uint8_t* out)
 {
+    assert(count % s_kBlockSize == 0);
     run(in, count, out, CipherDirection::INVERSE);
 }
 
-void AesCipher::run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction)
+uint64_t AesCipher::run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction)
 {
     // Events for waiting on executors
     std::vector<std::shared_ptr<AutoResetEvent>> events;
@@ -85,6 +86,12 @@ void AesCipher::run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirec
     {
         events[executorIdx]->wait();
     }
+
+    if (count % s_kBlockSize != 0)
+    {
+        return (count / s_kBlockSize + 1) * s_kBlockSize;
+    }
+    return count;
 }
 
 void AesCipher::generateRoundKeys(const uint8_t* key)

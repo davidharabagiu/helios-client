@@ -156,9 +156,14 @@ private:
     std::condition_variable m_transfersCompletedCondVar;
 
     /**
-     * @brief Cipher instace used for encrypting and decrypting files
+     * @brief Cipher factory instance
      */
-    std::shared_ptr<Cipher> m_cipher;
+    std::unique_ptr<CipherFactory> m_cipherFactory;
+
+    /**
+     * @brief Number of cipher executors
+     */
+    unsigned m_numberOfCipherExecutors;
 };
 
 #endif  // FILESERVICEIMPL_H

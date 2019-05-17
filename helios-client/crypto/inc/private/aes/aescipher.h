@@ -30,9 +30,9 @@ public:
     ~AesCipher();
 
 public:  // from Cipher
-    void setKey(const uint8_t* key) override;
-    void encrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
-    void decrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
+    void     setKey(const uint8_t* key) override;
+    uint64_t encrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
+    void     decrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
 
 public:
     /**
@@ -41,8 +41,9 @@ public:
      * @param count - Number of bytes in input buffer
      * @param out - Output buffer
      * @param direction - Encryption / decryption
+     * @return Number of bytes in the result
      */
-    void run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction);
+    uint64_t run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction);
 
 private:
     /**

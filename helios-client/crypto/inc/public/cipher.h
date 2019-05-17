@@ -26,8 +26,9 @@ public:
      * @param in - Input (plain text) buffer
      * @param count - Number of bytes in the input buffer
      * @param out - Output (encrypted) buffer
+     * @return Number of encrypted data bytes
      */
-    virtual void encrypt(const uint8_t* in, uint64_t count, uint8_t* out) = 0;
+    virtual uint64_t encrypt(const uint8_t* in, uint64_t count, uint8_t* out) = 0;
 
     /**
      * @brief Run the decryption cipher algorithm
