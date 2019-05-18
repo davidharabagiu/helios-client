@@ -8,6 +8,8 @@
 #include "aes/commondefs.h"
 #include "executor.h"
 
+// TODO: Investigate the performance benefits of a hardware accelerated AES cipher
+
 namespace Aes
 {
 /**

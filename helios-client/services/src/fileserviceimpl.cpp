@@ -14,6 +14,7 @@
 #include "config.h"
 #include "configkeys.h"
 #include "autoresetevent.h"
+#include "manualresetevent.h"
 #include "pathutils.h"
 
 namespace
@@ -488,80 +489,101 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                 Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
 
                 // Post transfer execution
-                m_transferExecutors[nextExecutorIndex()]->post([this, transfer, transferId, fullRemotePath,
-                                                                cipher]() mutable {
-                    uint64_t chunkSize =
-                        safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
-                    auto                       stream = std::static_pointer_cast<std::ofstream>(transfer->stream);
-                    std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize]);
+                m_transferExecutors[nextExecutorIndex()]->post(
+                    [this, transfer, transferId, fullRemotePath, cipher]() mutable {
+                        uint64_t chunkSize =
+                            safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
+                        auto                       stream = std::static_pointer_cast<std::ofstream>(transfer->stream);
+                        std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize]);
 
-                    auto     fileSize    = transfer->transfer->fileSize();
-                    uint64_t transferred = transfer->transfer->transferredBytes();
+                        auto     fileSize    = transfer->transfer->fileSize();
+                        uint64_t transferred = transfer->transfer->transferredBytes();
+                        uint64_t processed   = 0;
 
-                    AutoResetEvent chunkDone;
-
-                    while (transferred < fileSize && !transfer->canceled)
-                    {
-                        uint64_t actualChunkSize =
-                            (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
-                        uint64_t lastTransferred;
+                        AutoResetEvent   chunkDone;
+                        ManualResetEvent decryptionDone;
 
                         ApiCallStatus lastStatus;
-                        m_apiCaller->download(m_authToken, transferId, transferred, actualChunkSize,
-                                              [&chunkDone, &lastStatus, &transferred, &buffer, &lastTransferred](
-                                                  ApiCallStatus status, const std::vector<uint8_t>& bytes) {
-                                                  lastStatus = status;
-                                                  if (status == ApiCallStatus::SUCCESS)
-                                                  {
-                                                      std::copy(bytes.cbegin(), bytes.cend(), buffer.get());
-                                                      transferred += bytes.size();
-                                                      lastTransferred = safe_integral_cast<uint64_t>(bytes.size());
-                                                  }
-                                                  chunkDone.set();
-                                              });
+                        uint64_t      lastTransferred;
 
-                        chunkDone.wait();
-
-                        cipher->decrypt(buffer.get(), lastTransferred, buffer.get());
-                        stream->write(reinterpret_cast<const char*>(buffer.get()),
-                                      safe_integral_cast<std::__1::streamsize>(lastTransferred));
-
-                        if (lastStatus == ApiCallStatus::SUCCESS)
+                        while (processed < fileSize && !transfer->canceled)
                         {
-                            transfer->transfer->setTransferredBytes(transferred);
-                            Observable::notifyAll(&FileServiceListener::transferProgressChanged, transfer->transfer);
+                            uint64_t actualChunkSize =
+                                (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
+
+                            if (transferred < fileSize)
+                            {
+                                // We have data left to download
+                                m_apiCaller->download(
+                                    m_authToken, transferId, transferred, actualChunkSize,
+                                    [&chunkDone, &lastStatus, &transferred, &buffer, &lastTransferred, &decryptionDone](
+                                        ApiCallStatus status, const std::vector<uint8_t>& bytes) {
+                                        lastStatus = status;
+                                        if (status == ApiCallStatus::SUCCESS)
+                                        {
+                                            decryptionDone.wait();
+                                            std::copy(bytes.cbegin(), bytes.cend(), buffer.get());
+                                            transferred += bytes.size();
+                                            lastTransferred = safe_integral_cast<uint64_t>(bytes.size());
+                                        }
+                                        chunkDone.set();
+                                    });
+                            }
+
+                            decryptionDone.reset();
+                            if (transferred > 0)
+                            {
+                                // We have data for decryption
+                                cipher->decrypt(buffer.get(), lastTransferred, buffer.get());
+                                stream->write(reinterpret_cast<const char*>(buffer.get()),
+                                              safe_integral_cast<std::__1::streamsize>(lastTransferred));
+
+                                if (lastStatus == ApiCallStatus::SUCCESS)
+                                {
+                                    transfer->transfer->setTransferredBytes(transferred);
+                                    Observable::notifyAll(&FileServiceListener::transferProgressChanged,
+                                                          transfer->transfer);
+                                }
+                                else
+                                {
+                                    // Upload failure
+                                    std::ostringstream ss;
+                                    ss << "Error while downloading. ApiCallStatus = ";
+                                    ss << static_cast<int>(lastStatus);
+                                    Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                                    break;
+                                }
+
+                                processed += lastTransferred;
+                            }
+                            decryptionDone.set();
+
+                            if (transferred < fileSize)
+                            {
+                                chunkDone.wait();
+                            }
+                        }
+
+                        // Cleanup
+                        {
+                            std::lock_guard<std::mutex> lock(m_mutex);
+                            m_activeTransfers.erase(fullRemotePath);
+                        }
+
+                        if (processed == fileSize)
+                        {
+                            // Notify completion
+                            Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
                         }
                         else
                         {
-                            // Upload failure
-                            std::ostringstream ss;
-                            ss << "Error while downloading. ApiCallStatus = ";
-                            ss << static_cast<int>(lastStatus);
-                            Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                            break;
+                            Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
                         }
-                    }
 
-                    // Cleanup
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        m_activeTransfers.erase(fullRemotePath);
-                    }
+                        cipher.reset();
 
-                    if (transferred == fileSize)
-                    {
-                        // Notify completion
-                        Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
-                    }
-                    else
-                    {
-                        Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
-                    }
-
-                    cipher.reset();
-
-                    m_transfersCompletedCondVar.notify_one();
-                });
+                        m_transfersCompletedCondVar.notify_one();
+                    });
             }
             else if (status == ApiCallStatus::INVALID_PATH)
             {
