@@ -2,8 +2,6 @@
 #define CIPHER_H
 
 #include <cstdint>
-#include <istream>
-#include <ostream>
 
 /**
  * @class Cipher
@@ -18,20 +16,27 @@ public:
     virtual ~Cipher() = default;
 
     /**
-     * @brief Run the encryption cipher algorithm
-     * @param key - Encryption key
-     * @param in - Input (plain text) stream
-     * @param out - Output (encrypted) stream
+     * @brief Set the encryption / decryption key and do the initial preparations for the operations that will follow.
+     * @param key - Key
      */
-    virtual void encrypt(const uint8_t* key, std::istream& in, std::ostream& out) = 0;
+    virtual void setKey(const uint8_t* key) = 0;
+
+    /**
+     * @brief Run the encryption cipher algorithm
+     * @param in - Input (plain text) buffer
+     * @param count - Number of bytes in the input buffer
+     * @param out - Output (encrypted) buffer
+     * @return Number of encrypted data bytes
+     */
+    virtual uint64_t encrypt(const uint8_t* in, uint64_t count, uint8_t* out) = 0;
 
     /**
      * @brief Run the decryption cipher algorithm
-     * @param key - Decryption key
-     * @param in - Input (encrypted) stream
-     * @param out - Output (plain text) stream
+     * @param in - Input (encrypted) buffer
+     * @param count - Number of bytes in the input buffer
+     * @param out - Output (plain text) buffer
      */
-    virtual void decrypt(const uint8_t* key, std::istream& in, std::ostream& out) = 0;
+    virtual void decrypt(const uint8_t* in, uint64_t count, uint8_t* out) = 0;
 };
 
 #endif  // CIPHER_H

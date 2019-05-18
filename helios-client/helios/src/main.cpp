@@ -17,6 +17,7 @@
 #include "httprequestmanagerimpl.h"
 #include "configimpl.h"
 #include "httprequestfactoryimpl.h"
+#include "cipherfactoryimpl.h"
 
 void registerInstances()
 {
@@ -37,8 +38,8 @@ void registerInstances()
         new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));
     Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
 
-    std::shared_ptr<FileService> fileService(
-        new FileServiceImpl(config, std::make_unique<FileApiCallerImpl>(httpRequestManager)));
+    std::shared_ptr<FileService> fileService(new FileServiceImpl(
+        config, std::make_unique<FileApiCallerImpl>(httpRequestManager), std::make_unique<CipherFactoryImpl>()));
     Single<DependencyInjector>::instance().registerInstance<FileService>(fileService);
 }
 

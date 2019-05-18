@@ -21,3 +21,5 @@ add_subdirectory(crypto)
 if (WITH_TESTS)
     add_subdirectory(tests)
 endif()
+
+add_subdirectory(testapp)

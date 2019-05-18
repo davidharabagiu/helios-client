@@ -55,6 +55,14 @@ ConfigImpl::ConfigImpl()
     }
     m_valuesRegistry.emplace(ConfigKeys::kNumberOfTransferExecutors,
                              safe_integral_cast<uint>(numberOfTransferExecutorsObj.toInt()));
+
+    auto numberOfCipherExecutorsObj = json[QString::fromStdString(ConfigKeys::kNumberOfCipherExecutors)];
+    if (numberOfCipherExecutorsObj.type() != QJsonValue::Double)
+    {
+        qFatal("%s not found in %s", ConfigKeys::kNumberOfCipherExecutors.c_str(), Paths::kConfigFile.c_str());
+    }
+    m_valuesRegistry.emplace(ConfigKeys::kNumberOfCipherExecutors,
+                             safe_integral_cast<uint>(numberOfCipherExecutorsObj.toInt()));
 }
 
 QVariant ConfigImpl::operator[](const std::string& key) const

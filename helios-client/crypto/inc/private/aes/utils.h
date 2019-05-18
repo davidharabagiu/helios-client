@@ -27,7 +27,9 @@ inline size_t bytesInKey(const KeySize keySize)
     {
         return 32;
     }
+
     assert(false);
+    return 0;
 }
 
 /**
@@ -49,7 +51,9 @@ inline size_t numberOfRounds(const KeySize keySize)
     {
         return 14;
     }
+
     assert(false);
+    return 0;
 }
 }  // namespace Aes
 

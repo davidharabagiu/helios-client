@@ -25,6 +25,8 @@ add_library(${PROJECT_NAME}
     "src/pathutils.cpp"
     "inc/customactionevent.h"
     "src/customactionevent.cpp"
+    "inc/manualresetevent.h"
+    "src/manualresetevent.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

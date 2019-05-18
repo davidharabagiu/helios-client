@@ -28,6 +28,12 @@ const std::string kUploadChunkSize = "uploadChunkSize";
  * @note Type = uint
  */
 const std::string kNumberOfTransferExecutors = "numberOfTransferExecutors";
+
+/**
+ * @brief Number of file encryption / decryption jobs that can run in parallel
+ * @note Type = uint
+ */
+const std::string kNumberOfCipherExecutors = "numberOfCipherExecutors";
 }  // namespace ConfigKeys
 
 #endif  // CONFIGKEYS_H
