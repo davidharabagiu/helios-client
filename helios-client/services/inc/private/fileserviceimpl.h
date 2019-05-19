@@ -16,6 +16,7 @@
 
 // Forward declarations
 class Config;
+class KeyManager;
 
 /**
  * @class FileServiceImpl
@@ -52,9 +53,10 @@ public:
      * @param config - Config instance
      * @param fileApiCaller - File API caller instance
      * @param cipherFactory - Cipher factory instance
+     * @param keyManager - Key manager instance
      */
     FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
-                    std::unique_ptr<CipherFactory> cipherFactory);
+                    std::unique_ptr<CipherFactory> cipherFactory, std::shared_ptr<KeyManager> keyManager);
 
     /**
      * @brief Destructor
@@ -166,6 +168,11 @@ private:
      * @brief Number of cipher executors
      */
     unsigned m_numberOfCipherExecutors;
+
+    /**
+     * @brief Key manager instance
+     */
+    std::shared_ptr<KeyManager> m_keyManager;
 };
 
 #endif  // FILESERVICEIMPL_H

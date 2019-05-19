@@ -16,6 +16,7 @@
 #include "autoresetevent.h"
 #include "manualresetevent.h"
 #include "pathutils.h"
+#include "keymanager.h"
 
 namespace
 {
@@ -25,13 +26,14 @@ const uint8_t kTestKey[32] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x
 }
 
 FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
-                                 std::unique_ptr<CipherFactory> cipherFactory)
+                                 std::unique_ptr<CipherFactory> cipherFactory, std::shared_ptr<KeyManager> keyManager)
     : m_apiCaller(std::move(fileApiCaller))
     , m_config(config)
     , m_lastUsedExecutorIndex(0)
     , m_numberOfTransferExecutors(m_config->get(ConfigKeys::kNumberOfTransferExecutors).toUInt())
     , m_cipherFactory(std::move(cipherFactory))
     , m_numberOfCipherExecutors(m_config->get(ConfigKeys::kNumberOfCipherExecutors).toUInt())
+    , m_keyManager(keyManager)
 {
     for (unsigned int i = 0; i < m_numberOfTransferExecutors; ++i)
     {
