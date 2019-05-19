@@ -20,6 +20,10 @@ add_library(${PROJECT_NAME}
     "src/qremotefilesystemcontroller.cpp"
     "inc/private/qremotefilesystemcontrollerimpl.h"
     "src/qremotefilesystemcontrollerimpl.cpp"
+    "inc/public/qkeystoragecontroller.h"
+    "src/qkeystoragecontroller.cpp"
+    "inc/private/qkeystoragecontrollerimpl.h"
+    "src/qkeystoragecontrollerimpl.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -30,6 +34,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:services,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:settings,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:config,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:keystorage,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -39,4 +44,5 @@ target_link_libraries(${PROJECT_NAME}
     services
     settings
     config
+    keystorage
 )
