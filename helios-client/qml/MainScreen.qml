@@ -52,7 +52,12 @@ Rectangle {
         selectFolder: false
         selectMultiple: false
         onAccepted: {
-            rfsCtl.upload(fileUrl);
+            if (keyListing.selectedIndex !== -1) {
+                rfsCtl.upload(fileUrl, keyListing.selectedKey);
+            } else {
+                errorDialog.text = "Please select a key";
+                errorDialog.visible = true;
+            }
         }
     }
 
@@ -67,7 +72,13 @@ Rectangle {
         selectFolder: true
         selectMultiple: false
         onAccepted: {
-            rfsCtl.download(fileToDownload, fileUrl);
+            if (keyListing.selectedIndex !== -1) {
+                rfsCtl.download(fileToDownload, fileUrl, keyListing.selectedKey);
+            }
+            else {
+                errorDialog.text = "Please select a key";
+                errorDialog.visible = true;
+            }
         }
     }
 
@@ -111,11 +122,7 @@ Rectangle {
         id: ksCtl
 
         onKeysChanged: {
-            var list = ksCtl.keys(KeyStorageController.KEY_SIZE_256);
-            if (list.length === 0) {
-                keyListing.selectedIndex = -1;
-            }
-            keyListing.model = list;
+            keyListing.model = ksCtl.keys(KeyStorageController.KEY_SIZE_256);
         }
     }
 
@@ -374,6 +381,8 @@ Rectangle {
                     if (!ksCtl.removeKey(keyListing.selectedKey)) {
                         errorDialog.text = "There is no key with the name " + keyListing.selectedKey;
                         errorDialog.visible = true;
+                    } else {
+                        keyListing.selectedIndex = -1;
                     }
                 }
             }
