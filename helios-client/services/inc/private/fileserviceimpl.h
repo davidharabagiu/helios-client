@@ -71,8 +71,10 @@ public:  // from FileService
     void                                       changeCurrentDirectory(const std::string& path, bool relative) override;
     void                                       navigateBack() override;
     void                                       createDirectory(const std::string& path, bool relative) override;
-    void uploadFile(const std::string& localPath, const std::string& remotePath, bool relative) override;
-    void downloadFile(const std::string& remotePath, bool relative, const std::string& localPath) override;
+    void uploadFile(const std::string& localPath, const std::string& remotePath, bool relative,
+                    const std::string& encryptionKeyName) override;
+    void downloadFile(const std::string& remotePath, bool relative, const std::string& localPath,
+                      const std::string& decryptionKeyName) override;
     void cancelOperation(const std::string& path) override;
     void moveFile(const std::string& sourcePath, const std::string& destinationPath) override;
     void removeFile(const std::string& path, bool relative) override;

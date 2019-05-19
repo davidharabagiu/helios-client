@@ -81,16 +81,20 @@ public:
      * @param localPath - Path of the local file
      * @param remotePath - Path of the remote file
      * @param relative - True if the remote path is relative to the current working directory
+     * @param encryptionKeyName - Identifier name of the key to use for file encryption
      */
-    virtual void uploadFile(const std::string& localPath, const std::string& remotePath, bool relative) = 0;
+    virtual void uploadFile(const std::string& localPath, const std::string& remotePath, bool relative,
+                            const std::string& encryptionKeyName) = 0;
 
     /**
      * @brief Download a remote file to the local file system. The file will be downloaded at the specified path.
      * @param remotePath - Path of the remote file
      * @param relative - True if the remote path is relative to the current working directory
      * @param localPath - Path of the local file
+     * @param decryptionKeyName - Identifier name of the key to user for file decryption
      */
-    virtual void downloadFile(const std::string& remotePath, bool relative, const std::string& localPath) = 0;
+    virtual void downloadFile(const std::string& remotePath, bool relative, const std::string& localPath,
+                              const std::string& decryptionKeyName) = 0;
 
     /**
      * @brief Cancel a download or upload operation. The upload progress made so far won't be discarded.

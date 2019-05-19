@@ -49,8 +49,8 @@ public:  // forwarded from QRemoteFileSystemController
     void         remove(const QString& fileName);
     void         move(const QString& fileName, const QString& destinationDirPath);
     void         rename(const QString& fileName, const QString& newName);
-    void         upload(const QUrl& localPath);
-    void         download(const QString& filename, const QUrl& destinationDir);
+    void         upload(const QUrl& localPath, const QString& encryptionKeyName);
+    void         download(const QString& filename, const QUrl& destinationDir, const QString& decryptionKeyName);
     void         cancelTransfer(const QFileTransfer& transfer);
 
 public:  // from FileServiceListener

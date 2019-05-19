@@ -262,7 +262,8 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
     });
 }
 
-void FileServiceImpl::uploadFile(const std::string& localPath, const std::string& remotePath, bool relative)
+void FileServiceImpl::uploadFile(const std::string& localPath, const std::string& remotePath, bool relative,
+                                 const std::string& /*encryptionKeyName*/)
 {
     // Obtain the full remote path
     std::string fullRemotePath;
@@ -438,7 +439,8 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
         });
 }
 
-void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative, const std::string& localPath)
+void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative, const std::string& localPath,
+                                   const std::string& /*decryptionKeyName*/)
 {
     // Obtain the full remote path
     std::string fullRemotePath;

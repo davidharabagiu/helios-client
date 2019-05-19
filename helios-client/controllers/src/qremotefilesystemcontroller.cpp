@@ -73,14 +73,15 @@ void QRemoteFileSystemController::rename(const QString& fileName, const QString&
     m_privateImpl->rename(fileName, newName);
 }
 
-void QRemoteFileSystemController::upload(const QUrl& localPath)
+void QRemoteFileSystemController::upload(const QUrl& localPath, const QString& encryptionKeyName)
 {
-    m_privateImpl->upload(localPath);
+    m_privateImpl->upload(localPath, encryptionKeyName);
 }
 
-void QRemoteFileSystemController::download(const QString& fileName, const QUrl& destinationDir)
+void QRemoteFileSystemController::download(const QString& fileName, const QUrl& destinationDir,
+                                           const QString& decryptionKeyName)
 {
-    m_privateImpl->download(fileName, destinationDir);
+    m_privateImpl->download(fileName, destinationDir, decryptionKeyName);
 }
 
 void QRemoteFileSystemController::cancelTransfer(const QFileTransfer& transfer)

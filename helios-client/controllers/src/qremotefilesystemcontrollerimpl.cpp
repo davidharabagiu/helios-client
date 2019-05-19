@@ -120,7 +120,7 @@ void QRemoteFileSystemControllerImpl::rename(const QString& fileName, const QStr
     }
 }
 
-void QRemoteFileSystemControllerImpl::upload(const QUrl& localPath)
+void QRemoteFileSystemControllerImpl::upload(const QUrl& localPath, const QString& encryptionKeyName)
 {
     const auto& _localPath = localPath.url(QUrl::PreferLocalFile);
     if (!_localPath.isEmpty())
@@ -128,18 +128,20 @@ void QRemoteFileSystemControllerImpl::upload(const QUrl& localPath)
         std::string fileName;
         std::string filePath;
         PathUtils::getFileNameAndParentDir(_localPath.toStdString(), fileName, filePath);
-        m_fileService->uploadFile(_localPath.toStdString(), fileName, true);
+        m_fileService->uploadFile(_localPath.toStdString(), fileName, true, encryptionKeyName.toStdString());
     }
 }
 
-void QRemoteFileSystemControllerImpl::download(const QString& filename, const QUrl& destinationDir)
+void QRemoteFileSystemControllerImpl::download(const QString& filename, const QUrl& destinationDir,
+                                               const QString& decryptionKeyName)
 {
     if (!filename.isEmpty())
     {
         const auto& localPath = QDir(destinationDir.url(QUrl::PreferLocalFile)).filePath(filename);
         if (!localPath.isEmpty())
         {
-            m_fileService->downloadFile(filename.toStdString(), true, localPath.toStdString());
+            m_fileService->downloadFile(filename.toStdString(), true, localPath.toStdString(),
+                                        decryptionKeyName.toStdString());
         }
     }
 }

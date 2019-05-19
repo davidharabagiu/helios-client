@@ -130,15 +130,17 @@ public:
     /**
      * @brief Upload a file in the cwd under the same name
      * @param localPath - Local file path
+     * @param encryptionKeyName - Identifier name of the key to use for file encryption
      */
-    Q_INVOKABLE void upload(const QUrl& localPath);
+    Q_INVOKABLE void upload(const QUrl& localPath, const QString& encryptionKeyName);
 
     /**
      * @brief Download a file from the cwd with the given name
      * @param fileName - Name of the file to download
      * @param destinationDir - Local path of the destination directory
+     * @param decryptionKeyName - Identifier name of the key to use for file decryption
      */
-    Q_INVOKABLE void download(const QString& fileName, const QUrl& destinationDir);
+    Q_INVOKABLE void download(const QString& fileName, const QUrl& destinationDir, const QString& decryptionKeyName);
 
     /**
      * @brief Cancel a file transfer
