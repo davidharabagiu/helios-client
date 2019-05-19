@@ -3,6 +3,11 @@
 
 #include <QList>
 #include <QString>
+#include <memory>
+#include <cstdint>
+
+// Forward declarations
+class KeyManager;
 
 /**
  * @class QKeyStorageControllerImpl
@@ -31,6 +36,15 @@ public:  // Forwarded from QKeyStorageController
     bool           createKey(const QString& name, KeySize size);
     bool           removeKey(const QString& name);
     void           removeAllKeys();
+
+private:
+    static uint16_t keySizeToByteLength(KeySize keySize);
+
+private:
+    /**
+     * @brief Key manager instance
+     */
+    std::shared_ptr<KeyManager> m_keyManager;
 };
 
 #endif  // QKEYSTORAGECONTROLLERIMPL_H
