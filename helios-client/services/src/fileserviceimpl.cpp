@@ -18,12 +18,7 @@
 #include "pathutils.h"
 #include "keymanager.h"
 
-namespace
-{
-const uint8_t kTestKey[32] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
-                              0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
-                              0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
-}
+const size_t FileServiceImpl::s_kAcceptableKeyLength = 32;
 
 FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
                                  std::unique_ptr<CipherFactory> cipherFactory, std::shared_ptr<KeyManager> keyManager)
@@ -265,8 +260,18 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
 }
 
 void FileServiceImpl::uploadFile(const std::string& localPath, const std::string& remotePath, bool relative,
-                                 const std::string& /*encryptionKeyName*/)
+                                 const std::string& encryptionKeyName)
 {
+    auto encryptionKey = m_keyManager->getKey(encryptionKeyName);
+    if (encryptionKey.size() != s_kAcceptableKeyLength)
+    {
+        std::ostringstream ss;
+        ss << "There is no key of valid length with the name ";
+        ss << encryptionKeyName;
+        Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+        return;
+    }
+
     // Obtain the full remote path
     std::string fullRemotePath;
     if (relative)
@@ -299,7 +304,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
 
     auto cipher = m_cipherFactory->createCipher(CipherFactory::Algorithm::AES256,
                                                 safe_integral_cast<int>(m_numberOfCipherExecutors));
-    cipher->setKey(kTestKey);
+    cipher->setKey(encryptionKey.data());
 
     m_apiCaller->beginUpload(
         m_authToken, fullRemotePath,
@@ -442,8 +447,18 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
 }
 
 void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative, const std::string& localPath,
-                                   const std::string& /*decryptionKeyName*/)
+                                   const std::string& decryptionKeyName)
 {
+    auto decryptionKey = m_keyManager->getKey(decryptionKeyName);
+    if (decryptionKey.size() != s_kAcceptableKeyLength)
+    {
+        std::ostringstream ss;
+        ss << "There is no key with the name ";
+        ss << decryptionKeyName;
+        Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+        return;
+    }
+
     // Obtain the full remote path
     std::string fullRemotePath;
     if (relative)
@@ -476,7 +491,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
 
     auto cipher = m_cipherFactory->createCipher(CipherFactory::Algorithm::AES256,
                                                 safe_integral_cast<int>(m_numberOfCipherExecutors));
-    cipher->setKey(kTestKey);
+    cipher->setKey(decryptionKey.data());
 
     m_apiCaller->beginDownload(
         m_authToken, fullRemotePath,

@@ -173,6 +173,11 @@ private:
      * @brief Key manager instance
      */
     std::shared_ptr<KeyManager> m_keyManager;
+
+    /**
+     * @brief For now only support one type of keys
+     */
+    static const size_t s_kAcceptableKeyLength;
 };
 
 #endif  // FILESERVICEIMPL_H
