@@ -9,8 +9,6 @@ add_library(${PROJECT_NAME}
     "inc/public/keymanager.h"
     "inc/private/keymanagerimpl.h"
     "src/keymanagerimpl.cpp"
-    "inc/private/key.h"
-    "src/key.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
