@@ -18,6 +18,7 @@
 #include "configimpl.h"
 #include "httprequestfactoryimpl.h"
 #include "cipherfactoryimpl.h"
+#include "keymanagerimpl.h"
 
 void registerInstances()
 {
@@ -41,6 +42,9 @@ void registerInstances()
     std::shared_ptr<FileService> fileService(new FileServiceImpl(
         config, std::make_unique<FileApiCallerImpl>(httpRequestManager), std::make_unique<CipherFactoryImpl>()));
     Single<DependencyInjector>::instance().registerInstance<FileService>(fileService);
+
+    std::shared_ptr<KeyManager> keyManager(new KeyManagerImpl());
+    Single<DependencyInjector>::instance().registerInstance<KeyManager>(keyManager);
 }
 
 int main(int argc, char* argv[])

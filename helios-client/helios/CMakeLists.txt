@@ -21,6 +21,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:http,INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:config,INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:crypto,INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:keystorage,INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -34,6 +35,7 @@ target_link_libraries(${PROJECT_NAME}
     http
     config
     crypto
+    keystorage
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
