@@ -1,13 +1,14 @@
 #ifndef QKEYSTORAGECONTROLLERIMPL_H
 #define QKEYSTORAGECONTROLLERIMPL_H
 
-#include <QList>
+#include <QStringList>
 #include <QString>
 #include <memory>
 #include <cstdint>
 
 // Forward declarations
 class KeyManager;
+class QKeyStorageController;
 
 /**
  * @class QKeyStorageControllerImpl
@@ -28,19 +29,25 @@ public:
 
     /**
      * @brief Constructor
+     * @param publicImpl - Public implementation
      */
-    QKeyStorageControllerImpl();
+    QKeyStorageControllerImpl(QKeyStorageController* publicImpl);
 
 public:  // Forwarded from QKeyStorageController
-    QList<QString> keys(KeySize keySize) const;
-    bool           createKey(const QString& name, KeySize size);
-    bool           removeKey(const QString& name);
-    void           removeAllKeys();
+    QStringList keys(KeySize keySize) const;
+    bool        createKey(const QString& name, KeySize size);
+    bool        removeKey(const QString& name);
+    void        removeAllKeys();
 
 private:
     static uint16_t keySizeToByteLength(KeySize keySize);
 
 private:
+    /**
+     * @brief Public implementation
+     */
+    QKeyStorageController* m_publicImpl;
+
     /**
      * @brief Key manager instance
      */

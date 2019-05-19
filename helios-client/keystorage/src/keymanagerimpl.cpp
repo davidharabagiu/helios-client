@@ -132,6 +132,8 @@ void KeyManagerImpl::removeAllKeys()
 
 void KeyManagerImpl::persistKey(const QString& keyName, QFile& output) const
 {
+    static const char nullChar = '\0';
+
     auto it = m_keys.find(keyName);
     if (it == m_keys.cend())
     {
@@ -139,6 +141,7 @@ void KeyManagerImpl::persistKey(const QString& keyName, QFile& output) const
     }
 
     output.write(keyName.toUtf8());
+    output.write(&nullChar, 1);
     uint16_t keyLength = safe_integral_cast<uint16_t>(it->length());
     output.write(reinterpret_cast<char*>(&keyLength), sizeof(keyLength));
     output.write(*it);

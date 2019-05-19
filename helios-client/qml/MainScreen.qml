@@ -107,6 +107,18 @@ Rectangle {
         }
     }
 
+    KeyStorageController {
+        id: ksCtl
+
+        onKeysChanged: {
+            var list = ksCtl.keys(KeyStorageController.KEY_SIZE_256);
+            if (list.length === 0) {
+                keyListing.selectedIndex = -1;
+            }
+            keyListing.model = list;
+        }
+    }
+
     FileListing {
         id: fileListing
     }
@@ -225,6 +237,8 @@ Rectangle {
     }
 
     Rectangle {
+        id: fileListingContainer
+
         anchors {
             left: parent.left
             top: fileControls.bottom
@@ -232,10 +246,13 @@ Rectangle {
             topMargin: 5
             right: transfersPane.left
             rightMargin: 5
-            bottom: parent.bottom
+            bottom: keyListingContainer.top
             bottomMargin: 5
         }
+
         clip: true
+        border.width: 1
+        border.color: root.darkMode ? "#ffffff" : "#000000"
 
         ListView {
             anchors.fill: parent
@@ -243,6 +260,7 @@ Rectangle {
             delegate: Rectangle {
                 width: 300
                 height: 30
+                color: "transparent"
                 HLabel {
                     darkMode: root.darkMode
                     text: model.fileData.name + " " + (model.fileData.isDirectory ? "[dir]" : model.fileData.size)
@@ -257,6 +275,105 @@ Rectangle {
                             downloadDirPickDlg.fileToDownload = model.fileData.name;
                             downloadDirPickDlg.visible = true;
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: keyListingContainer
+
+        anchors {
+            left: parent.left
+            leftMargin: 5
+            right: transfersPane.left
+            rightMargin: 5
+            bottom: parent.bottom
+            bottomMargin: 5
+        }
+
+        height: 150
+
+        clip: true
+        border.width: 1
+        border.color: root.darkMode ? "#ffffff" : "#000000"
+
+        ListView {
+            id: keyListing
+
+            property int selectedIndex: -1
+            property string selectedKey
+
+            anchors.fill: parent
+            model: ksCtl.keys(KeyStorageController.KEY_SIZE_256)
+            delegate: Rectangle {
+                width: 300
+                height: 25
+                color: keyListing.selectedIndex === index ? "#777777" : "transparent"
+                HLabel {
+                    darkMode: root.darkMode
+                    text: modelData
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        keyListing.selectedIndex = index;
+                        keyListing.selectedKey = modelData;
+                    }
+                }
+            }
+        }
+
+        HTextInput {
+            id: keyNameInput
+            darkMode: root.darkMode
+            hint: "Key name"
+            anchors {
+                right: newKeyButton.left
+                rightMargin: 5
+                bottom: parent.bottom
+                bottomMargin: 5
+            }
+        }
+
+        HButton {
+            id: newKeyButton
+            anchors {
+                bottom: parent.bottom
+                bottomMargin: 5
+                right: parent.right
+                rightMargin: 5
+            }
+
+            onClicked: {
+                if (!ksCtl.createKey(keyNameInput.text, KeyStorageController.KEY_SIZE_256)) {
+                    errorDialog.text = "A key with this name already exists";
+                    errorDialog.visible = true;
+                }
+            }
+
+            darkMode: root.darkMode
+            label: "New key"
+        }
+
+        HButton {
+            id: removeKeyButton
+            anchors {
+                bottom: newKeyButton.top
+                bottomMargin: 5
+                right: parent.right
+                rightMargin: 5
+            }
+            darkMode: root.darkMode
+            label: "Remove key"
+
+            onClicked: {
+                if (keyListing.selectedIndex !== -1) {
+                    if (!ksCtl.removeKey(keyListing.selectedKey)) {
+                        errorDialog.text = "There is no key with the name " + keyListing.selectedKey;
+                        errorDialog.visible = true;
                     }
                 }
             }

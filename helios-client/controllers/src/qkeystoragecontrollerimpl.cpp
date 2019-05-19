@@ -1,12 +1,14 @@
 #include <cassert>
 
 #include "qkeystoragecontrollerimpl.h"
+#include "qkeystoragecontroller.h"
 #include "single.h"
 #include "dependencyinjector.h"
 #include "keymanager.h"
 #include "typeconversions.h"
 
-QKeyStorageControllerImpl::QKeyStorageControllerImpl()
+QKeyStorageControllerImpl::QKeyStorageControllerImpl(QKeyStorageController* publicImpl)
+    : m_publicImpl(publicImpl)
 {
     m_keyManager = Single<DependencyInjector>::instance().getInstance<KeyManager>();
     if (!m_keyManager)
@@ -15,9 +17,9 @@ QKeyStorageControllerImpl::QKeyStorageControllerImpl()
     }
 }
 
-QList<QString> QKeyStorageControllerImpl::keys(QKeyStorageControllerImpl::KeySize keySize) const
+QStringList QKeyStorageControllerImpl::keys(QKeyStorageControllerImpl::KeySize keySize) const
 {
-    QList<QString> result;
+    QStringList result;
 
     auto keys = m_keyManager->listKeys(keySizeToByteLength(keySize));
     result.reserve(safe_integral_cast<int>(keys.size()));
@@ -32,17 +34,22 @@ QList<QString> QKeyStorageControllerImpl::keys(QKeyStorageControllerImpl::KeySiz
 
 bool QKeyStorageControllerImpl::createKey(const QString& name, QKeyStorageControllerImpl::KeySize size)
 {
-    return m_keyManager->createKey(name.toStdString(), keySizeToByteLength(size));
+    bool result = m_keyManager->createKey(name.toStdString(), keySizeToByteLength(size));
+    emit m_publicImpl->keysChanged();
+    return result;
 }
 
 bool QKeyStorageControllerImpl::removeKey(const QString& name)
 {
-    return m_keyManager->removeKey(name.toStdString());
+    bool result = m_keyManager->removeKey(name.toStdString());
+    emit m_publicImpl->keysChanged();
+    return result;
 }
 
 void QKeyStorageControllerImpl::removeAllKeys()
 {
     m_keyManager->removeAllKeys();
+    emit m_publicImpl->keysChanged();
 }
 
 uint16_t QKeyStorageControllerImpl::keySizeToByteLength(QKeyStorageControllerImpl::KeySize keySize)

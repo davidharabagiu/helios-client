@@ -2,11 +2,11 @@
 
 QKeyStorageController::QKeyStorageController(QObject* parent)
     : QObject(parent)
-    , m_privateImpl(new QKeyStorageControllerImpl())
+    , m_privateImpl(new QKeyStorageControllerImpl(this))
 {
 }
 
-QList<QString> QKeyStorageController::keys(KeySize keySize) const
+QStringList QKeyStorageController::keys(KeySize keySize) const
 {
     return m_privateImpl->keys(static_cast<QKeyStorageControllerImpl::KeySize>(keySize));
 }

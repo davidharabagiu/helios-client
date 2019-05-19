@@ -2,7 +2,7 @@
 #define QKEYSTORAGECONTROLLER_H
 
 #include <QObject>
-#include <QList>
+#include <QStringList>
 #include <QString>
 #include <memory>
 
@@ -26,17 +26,17 @@ public:
         /**
          * @brief 128-bit keys
          */
-        _128 = static_cast<int>(QKeyStorageControllerImpl::KeySize::_128),
+        KEY_SIZE_128 = static_cast<int>(QKeyStorageControllerImpl::KeySize::_128),
 
         /**
          * @brief 192-bit keys
          */
-        _192 = static_cast<int>(QKeyStorageControllerImpl::KeySize::_192),
+        KEY_SIZE_192 = static_cast<int>(QKeyStorageControllerImpl::KeySize::_192),
 
         /**
          * @brief 256-bit keys
          */
-        _256 = static_cast<int>(QKeyStorageControllerImpl::KeySize::_256)
+        KEY_SIZE_256 = static_cast<int>(QKeyStorageControllerImpl::KeySize::_256)
     };
     Q_ENUM(KeySize);
 
@@ -49,9 +49,9 @@ public:
     /**
      * @brief Returns all the names of the keys which are of a given size
      * @param keySize - enum KeySize
-     * @return QList<QString>
+     * @return QStringList
      */
-    Q_INVOKABLE QList<QString> keys(KeySize keySize) const;
+    Q_INVOKABLE QStringList keys(KeySize keySize) const;
 
     /**
      * @brief Create a new key
@@ -72,6 +72,12 @@ public:
      * @brief Remove all keys
      */
     Q_INVOKABLE void removeAllKeys();
+
+signals:
+    /**
+     * @brief SIGNAL emitted when the list of keys has changed
+     */
+    void keysChanged();
 
 private:
     /**
