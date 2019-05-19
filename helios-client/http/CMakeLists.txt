@@ -29,9 +29,11 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc/private
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc/public
     PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:async,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME}
     ${QT5_LIBS}
     utils
+    async
 )
