@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 project(keystorage)
 
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
+include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
     "inc/public/keymanager.h"
@@ -19,5 +20,6 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
+    ${QT5_LIBS}
     utils
 )

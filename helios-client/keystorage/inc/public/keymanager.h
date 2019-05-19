@@ -36,10 +36,9 @@ public:
     /**
      * @brief Retrieve an existent key
      * @param name - Name of the key
-     * @param key - The requested key
-     * @return False is a key with this name does not exist
+     * @return The requested key. The vector has size zero if the key with the given name does not exist.
      */
-    virtual bool getKey(const std::string& name, uint8_t* key) const = 0;
+    virtual std::vector<uint8_t> getKey(const std::string& name) const = 0;
 
     /**
      * @brief Remove an existent key
