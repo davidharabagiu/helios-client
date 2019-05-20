@@ -1,5 +1,6 @@
 {
-    "serverUrl": "http://127.0.0.1:8000",
+    "serverUrl": "https://localhost:8443",
+    "ignoreSslErrors": true,
     "settingsAutoSaveInterval": 0,
     "uploadChunkSize": 4096,
     "numberOfTransferExecutors": 5,

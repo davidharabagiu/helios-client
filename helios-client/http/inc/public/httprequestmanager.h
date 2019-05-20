@@ -51,6 +51,12 @@ public:
      * @param callback - Reply callback
      */
     virtual void get(std::shared_ptr<UrlEncodedRequest> request, const HttpReplyCallback& callback) = 0;
+
+    /**
+     * @brief Specify whether or not to ignore SSL errors regarding security issues. By default this value is false.
+     * @param value - bool
+     */
+    virtual void setIgnoreSslErrors(bool value) = 0;
 };
 
 #endif  // HTTPREQUESTMANAGER_H

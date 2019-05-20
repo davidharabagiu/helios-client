@@ -11,6 +11,7 @@ add_library(${PROJECT_NAME}
     "src/urlencodedrequestimpl.cpp"
     "src/formdatarequestimpl.cpp"
     "src/httprequestfactoryimpl.cpp"
+    "src/qhttprequestmanagerimpl.cpp"
     "inc/public/httprequestmanager.h"
     "inc/public/httpstatus.h"
     "inc/public/urlencodedrequest.h"
@@ -23,6 +24,7 @@ add_library(${PROJECT_NAME}
     "inc/private/urlencodedrequestimpl.h"
     "inc/private/formdatarequestimpl.h"
     "inc/private/httprequestfactoryimpl.h"
+    "inc/private/qhttprequestmanagerimpl.h"
 )
 
 target_include_directories(${PROJECT_NAME}
