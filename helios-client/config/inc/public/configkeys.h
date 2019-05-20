@@ -12,6 +12,13 @@ namespace ConfigKeys
 const std::string kServerUrlKey = "serverUrl";
 
 /**
+ * @brief Ignore SSL errors (e.g. Untrusted certificate source). You should only set this value to true in a
+ * non-production environment, with a development server.
+ * @note Type = bool
+ */
+const std::string kIgnoreSslErrors = "ignoreSslErrors";
+
+/**
  * @brief Settings auto-save interval in milliseconds (0 = disable auto-save)
  * @note Type = uint
  */

@@ -19,6 +19,7 @@
 #include "httprequestfactoryimpl.h"
 #include "cipherfactoryimpl.h"
 #include "keymanagerimpl.h"
+#include "configkeys.h"
 
 void registerInstances()
 {
@@ -33,6 +34,7 @@ void registerInstances()
     Single<DependencyInjector>::instance().registerInstance<HttpRequestFactory>(httpRequestFactory);
 
     std::shared_ptr<HttpRequestManager> httpRequestManager(new HttpRequestManagerImpl());
+    httpRequestManager->setIgnoreSslErrors(config->get(ConfigKeys::kIgnoreSslErrors).toBool());
     Single<DependencyInjector>::instance().registerInstance<HttpRequestManager>(httpRequestManager);
 
     std::shared_ptr<UserService> userService(

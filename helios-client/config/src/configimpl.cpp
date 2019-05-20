@@ -33,6 +33,13 @@ ConfigImpl::ConfigImpl()
     }
     m_valuesRegistry.emplace(ConfigKeys::kServerUrlKey, serverUrlObj.toString());
 
+    auto ignoreSslErrorsObj = json[QString::fromStdString(ConfigKeys::kIgnoreSslErrors)];
+    if (ignoreSslErrorsObj.type() != QJsonValue::Bool)
+    {
+        qFatal("%s not found in %s", ConfigKeys::kIgnoreSslErrors.c_str(), Paths::kConfigFile.c_str());
+    }
+    m_valuesRegistry.emplace(ConfigKeys::kIgnoreSslErrors, ignoreSslErrorsObj.toBool());
+
     auto settingsAutoSaveIntervalObj = json[QString::fromStdString(ConfigKeys::kSettingsAutoSaveIntervalKey)];
     if (settingsAutoSaveIntervalObj.type() != QJsonValue::Double)
     {
