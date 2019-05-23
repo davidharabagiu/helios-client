@@ -9,12 +9,14 @@ add_executable(${PROJECT_NAME}
     "main.cpp"
 )
 
-target_include_directories(${PROJECT_NAME}
-    PRIVATE $<TARGET_PROPERTY:crypto,INCLUDE_DIRECTORIES>
+target_include_directories(${PROJECT_NAME} SYSTEM
+    PRIVATE $ENV{CRYPTOPP_DIR}/include/cryptopp
 )
 
+find_library(CRYPTOPP_LIB cryptopp $ENV{CRYPTOPP_DIR}/lib)
+
 target_link_libraries(${PROJECT_NAME}
-    crypto
+    ${CRYPTOPP_LIB}
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
