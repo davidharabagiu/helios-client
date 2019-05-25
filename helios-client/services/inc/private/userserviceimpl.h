@@ -8,6 +8,7 @@
 #include "userservice.h"
 #include "apicalldefs.h"
 #include "usersession.h"
+#include "executor.h"
 
 class UserApiCaller;
 class SettingsManager;
@@ -65,6 +66,12 @@ private:
      */
     void handleCheckToken(ApiCallStatus status, const UserSession& session);
 
+    /**
+     * @brief Check if the public and private user keys for the current user exist and update the public key stored on
+     * the server if necessary.
+     */
+    void checkUserKeys();
+
 private:
     /**
      * @brief Current user session. Valid only when logged in.
@@ -85,6 +92,11 @@ private:
      * @brief RSA utilities instance
      */
     std::unique_ptr<Rsa> m_rsa;
+
+    /**
+     * @brief Executor used for generating key pairs asynchronously
+     */
+    Executor m_rsaExecutor;
 };
 
 #endif  // USERSERVICEIMPL_H

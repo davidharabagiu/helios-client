@@ -2,7 +2,7 @@
 #include <QString>
 #include <QDebug>
 #include <algorithm>
-#include <future>
+#include <fstream>
 
 #include "userserviceimpl.h"
 #include "userapicaller.h"
@@ -10,6 +10,7 @@
 #include "userservicelistener.h"
 #include "useraccount.h"
 #include "rsa.h"
+#include "executor.h"
 
 namespace SettingsKeys
 {
@@ -125,12 +126,7 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
 
     if (success)
     {
-        std::async(std::launch::async, [this] {
-            m_apiCaller->getUserKey(m_session.authToken(), m_session.username(),
-                                    [](ApiCallStatus status, const std::string& key) {
-                                        qDebug() << static_cast<int>(status) << key.c_str();
-                                    });
-        });
+        checkUserKeys();
     }
 }
 
@@ -198,6 +194,7 @@ void UserServiceImpl::handleCheckToken(ApiCallStatus status, const UserSession& 
         {
             m_session = session;
             Observable::notifyAll(&UserServiceListener::loginCompleted, true, std::string());
+            checkUserKeys();
         }
     }
     else
@@ -206,4 +203,46 @@ void UserServiceImpl::handleCheckToken(ApiCallStatus status, const UserSession& 
         m_settingsManager->reset(SettingsKeys::kAuthToken);
         m_settingsManager->save();
     }
+}
+
+void UserServiceImpl::checkUserKeys()
+{
+    // Make a copy of the current session in case it changes
+    auto session = m_session;
+
+    m_rsaExecutor.post([this, session] {
+        std::string publicKeyFile(session.username() + ".pubk");
+        std::string privateKeyFile(session.username() + ".pk");
+        std::string key;
+
+        // Check if we have a generated key pair for this user
+        std::ifstream publicKeyInStream(publicKeyFile);
+        std::ifstream privateKeyInStream(privateKeyFile);
+        if (publicKeyInStream.good() && privateKeyInStream.good())
+        {
+            // All good, read the public key
+            publicKeyInStream >> key;
+            publicKeyInStream.close();
+            privateKeyInStream.close();
+        }
+        else
+        {
+            // No keys available, generate pair and read the public key
+            publicKeyInStream.close();
+            privateKeyInStream.close();
+            m_rsa->generateKeyPair(privateKeyFile, publicKeyFile);
+            std::ifstream _publicKeyInStream(publicKeyFile);
+            _publicKeyInStream >> key;
+            _publicKeyInStream.close();
+        }
+        m_apiCaller->getUserKey(session.authToken(), session.username(),
+                                [this, key, session](ApiCallStatus status, const std::string& aKey) {
+                                    if (session == m_session && ((status == ApiCallStatus::SUCCESS && key != aKey) ||
+                                                                 status == ApiCallStatus::NO_KEY_SPECIFIED))
+                                    {
+                                        // No server-side key or server-side key not up-to-date
+                                        // TODO: Send up-to-date key
+                                    }
+                                });
+    });
 }
