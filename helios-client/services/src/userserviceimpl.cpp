@@ -235,14 +235,16 @@ void UserServiceImpl::checkUserKeys()
             _publicKeyInStream >> key;
             _publicKeyInStream.close();
         }
-        m_apiCaller->getUserKey(session.authToken(), session.username(),
-                                [this, key, session](ApiCallStatus status, const std::string& aKey) {
-                                    if (session == m_session && ((status == ApiCallStatus::SUCCESS && key != aKey) ||
-                                                                 status == ApiCallStatus::NO_KEY_SPECIFIED))
-                                    {
-                                        // No server-side key or server-side key not up-to-date
-                                        // TODO: Send up-to-date key
-                                    }
-                                });
+        m_apiCaller->getUserKey(
+            session.authToken(), session.username(),
+            [this, key, session](ApiCallStatus status, const std::string& aKey) {
+                if (session == m_session &&
+                    ((status == ApiCallStatus::SUCCESS && key != aKey) || status == ApiCallStatus::NO_KEY_SPECIFIED))
+                {
+                    // No server-side key or server-side key not up-to-date
+
+                    m_apiCaller->setUserKey(session.authToken(), key, [](ApiCallStatus /*status*/) {});
+                }
+            });
     });
 }
