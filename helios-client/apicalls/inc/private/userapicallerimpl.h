@@ -31,6 +31,8 @@ public:  // from UserApiCaller
                     const ApiCallbacks::CheckTokenCallback& callback) const override;
     void getUserKey(const std::string& token, const std::string& username,
                     const ApiCallbacks::GetUserKeyCallback& callback) const override;
+    void setUserKey(const std::string& token, const std::string& key,
+                    const ApiCallbacks::SetUserKeyCallback& callback) const override;
 
 private:
     /**

@@ -7,6 +7,7 @@
 #include "logoutcall.h"
 #include "checktokencall.h"
 #include "getuserkeycall.h"
+#include "setuserkeycall.h"
 #include "begindownloadcall.h"
 #include "beginuploadcall.h"
 #include "createdirectorycall.h"

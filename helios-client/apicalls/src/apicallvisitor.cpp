@@ -88,3 +88,8 @@ void ApiCallVisitor::visit(GetUserKeyCall* call) const
 {
     handleGet(call);
 }
+
+void ApiCallVisitor::visit(SetUserKeyCall* call) const
+{
+    handlePost(call);
+}

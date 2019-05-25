@@ -9,6 +9,7 @@
 #include "logoutcall.h"
 #include "checktokencall.h"
 #include "getuserkeycall.h"
+#include "setuserkeycall.h"
 
 UserApiCallerImpl::UserApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
@@ -46,5 +47,12 @@ void UserApiCallerImpl::getUserKey(const std::string& token, const std::string& 
                                    const ApiCallbacks::GetUserKeyCallback& callback) const
 {
     auto call = new GetUserKeyCall(token, username, callback);
+    call->send(m_visitor);
+}
+
+void UserApiCallerImpl::setUserKey(const std::string& token, const std::string& key,
+                                   const ApiCallbacks::SetUserKeyCallback& callback) const
+{
+    auto call = new SetUserKeyCall(token, key, callback);
     call->send(m_visitor);
 }

@@ -55,6 +55,11 @@ using CheckTokenCallback = std::function<void(ApiCallStatus)>;
 using GetUserKeyCallback = std::function<void(ApiCallStatus, const std::string&)>;
 
 /**
+ * @brief Set user key callback function. Receives the call status.
+ */
+using SetUserKeyCallback = std::function<void(ApiCallStatus)>;
+
+/**
  * @brief Create directory callback function. Receives the call status.
  */
 using CreateDirectoryCallback = std::function<void(ApiCallStatus)>;

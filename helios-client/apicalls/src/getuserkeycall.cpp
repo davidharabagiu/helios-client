@@ -77,5 +77,5 @@ void GetUserKeyCall::receive(HttpStatus status, const std::vector<uint8_t>& repl
 
     qCritical() << "Unhandled HTTP reply with status " << static_cast<int>(status) << " and content "
                 << replyStr.c_str();
-    m_callback(ApiCallStatus::UNKNOWN_ERROR, 0);
+    m_callback(ApiCallStatus::UNKNOWN_ERROR, "");
 }
