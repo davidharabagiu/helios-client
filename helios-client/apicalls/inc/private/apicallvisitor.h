@@ -8,6 +8,7 @@ class RegisterUserCall;
 class LoginCall;
 class LogoutCall;
 class CheckTokenCall;
+class GetUserKeyCall;
 class CreateDirectoryCall;
 class BeginUploadCall;
 class UploadCall;
@@ -56,6 +57,12 @@ public:
      * @param call - CreateDirectoryCall
      */
     void visit(CreateDirectoryCall* call) const;
+
+    /**
+     * @brief Visit GetUserKeyCall
+     * @param call - GetUserKeyCall
+     */
+    void visit(GetUserKeyCall* call) const;
 
     /**
      * @brief Visit BeginUploadCall

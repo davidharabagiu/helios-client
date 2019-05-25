@@ -47,6 +47,8 @@ add_library(${PROJECT_NAME}
     "src/checktokencall.cpp"
     "inc/private/isdircall.h"
     "src/isdircall.cpp"
+    "inc/private/getuserkeycall.h"
+    "src/getuserkeycall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

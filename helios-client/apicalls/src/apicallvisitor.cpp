@@ -1,17 +1,6 @@
 #include <QDebug>
 
 #include "apicallvisitor.h"
-#include "registerusercall.h"
-#include "logincall.h"
-#include "logoutcall.h"
-#include "createdirectorycall.h"
-#include "beginuploadcall.h"
-#include "uploadcall.h"
-#include "begindownloadcall.h"
-#include "downloadcall.h"
-#include "endtransfercall.h"
-#include "getfilesizecall.h"
-#include "listcall.h"
 #include "httprequestmanager.h"
 #include "httpstatus.h"
 
@@ -91,6 +80,11 @@ void ApiCallVisitor::visit(CheckTokenCall* call) const
 }
 
 void ApiCallVisitor::visit(IsDirCall* call) const
+{
+    handleGet(call);
+}
+
+void ApiCallVisitor::visit(GetUserKeyCall* call) const
 {
     handleGet(call);
 }

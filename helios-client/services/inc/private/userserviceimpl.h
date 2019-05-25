@@ -11,6 +11,7 @@
 
 class UserApiCaller;
 class SettingsManager;
+class Rsa;
 
 /**
  * @class UserServiceImpl
@@ -23,9 +24,10 @@ public:
      * @brief Constructor
      * @param userApiCaller - Api caller for user operations
      * @param settingsManager - Settings manager
+     * @param rsa - Rsa utilities instance
      */
     UserServiceImpl(std::unique_ptr<UserApiCaller>          userApiCaller,
-                    const std::shared_ptr<SettingsManager>& settingsManager);
+                    const std::shared_ptr<SettingsManager>& settingsManager, std::unique_ptr<Rsa> rsa);
 
 public:  // from UserService
     const UserSession& session() const override;
@@ -78,6 +80,11 @@ private:
      * @brief Settings manager
      */
     std::shared_ptr<SettingsManager> m_settingsManager;
+
+    /**
+     * @brief RSA utilities instance
+     */
+    std::unique_ptr<Rsa> m_rsa;
 };
 
 #endif  // USERSERVICEIMPL_H

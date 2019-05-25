@@ -20,6 +20,7 @@
 #include "cipherfactoryimpl.h"
 #include "keymanagerimpl.h"
 #include "configkeys.h"
+#include "rsaimpl.h"
 
 void registerInstances()
 {
@@ -37,8 +38,8 @@ void registerInstances()
     httpRequestManager->setIgnoreSslErrors(config->get(ConfigKeys::kIgnoreSslErrors).toBool());
     Single<DependencyInjector>::instance().registerInstance<HttpRequestManager>(httpRequestManager);
 
-    std::shared_ptr<UserService> userService(
-        new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager));
+    std::shared_ptr<UserService> userService(new UserServiceImpl(
+        std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager, std::make_unique<RsaImpl>()));
     Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
 
     std::shared_ptr<KeyManager> keyManager(new KeyManagerImpl());

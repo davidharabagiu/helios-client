@@ -1,12 +1,15 @@
 #include <QVariant>
 #include <QString>
+#include <QDebug>
 #include <algorithm>
+#include <future>
 
 #include "userserviceimpl.h"
 #include "userapicaller.h"
 #include "settingsmanager.h"
 #include "userservicelistener.h"
 #include "useraccount.h"
+#include "rsa.h"
 
 namespace SettingsKeys
 {
@@ -21,9 +24,10 @@ const std::string kAuthToken = "token";
 }  // namespace SettingsKeys
 
 UserServiceImpl::UserServiceImpl(std::unique_ptr<UserApiCaller>          userApiCaller,
-                                 const std::shared_ptr<SettingsManager>& settingsManager)
+                                 const std::shared_ptr<SettingsManager>& settingsManager, std::unique_ptr<Rsa> rsa)
     : m_apiCaller(std::move(userApiCaller))
     , m_settingsManager(settingsManager)
+    , m_rsa(std::move(rsa))
 {
 }
 
@@ -117,6 +121,16 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
         m_settingsManager->set(SettingsKeys::kUsername, QString::fromStdString(session.username()));
         m_settingsManager->set(SettingsKeys::kAuthToken, QString::fromStdString(session.authToken()));
         m_settingsManager->save();
+    }
+
+    if (success)
+    {
+        std::async(std::launch::async, [this] {
+            m_apiCaller->getUserKey(m_session.authToken(), m_session.username(),
+                                    [](ApiCallStatus status, const std::string& key) {
+                                        qDebug() << static_cast<int>(status) << key.c_str();
+                                    });
+        });
     }
 }
 

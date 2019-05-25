@@ -23,6 +23,7 @@ enum class ApiCallStatus
     INVALID_PATH,
     INVALID_TRANSFER_ID,
     INVALID_REPLY_FORMAT,
+    NO_KEY_SPECIFIED,
     UNKNOWN_ERROR
 };
 
@@ -47,6 +48,11 @@ using LogoutCallback = std::function<void(ApiCallStatus)>;
  * @brief Check token callback function. Receives the call status.
  */
 using CheckTokenCallback = std::function<void(ApiCallStatus)>;
+
+/**
+ * @brief Get user key callback function. Receives the call status and the key in base64 format.
+ */
+using GetUserKeyCallback = std::function<void(ApiCallStatus, const std::string&)>;
 
 /**
  * @brief Create directory callback function. Receives the call status.

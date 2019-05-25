@@ -29,6 +29,8 @@ public:  // from UserApiCaller
     void logout(const std::string& token, const ApiCallbacks::LogoutCallback& callback) const override;
     void checkToken(const std::string& username, const std::string& token,
                     const ApiCallbacks::CheckTokenCallback& callback) const override;
+    void getUserKey(const std::string& token, const std::string& username,
+                    const ApiCallbacks::GetUserKeyCallback& callback) const override;
 
 private:
     /**

@@ -51,6 +51,15 @@ public:
      */
     virtual void checkToken(const std::string& username, const std::string& token,
                             const ApiCallbacks::CheckTokenCallback& callback) const = 0;
+
+    /**
+     * @brief Get the public key of a user
+     * @param token - Authentication token
+     * @param username - Username of the key owner
+     * @param callback - GetUserKeyCallback
+     */
+    virtual void getUserKey(const std::string& token, const std::string& username,
+                            const ApiCallbacks::GetUserKeyCallback& callback) const = 0;
 };
 
 #endif  // USERAPICALLER_H
