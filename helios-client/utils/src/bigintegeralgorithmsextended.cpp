@@ -2,15 +2,12 @@
 
 #include "bigintegeralgorithmsextended.h"
 #include "typeconversions.h"
+#include "random.h"
 
 namespace BigIntegerAlgorithms
 {
-BigUnsigned random(const BigUnsigned& min, const BigUnsigned& max, bool odd)
+BigUnsigned random(const std::shared_ptr<Random>& generator, const BigUnsigned& min, const BigUnsigned& max, bool odd)
 {
-    static std::random_device                     randomDevice;
-    static std::mt19937                           mersenneTwister(randomDevice());
-    static std::uniform_int_distribution<uint8_t> distribution;
-
     const auto& lim        = max - min;
     auto        totalBytes = lim.getLength() * sizeof(BigUnsigned::Blk);
     auto        totalBits  = totalBytes * 8;
@@ -40,7 +37,7 @@ BigUnsigned random(const BigUnsigned& min, const BigUnsigned& max, bool odd)
         for (unsigned long i = 0; i < totalBytes; ++i)
         {
             randomNumber <<= 8;
-            randomNumber |= distribution(mersenneTwister);
+            randomNumber |= static_cast<uint8_t>(generator->get());
         }
         randomNumber &= zeroBitMask;
         if (randomNumber <= lim)
@@ -55,7 +52,7 @@ BigUnsigned random(const BigUnsigned& min, const BigUnsigned& max, bool odd)
     }
 }
 
-bool isProbablyPrime(const BigUnsigned& num, int numberOfRounds)
+bool isProbablyPrime(const std::shared_ptr<Random>& generator, const BigUnsigned& num, int numberOfRounds)
 {
     auto num_m1 = num - 1;
     auto num_m2 = num - 2;
@@ -68,7 +65,7 @@ bool isProbablyPrime(const BigUnsigned& num, int numberOfRounds)
     }
     for (int i = 0; i != numberOfRounds; ++i)
     {
-        const auto& a = random(2, num_m2);
+        const auto& a = random(generator, 2, num_m2);
         auto        x = modexp(a, d, num);
         if (x == 1 || x == num_m1)
         {

@@ -1,7 +1,10 @@
 #include <chrono>
 
 #include "isaac/isaac64wrapper.h"
+
+extern "C" {
 #include "isaac/isaac64.h"
+}
 
 Isaac64Wrappwer::Isaac64Wrappwer()
 {

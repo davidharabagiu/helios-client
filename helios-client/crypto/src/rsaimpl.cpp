@@ -6,12 +6,15 @@
 #include "rsaimpl.h"
 #include "typeconversions.h"
 #include "bigintegeralgorithmsextended.h"
+#include "random.h"
+#include "randomfactoryimpl.h"
 
 const BigUnsigned RsaImpl::s_kPublicExponent      = BigUnsigned(65537);
 const int         RsaImpl::s_kKeyLength           = 1024;
 const int         RsaImpl::s_kPrimalityTestRounds = 6;
 
 RsaImpl::RsaImpl()
+    : m_rng(RandomFactoryImpl().isaac64())
 {
 }
 
@@ -157,14 +160,14 @@ std::vector<uint8_t> RsaImpl::decrypt(const std::string& privateKeyFile, const s
     return result;
 }
 
-BigUnsigned RsaImpl::randomPrime()
+BigUnsigned RsaImpl::randomPrime() const
 {
     const auto& min = BigUnsigned(6074001) << (s_kKeyLength / 2 - 30);
     const auto& max = (BigUnsigned(1) << (s_kKeyLength / 2)) - 1;
     for (;;)
     {
-        const auto& num = BigIntegerAlgorithms::random(min, max, true);
-        if (BigIntegerAlgorithms::isProbablyPrime(num, s_kPrimalityTestRounds))
+        const auto& num = BigIntegerAlgorithms::random(m_rng, min, max, true);
+        if (BigIntegerAlgorithms::isProbablyPrime(m_rng, num, s_kPrimalityTestRounds))
         {
             return num;
         }

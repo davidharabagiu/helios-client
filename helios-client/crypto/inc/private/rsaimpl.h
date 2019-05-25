@@ -5,6 +5,9 @@
 
 #include "rsa.h"
 
+// Forward declarations
+class Random;
+
 /**
  * @class RsaImpl
  * @brief RsaUtilities home-made implementation
@@ -27,9 +30,14 @@ private:
      * @brief Generate a random k-bit prime number greater than sqrt(2) * 2^(k-1)
      * @return BigUnsigned
      */
-    static BigUnsigned randomPrime();
+    BigUnsigned randomPrime() const;
 
 private:
+    /**
+     * @brief Random number generator instance
+     */
+    std::shared_ptr<Random> m_rng;
+
     /**
      * @brief Fixed public exponent
      */

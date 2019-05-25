@@ -22,6 +22,7 @@ add_library(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
     PRIVATE $<TARGET_PROPERTY:async,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:crypto,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
@@ -33,4 +34,5 @@ find_library(BIGINT_LIB bigint $ENV{BIGINT_DIR}/lib)
 target_link_libraries(${PROJECT_NAME}
     ${BIGINT_LIB}
     async
+    crypto
 )
