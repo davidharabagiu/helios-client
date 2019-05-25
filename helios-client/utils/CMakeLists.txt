@@ -15,6 +15,8 @@ add_library(${PROJECT_NAME}
     "inc/observable.h"
     "inc/pathutils.h"
     "src/pathutils.cpp"
+    "inc/bigintegeralgorithmsextended.h"
+    "src/bigintegeralgorithmsextended.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -22,6 +24,13 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:async,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
+target_include_directories(${PROJECT_NAME} SYSTEM
+    PRIVATE $ENV{BIGINT_DIR}/include
+)
+
+find_library(BIGINT_LIB bigint $ENV{BIGINT_DIR}/lib)
+
 target_link_libraries(${PROJECT_NAME}
+    ${BIGINT_LIB}
     async
 )

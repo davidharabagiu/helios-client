@@ -3,11 +3,14 @@ cmake_minimum_required(VERSION 3.1)
 project(crypto)
 
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
+include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
     "inc/public/cipher.h"
     "inc/public/cipherfactory.h"
-    "inc/public/rsautilities.h"
+    "inc/public/rsa.h"
+    "inc/private/rsaimpl.h"
+    "src/rsaimpl.cpp"
     "inc/private/cipherfactoryimpl.h"
     "src/cipherfactoryimpl.cpp"
     "inc/private/aes/aescipher.h"
@@ -23,6 +26,14 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<TARGET_PROPERTY:utils,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
+target_include_directories(${PROJECT_NAME} SYSTEM
+    PRIVATE $ENV{BIGINT_DIR}/include
+)
+
+find_library(BIGINT_LIB bigint $ENV{BIGINT_DIR}/lib)
+
 target_link_libraries(${PROJECT_NAME}
+    ${QT5_LIBS}
+    ${BIGINT_LIB}
     utils
 )
