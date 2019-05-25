@@ -2,12 +2,17 @@
 #define KEYMANAGERIMPL_H
 
 #include <cstdint>
+#include <memory>
 #include <QMap>
 #include <QByteArray>
 #include <QString>
 #include <QFile>
 
 #include "keymanager.h"
+
+// Forward declarations
+class RandomFactory;
+class Random;
 
 /**
  * @class KeyManagerImpl
@@ -16,7 +21,11 @@
 class KeyManagerImpl : public KeyManager
 {
 public:
-    KeyManagerImpl();
+    /**
+     * @brief Constructor
+     * @param randomFactory - RNG factory
+     */
+    KeyManagerImpl(std::unique_ptr<RandomFactory> randomFactory);
 
 public:  // from KeyManager
     std::vector<std::string> listKeys(uint16_t length) const;
@@ -33,6 +42,11 @@ private:
      * @brief Cached keys mapped by name
      */
     QMap<QString, QByteArray> m_keys;
+
+    /**
+     * @brief RNG instance
+     */
+    std::shared_ptr<Random> m_rng;
 };
 
 #endif  // KEYMANAGERIMPL_H

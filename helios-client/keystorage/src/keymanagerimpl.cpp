@@ -1,12 +1,14 @@
 #include <cstring>
-#include <random>
 #include <limits>
 
 #include "keymanagerimpl.h"
 #include "paths.h"
 #include "typeconversions.h"
+#include "random.h"
+#include "randomfactory.h"
 
-KeyManagerImpl::KeyManagerImpl()
+KeyManagerImpl::KeyManagerImpl(std::unique_ptr<RandomFactory> rngFactory)
+    : m_rng(rngFactory->isaac64())
 {
     QFile storageFile(QString::fromStdString(Paths::kKeyStorageFile));
     if (!storageFile.exists())
@@ -64,16 +66,11 @@ bool KeyManagerImpl::createKey(const std::string& name, uint16_t length)
         return false;
     }
 
-    std::random_device                     randomDevice;
-    std::mt19937                           mersenneTwister(randomDevice());
-    std::uniform_int_distribution<uint8_t> distribution(std::numeric_limits<uint8_t>::min(),
-                                                        std::numeric_limits<uint8_t>::max());
-
     QByteArray key;
     key.reserve(length);
     for (uint16_t i = 0; i < length; ++i)
     {
-        key.push_back(static_cast<char>(distribution(mersenneTwister)));
+        key.push_back(static_cast<char>(m_rng->get()));
     }
 
     QString keyName(QString::fromStdString(name));

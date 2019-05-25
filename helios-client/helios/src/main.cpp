@@ -21,6 +21,7 @@
 #include "keymanagerimpl.h"
 #include "configkeys.h"
 #include "rsaimpl.h"
+#include "randomfactoryimpl.h"
 
 void registerInstances()
 {
@@ -42,7 +43,7 @@ void registerInstances()
         std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager, std::make_unique<RsaImpl>()));
     Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
 
-    std::shared_ptr<KeyManager> keyManager(new KeyManagerImpl());
+    std::shared_ptr<KeyManager> keyManager(new KeyManagerImpl(std::make_unique<RandomFactoryImpl>()));
     Single<DependencyInjector>::instance().registerInstance<KeyManager>(keyManager);
 
     std::shared_ptr<FileService> fileService(
