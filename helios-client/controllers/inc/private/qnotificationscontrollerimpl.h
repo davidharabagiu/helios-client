@@ -44,6 +44,8 @@ public:  // Forwarded from QNotificationsController
     void         setAuthenticationToken(const QString& newValue);
     void         resetAuthenticationToken();
     QVariantList notifications() const;
+    void         dismissNotification(const QString& notificationId);
+    void         dismissAllNotifications();
 
 public:  // From NotificationServiceListener
     void notificationListUpdated() override;

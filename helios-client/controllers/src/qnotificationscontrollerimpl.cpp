@@ -47,6 +47,16 @@ QVariantList QNotificationsControllerImpl::notifications() const
     return m_notifications;
 }
 
+void QNotificationsControllerImpl::dismissNotification(const QString& notificationId)
+{
+    m_service->dismissNotification(notificationId.toStdString());
+}
+
+void QNotificationsControllerImpl::dismissAllNotifications()
+{
+    m_service->dismissAllNotifications();
+}
+
 void QNotificationsControllerImpl::notificationListUpdated()
 {
     QVariantList newNotifications;

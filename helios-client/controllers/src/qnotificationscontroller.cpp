@@ -22,3 +22,13 @@ QVariantList QNotificationsController::notifications() const
 {
     return m_privateImpl->notifications();
 }
+
+void QNotificationsController::dismissNotification(const QString& notificationId)
+{
+    m_privateImpl->dismissNotification(notificationId);
+}
+
+void QNotificationsController::dismissAllNotifications()
+{
+    m_privateImpl->dismissAllNotifications();
+}

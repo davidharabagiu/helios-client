@@ -53,6 +53,17 @@ public:
      */
     QVariantList notifications() const;
 
+    /**
+     * @brief Dismiss notification by notification id
+     * @param notificationId - notification id
+     */
+    Q_INVOKABLE void dismissNotification(const QString& notificationId);
+
+    /**
+     * @brief Dismiss all notifications
+     */
+    Q_INVOKABLE void dismissAllNotifications();
+
 signals:
     /**
      * @brief SIGNAL emitted when notifications changes
