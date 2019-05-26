@@ -7,6 +7,10 @@
 
 #include "filetransfer.h"
 
+/**
+ * @class QFileTransfer
+ * @brief Qt wrapper over FileTransfer
+ */
 class QFileTransfer
 {
     Q_GADGET
