@@ -94,6 +94,11 @@ void ApiCallVisitor::visit(DismissNotificationCall* call) const
     handlePost(call);
 }
 
+void ApiCallVisitor::visit(DismissAllNotificationsCall* call) const
+{
+    handlePost(call);
+}
+
 void ApiCallVisitor::visit(GetUserKeyCall* call) const
 {
     handleGet(call);

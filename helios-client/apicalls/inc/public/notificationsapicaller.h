@@ -34,6 +34,14 @@ public:
      */
     virtual void dismissNotification(const std::string& authToken, const std::string& notificationId,
                                      const ApiCallbacks::DismissNotificationCallback& callback) const = 0;
+
+    /**
+     * @brief Dismiss all notifications
+     * @param authToken - Authentication token
+     * @param callback - DismissAllNotificationsCallback
+     */
+    virtual void dismissAllNotifications(const std::string&                                   authToken,
+                                         const ApiCallbacks::DismissAllNotificationsCallback& callback) const = 0;
 };
 
 #endif  // NOTIFICATIONSAPICALLER_H

@@ -23,6 +23,7 @@ class MoveCall;
 class IsDirCall;
 class NotificationsCall;
 class DismissNotificationCall;
+class DismissAllNotificationsCall;
 
 /**
  * @class ApiCallVisitor
@@ -150,6 +151,12 @@ public:
      * @param call - DismissNotificationCall
      */
     void visit(DismissNotificationCall* call) const;
+
+    /**
+     * @brief DismissAllNotificationsCall
+     * @param call - DismissAllNotificationsCall
+     */
+    void visit(DismissAllNotificationsCall* call) const;
 
 private:
     /**

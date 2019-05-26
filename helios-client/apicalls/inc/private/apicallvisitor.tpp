@@ -22,6 +22,7 @@
 #include "isdircall.h"
 #include "notificationscall.h"
 #include "dismissnotificationcall.h"
+#include "dismissallnotificationscall.h"
 #include "typeutils.h"
 
 template <typename Call>

@@ -133,6 +133,11 @@ using NotificationsCallback =
  * @brief Dismiss notification callback function. Receives the call status.
  */
 using DismissNotificationCallback = std::function<void(ApiCallStatus)>;
+
+/**
+ * @brief Dismiss all notification callback function. Receives the call status.
+ */
+using DismissAllNotificationsCallback = std::function<void(ApiCallStatus)>;
 }  // namespace ApiCallbacks
 
 #endif  // APICALLDEFS_H

@@ -25,6 +25,8 @@ public:  // from NotificationsApiCaller
                        const ApiCallbacks::NotificationsCallback& callback) const override;
     void dismissNotification(const std::string& authToken, const std::string& notificationId,
                              const ApiCallbacks::DismissNotificationCallback& callback) const override;
+    void dismissAllNotifications(const std::string&                                   authToken,
+                                 const ApiCallbacks::DismissAllNotificationsCallback& callback) const override;
 
 private:
     /**

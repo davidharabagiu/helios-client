@@ -58,6 +58,8 @@ add_library(${PROJECT_NAME}
     "src/notificationscall.cpp"
     "inc/private/dismissnotificationcall.h"
     "src/dismissnotificationcall.cpp"
+    "inc/private/dismissallnotificationscall.h"
+    "src/dismissallnotificationscall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
