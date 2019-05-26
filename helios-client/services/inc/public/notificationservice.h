@@ -26,6 +26,17 @@ public:
      * @return std::vector<Notification>
      */
     virtual std::vector<Notification> notifications() const = 0;
+
+    /**
+     * @brief Dismiss a notification with the given id
+     * @param notificationId - Notification id
+     */
+    virtual void dismissNotification(const std::string& notificationId) = 0;
+
+    /**
+     * @brief Dismiss all notifications
+     */
+    virtual void dismissAllNotifications() = 0;
 };
 
 #endif  // NOTIFICATIONSERVICE_H

@@ -40,10 +40,12 @@ void NotificationServiceImpl::refresh()
         return;
     }
 
+    auto authToken = m_authToken;
     m_api->notifications(
-        m_authToken, [this](ApiCallStatus                                                              status,
-                            const std::vector<std::tuple<std::string, std::string, NotificationType>>& result) {
-            if (status == ApiCallStatus::SUCCESS && enabled())
+        authToken,
+        [this, authToken](ApiCallStatus                                                              status,
+                          const std::vector<std::tuple<std::string, std::string, NotificationType>>& result) {
+            if (status == ApiCallStatus::SUCCESS && m_authToken == authToken)
             {
                 std::lock_guard<std::mutex> lock(m_mutex);
                 m_notifications.clear();
@@ -69,4 +71,34 @@ std::vector<Notification> NotificationServiceImpl::notifications() const
         result.push_back(el.second);
     }
     return result;
+}
+
+void NotificationServiceImpl::dismissNotification(const std::string& notificationId)
+{
+    auto authToken = m_authToken;
+    m_api->dismissNotification(authToken, notificationId, [this, authToken, notificationId](ApiCallStatus status) {
+        if (status == ApiCallStatus::SUCCESS && authToken == m_authToken)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            auto                        it = m_notifications.find(notificationId);
+            if (it != m_notifications.end())
+            {
+                m_notifications.erase(it);
+                Observable::notifyAll(&NotificationServiceListener::notificationListUpdated);
+            }
+        }
+    });
+}
+
+void NotificationServiceImpl::dismissAllNotifications()
+{
+    auto authToken = m_authToken;
+    m_api->dismissAllNotifications(authToken, [this, authToken](ApiCallStatus status) {
+        if (status == ApiCallStatus::SUCCESS && authToken == m_authToken)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_notifications.clear();
+            Observable::notifyAll(&NotificationServiceListener::notificationListUpdated);
+        }
+    });
 }

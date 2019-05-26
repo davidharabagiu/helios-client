@@ -35,6 +35,8 @@ public:  // from AuthenticatedServiceInterface
 public:  // from NotificationService
     void                      refresh() override;
     std::vector<Notification> notifications() const override;
+    void                      dismissNotification(const std::string& notificationId) override;
+    void                      dismissAllNotifications() override;
 
 private:
     /**
