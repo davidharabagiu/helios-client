@@ -24,6 +24,9 @@ add_library(${PROJECT_NAME}
     "src/qkeystoragecontroller.cpp"
     "inc/private/qkeystoragecontrollerimpl.h"
     "src/qkeystoragecontrollerimpl.cpp"
+    "inc/public/qnotificationscontroller.h"
+    "src/qnotificationscontroller.cpp"
+    "inc/private/qnotificationscontrollerimpl.h"
 )
 
 target_include_directories(${PROJECT_NAME}

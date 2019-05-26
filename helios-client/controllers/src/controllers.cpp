@@ -5,6 +5,7 @@
 #include "qsettingscontroller.h"
 #include "qremotefilesystemcontroller.h"
 #include "qkeystoragecontroller.h"
+#include "qnotificationscontroller.h"
 
 void Controllers::registerQmlTypes(const char* uri)
 {
@@ -12,4 +13,5 @@ void Controllers::registerQmlTypes(const char* uri)
     qmlRegisterType<QSettingsController>(uri, 1, 0, "SettingsController");
     qmlRegisterType<QRemoteFileSystemController>(uri, 1, 0, "RemoteFileSystemController");
     qmlRegisterType<QKeyStorageController>(uri, 1, 0, "KeyStorageController");
+    qmlRegisterType<QNotificationsController>(uri, 1, 0, "NotificationsController");
 }
