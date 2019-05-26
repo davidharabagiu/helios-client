@@ -70,6 +70,14 @@ ConfigImpl::ConfigImpl()
     }
     m_valuesRegistry.emplace(ConfigKeys::kNumberOfCipherExecutors,
                              safe_integral_cast<uint>(numberOfCipherExecutorsObj.toInt()));
+
+    auto notificationsRefreshIntervalObj = json[QString::fromStdString(ConfigKeys::kNotificationsRefreshInterval)];
+    if (notificationsRefreshIntervalObj.type() != QJsonValue::Double)
+    {
+        qFatal("%s not found in %s", ConfigKeys::kNotificationsRefreshInterval.c_str(), Paths::kConfigFile.c_str());
+    }
+    m_valuesRegistry.emplace(ConfigKeys::kNotificationsRefreshInterval,
+                             safe_integral_cast<uint>(notificationsRefreshIntervalObj.toInt()));
 }
 
 QVariant ConfigImpl::operator[](const std::string& key) const

@@ -4,11 +4,14 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <mutex>
 
 #include "notificationservice.h"
+#include "timer.h"
 
 // Forward declarations
 class NotificationsApiCaller;
+class Config;
 
 /**
  * @class NotificationServiceImpl
@@ -17,7 +20,12 @@ class NotificationsApiCaller;
 class NotificationServiceImpl : public NotificationService
 {
 public:
-    NotificationServiceImpl(std::unique_ptr<NotificationsApiCaller> api);
+    /**
+     * @brief Constructor
+     * @param api - Notifications API instance
+     * @param config - Config instance
+     */
+    NotificationServiceImpl(std::unique_ptr<NotificationsApiCaller> api, std::shared_ptr<Config> config);
 
 public:  // from AuthenticatedServiceInterface
     bool enabled() const override;
@@ -40,9 +48,24 @@ private:
     std::string m_authToken;
 
     /**
+     * @brief Notifications refresh timer
+     */
+    Timer m_refreshTimer;
+
+    /**
+     * @brief Notifications refresh timer interval
+     */
+    uint32_t m_refreshTimerInterval;
+
+    /**
      * @brief Available notifications mapped by their id
      */
     std::map<std::string, Notification> m_notifications;
+
+    /**
+     * @brief Notifications mutex
+     */
+    mutable std::mutex m_mutex;
 };
 
 #endif  // NOTIFICATIONSERVICEIMPL_H

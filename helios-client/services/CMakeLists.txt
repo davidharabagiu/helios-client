@@ -18,6 +18,7 @@ add_library(${PROJECT_NAME}
     "inc/public/notificationservice.h"
     "inc/public/notificationservicelistener.h"
     "inc/private/notificationserviceimpl.h"
+    "src/notificationserviceimpl.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

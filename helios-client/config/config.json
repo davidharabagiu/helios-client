@@ -4,5 +4,6 @@
     "settingsAutoSaveInterval": 0,
     "uploadChunkSize": 4096,
     "numberOfTransferExecutors": 5,
-    "numberOfCipherExecutors": 8
+    "numberOfCipherExecutors": 8,
+    "notificationsRefreshInterval": 5000
 }

@@ -41,6 +41,12 @@ const std::string kNumberOfTransferExecutors = "numberOfTransferExecutors";
  * @note Type = uint
  */
 const std::string kNumberOfCipherExecutors = "numberOfCipherExecutors";
+
+/**
+ * @brief Notifications refresh interval in milliseconds (0 = disable auto-save)
+ * @note Type = uint
+ */
+const std::string kNotificationsRefreshInterval = "notificationsRefreshInterval";
 }  // namespace ConfigKeys
 
 #endif  // CONFIGKEYS_H
