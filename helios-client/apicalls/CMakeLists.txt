@@ -56,6 +56,8 @@ add_library(${PROJECT_NAME}
     "src/setuserkeycall.cpp"
     "inc/private/notificationscall.h"
     "src/notificationscall.cpp"
+    "inc/private/dismissnotificationcall.h"
+    "src/dismissnotificationcall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

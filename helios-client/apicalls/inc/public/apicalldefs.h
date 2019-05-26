@@ -128,6 +128,11 @@ using IsDirCallback = std::function<void(ApiCallStatus, bool)>;
  */
 using NotificationsCallback =
     std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, std::string, NotificationType>>&)>;
+
+/**
+ * @brief Dismiss notification callback function. Receives the call status.
+ */
+using DismissNotificationCallback = std::function<void(ApiCallStatus)>;
 }  // namespace ApiCallbacks
 
 #endif  // APICALLDEFS_H

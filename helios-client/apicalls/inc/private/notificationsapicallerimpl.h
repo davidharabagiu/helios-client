@@ -23,6 +23,8 @@ public:
 public:  // from NotificationsApiCaller
     void notifications(const std::string&                         authToken,
                        const ApiCallbacks::NotificationsCallback& callback) const override;
+    void dismissNotification(const std::string& authToken, const std::string& notificationId,
+                             const ApiCallbacks::DismissNotificationCallback& callback) const override;
 
 private:
     /**

@@ -21,6 +21,7 @@
 #include "uploadcall.h"
 #include "isdircall.h"
 #include "notificationscall.h"
+#include "dismissnotificationcall.h"
 #include "typeutils.h"
 
 template <typename Call>
