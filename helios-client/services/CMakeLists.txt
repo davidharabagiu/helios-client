@@ -6,6 +6,7 @@ include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
+    "inc/public/authenticatedserviceinterface.h"
     "inc/public/userservicelistener.h"
     "inc/public/userservice.h"
     "inc/private/userserviceimpl.h"
@@ -16,6 +17,7 @@ add_library(${PROJECT_NAME}
     "inc/public/fileservicelistener.h"
     "inc/public/notificationservice.h"
     "inc/public/notificationservicelistener.h"
+    "inc/private/notificationserviceimpl.h"
 )
 
 target_include_directories(${PROJECT_NAME}

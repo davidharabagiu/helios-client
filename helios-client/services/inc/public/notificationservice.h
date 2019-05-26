@@ -6,12 +6,14 @@
 #include "observable.h"
 #include "notificationservicelistener.h"
 #include "notification.h"
+#include "authenticatedserviceinterface.h"
 
 /**
  * @class NotificationService
  * @brief Notification management service
  */
-class NotificationService : public Observable<NotificationServiceListener, ObservableNotifyMode::ASYNC>
+class NotificationService : public AuthenticatedServiceInterface,
+                            public Observable<NotificationServiceListener, ObservableNotifyMode::ASYNC>
 {
 public:
     /**

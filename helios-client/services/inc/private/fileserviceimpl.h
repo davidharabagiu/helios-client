@@ -63,10 +63,12 @@ public:
      */
     ~FileServiceImpl();
 
+public:  // from AuthenticatedServiceInterface
+    bool enabled() const override;
+    void setAuthToken(const std::string& authToken) override;
+    void removeAuthToken() override;
+
 public:  // from FileService
-    bool                                       enabled() const override;
-    void                                       setAuthToken(const std::string& authToken) override;
-    void                                       removeAuthToken() override;
     std::string                                currentDirectory() const override;
     std::vector<std::shared_ptr<const File>>   files() const override;
     std::vector<std::shared_ptr<FileTransfer>> activeTransfers() const override;
