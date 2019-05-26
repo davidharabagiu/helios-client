@@ -5,6 +5,7 @@
 
 // Forward declarations
 class ApiCallVisitor;
+class HttpRequestManager;
 
 /**
  * @class NotificationsApiCallerImpl
@@ -15,9 +16,9 @@ class NotificationsApiCallerImpl : public NotificationsApiCaller
 public:
     /**
      * @brief Constructor
-     * @param visitor - API call visitor instance
+     * @param requestManager - HTTP request manager instance
      */
-    NotificationsApiCallerImpl(const std::shared_ptr<ApiCallVisitor>& visitor);
+    NotificationsApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager);
 
 public:  // from NotificationsApiCaller
     void notifications(const std::string&                         authToken,

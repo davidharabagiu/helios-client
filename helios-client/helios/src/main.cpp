@@ -22,6 +22,8 @@
 #include "configkeys.h"
 #include "rsaimpl.h"
 #include "randomfactoryimpl.h"
+#include "notificationserviceimpl.h"
+#include "notificationsapicallerimpl.h"
 
 void registerInstances()
 {
@@ -50,6 +52,10 @@ void registerInstances()
         new FileServiceImpl(config, std::make_unique<FileApiCallerImpl>(httpRequestManager),
                             std::make_unique<CipherFactoryImpl>(), keyManager));
     Single<DependencyInjector>::instance().registerInstance<FileService>(fileService);
+
+    std::shared_ptr<NotificationService> notificationService(
+        new NotificationServiceImpl(std::make_unique<NotificationsApiCallerImpl>(httpRequestManager), config));
+    Single<DependencyInjector>::instance().registerInstance<NotificationService>(notificationService);
 }
 
 int main(int argc, char* argv[])
