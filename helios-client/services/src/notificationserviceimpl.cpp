@@ -43,7 +43,7 @@ void NotificationServiceImpl::refresh()
     m_api->notifications(
         m_authToken, [this](ApiCallStatus                                                              status,
                             const std::vector<std::tuple<std::string, std::string, NotificationType>>& result) {
-            if (status == ApiCallStatus::SUCCESS)
+            if (status == ApiCallStatus::SUCCESS && enabled())
             {
                 std::lock_guard<std::mutex> lock(m_mutex);
                 m_notifications.clear();
