@@ -26,6 +26,11 @@ public:
     QNotificationsControllerImpl(QNotificationsController* publicImpl);
 
     /**
+     * @brief Destructor
+     */
+    ~QNotificationsControllerImpl();
+
+    /**
      * @brief Register for notifications from internal services
      */
     void registerForNotifications();
@@ -53,6 +58,11 @@ private:
      * @brief Notification service instance
      */
     std::shared_ptr<NotificationService> m_service;
+
+    /**
+     * @brief Cached user notifications
+     */
+    QVariantList m_notifications;
 };
 
 #endif  // QNOTIFICATIONSCONTROLLERIMPL_H

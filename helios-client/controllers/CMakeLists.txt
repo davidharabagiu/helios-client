@@ -27,6 +27,7 @@ add_library(${PROJECT_NAME}
     "inc/public/qnotificationscontroller.h"
     "src/qnotificationscontroller.cpp"
     "inc/private/qnotificationscontrollerimpl.h"
+    "src/qnotificationscontrollerimpl.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
