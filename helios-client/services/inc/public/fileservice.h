@@ -18,11 +18,6 @@ class FileService : public Observable<FileServiceListener, ObservableNotifyMode:
 {
 public:
     /**
-     * @brief Destructor
-     */
-    virtual ~FileService() = default;
-
-    /**
      * @brief Returns true if the service is enabled (an auth token is present).
      */
     virtual bool enabled() const = 0;

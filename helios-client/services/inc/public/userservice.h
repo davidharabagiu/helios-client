@@ -18,11 +18,6 @@ class UserService : public Observable<UserServiceListener, ObservableNotifyMode:
 {
 public:
     /**
-     * @brief Destructor
-     */
-    virtual ~UserService() = default;
-
-    /**
      * @brief Returns the current user session which contains the username and the authentication token. Valid only when
      * logged in.
      * @return const UserSession&

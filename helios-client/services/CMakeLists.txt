@@ -14,6 +14,8 @@ add_library(${PROJECT_NAME}
     "inc/private/fileserviceimpl.h"
     "src/fileserviceimpl.cpp"
     "inc/public/fileservicelistener.h"
+    "inc/public/notificationservice.h"
+    "inc/public/notificationservicelistener.h"
 )
 
 target_include_directories(${PROJECT_NAME}

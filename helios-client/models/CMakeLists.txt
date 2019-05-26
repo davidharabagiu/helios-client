@@ -13,6 +13,8 @@ add_library(${PROJECT_NAME}
     "src/file.cpp"
     "inc/filetransfer.h"
     "src/filetransfer.cpp"
+    "inc/notification.h"
+    "src/notification.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
