@@ -9,10 +9,13 @@ add_library(${PROJECT_NAME}
     "inc/public/apicalldefs.h"
     "inc/public/userapicaller.h"
     "inc/public/fileapicaller.h"
+    "inc/public/notificationsapicaller.h"
     "inc/private/userapicallerimpl.h"
     "src/userapicallerimpl.cpp"
     "inc/private/fileapicallerimpl.h"
     "src/fileapicallerimpl.cpp"
+    "inc/private/notificationsapicallerimpl.h"
+    "src/notificationsapicallerimpl.cpp"
     "inc/private/apicall.h"
     "inc/private/apicallvisitor.h"
     "inc/private/apicallvisitor.tpp"
@@ -51,6 +54,8 @@ add_library(${PROJECT_NAME}
     "src/getuserkeycall.cpp"
     "inc/private/setuserkeycall.h"
     "src/setuserkeycall.cpp"
+    "inc/private/notificationscall.h"
+    "src/notificationscall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

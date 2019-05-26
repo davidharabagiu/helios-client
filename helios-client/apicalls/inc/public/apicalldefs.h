@@ -27,6 +27,12 @@ enum class ApiCallStatus
     UNKNOWN_ERROR
 };
 
+enum class NotificationType
+{
+    FILE_SHARE,
+    KEY_SHARE
+};
+
 namespace ApiCallbacks
 {
 /**
@@ -115,6 +121,13 @@ using MoveCallback = std::function<void(ApiCallStatus)>;
  * @brief Is directory callback function. Receives the call status and if the provided path reffers to a directory.
  */
 using IsDirCallback = std::function<void(ApiCallStatus, bool)>;
+
+/**
+ * @brief Notifications callback function. Receives a list of notifications. Each notification is a tuple containing the
+ * notification id, notification text and notification type.
+ */
+using NotificationsCallback =
+    std::function<void(ApiCallStatus, const std::vector<std::tuple<std::string, std::string, NotificationType>>&)>;
 }  // namespace ApiCallbacks
 
 #endif  // APICALLDEFS_H

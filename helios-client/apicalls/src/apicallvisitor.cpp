@@ -84,6 +84,11 @@ void ApiCallVisitor::visit(IsDirCall* call) const
     handleGet(call);
 }
 
+void ApiCallVisitor::visit(NotificationsCall* call) const
+{
+    handleGet(call);
+}
+
 void ApiCallVisitor::visit(GetUserKeyCall* call) const
 {
     handleGet(call);

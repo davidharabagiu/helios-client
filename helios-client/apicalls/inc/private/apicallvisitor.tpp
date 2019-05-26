@@ -20,6 +20,7 @@
 #include "removecall.h"
 #include "uploadcall.h"
 #include "isdircall.h"
+#include "notificationscall.h"
 #include "typeutils.h"
 
 template <typename Call>

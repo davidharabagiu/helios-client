@@ -21,6 +21,7 @@ class ListCall;
 class RemoveCall;
 class MoveCall;
 class IsDirCall;
+class NotificationsCall;
 
 /**
  * @class ApiCallVisitor
@@ -136,6 +137,12 @@ public:
      * @param call - IsDirCall
      */
     void visit(IsDirCall* call) const;
+
+    /**
+     * @brief NotificationsCall
+     * @param call - NotificationsCall
+     */
+    void visit(NotificationsCall* call) const;
 
 private:
     /**
