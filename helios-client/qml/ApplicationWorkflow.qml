@@ -114,6 +114,23 @@ StackView {
             onLogoutButtonActivated: {
                 authCtl.logout();
             }
+
+            onNotificationsButtonActivated: {
+                root.push(notificationsScreenComponent);
+            }
+        }
+    }
+
+    Component {
+        id: notificationsScreenComponent
+
+        NotificationsScreen {
+            darkMode: settingsCtl.darkMode
+            authToken: authCtl.authenticationToken
+
+            onBackButtonActivated: {
+                root.pop();
+            }
         }
     }
 }

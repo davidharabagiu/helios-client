@@ -8,6 +8,11 @@ QNotificationsController::QNotificationsController(QObject* parent)
     m_privateImpl->registerForNotifications();
 }
 
+QNotificationsController::~QNotificationsController()
+{
+    m_privateImpl->unregisterFromNotifications();
+}
+
 void QNotificationsController::setAuthenticationToken(const QString& newValue)
 {
     m_privateImpl->setAuthenticationToken(newValue);

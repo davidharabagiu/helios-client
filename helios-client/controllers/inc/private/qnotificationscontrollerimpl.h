@@ -26,11 +26,6 @@ public:
     QNotificationsControllerImpl(QNotificationsController* publicImpl);
 
     /**
-     * @brief Destructor
-     */
-    ~QNotificationsControllerImpl();
-
-    /**
      * @brief Register for notifications from internal services
      */
     void registerForNotifications();

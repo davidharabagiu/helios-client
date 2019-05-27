@@ -10,6 +10,7 @@ Rectangle {
     property string authToken
 
     signal logoutButtonActivated
+    signal notificationsButtonActivated
 
     color: darkMode ? "#000000" : "#ffffff"
 
@@ -26,6 +27,7 @@ Rectangle {
     }
 
     HButton {
+        id: logoutButton
         darkMode: root.darkMode
         label: "Log out"
         anchors {
@@ -36,6 +38,21 @@ Rectangle {
         }
         onClicked: {
             logoutButtonActivated();
+        }
+    }
+
+    HButton {
+        darkMode: root.darkMode
+        label: "Notifications"
+        anchors {
+            left: logoutButton.right
+            leftMargin: 5
+            top: parent.top
+            topMargin: 5
+        }
+        width: 100
+        onClicked: {
+            notificationsButtonActivated();
         }
     }
 

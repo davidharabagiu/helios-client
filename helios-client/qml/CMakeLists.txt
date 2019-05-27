@@ -13,6 +13,7 @@ set(QML_FILES
     "LoginScreen.qml"
     "RegisterScreen.qml"
     "MainScreen.qml"
+    "NotificationsScreen.qml"
 )
 
 add_custom_target(${PROJECT_NAME} SOURCES ${QML_FILES})

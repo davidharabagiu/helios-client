@@ -37,6 +37,11 @@ public:
     explicit QNotificationsController(QObject* parent = nullptr);
 
     /**
+     * @brief Destructor
+     */
+    ~QNotificationsController();
+
+    /**
      * @brief Setter for authenticationToken
      * @param newValue - QString
      */

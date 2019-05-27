@@ -17,11 +17,6 @@ QNotificationsControllerImpl::QNotificationsControllerImpl(QNotificationsControl
     }
 }
 
-QNotificationsControllerImpl::~QNotificationsControllerImpl()
-{
-    unregisterFromNotifications();
-}
-
 void QNotificationsControllerImpl::registerForNotifications()
 {
     m_service->registerListener(shared_from_this());
@@ -34,7 +29,14 @@ void QNotificationsControllerImpl::unregisterFromNotifications()
 
 void QNotificationsControllerImpl::setAuthenticationToken(const QString& newValue)
 {
-    m_service->setAuthToken(newValue.toStdString());
+    if (newValue.isNull() || newValue.isEmpty())
+    {
+        m_service->removeAuthToken();
+    }
+    else
+    {
+        m_service->setAuthToken(newValue.toStdString());
+    }
 }
 
 void QNotificationsControllerImpl::resetAuthenticationToken()
