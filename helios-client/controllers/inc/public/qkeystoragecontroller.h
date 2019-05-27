@@ -79,7 +79,7 @@ public:
      * @param keyName - Identity name of the key
      * @return True if a key with this name could be found and was sent
      */
-    Q_INVOKABLE bool sendKey(const QString& username, const QString& keyName);
+    Q_INVOKABLE void sendKey(const QString& username, const QString& keyName);
 
 signals:
     /**

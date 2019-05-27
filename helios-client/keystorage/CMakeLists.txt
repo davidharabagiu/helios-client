@@ -9,6 +9,7 @@ add_library(${PROJECT_NAME}
     "inc/public/keymanager.h"
     "inc/private/keymanagerimpl.h"
     "src/keymanagerimpl.cpp"
+    "inc/public/keymanagerlistener.h"
 )
 
 target_include_directories(${PROJECT_NAME}

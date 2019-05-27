@@ -33,7 +33,6 @@ public:  // from KeyManager
     std::vector<uint8_t>     getKey(const std::string& name) const override;
     bool                     removeKey(const std::string& name) override;
     void                     removeAllKeys() override;
-    bool                     sendKey(const std::string& username, const std::string& keyName) override;
 
 private:
     void persistKey(const QString& keyName, QFile& output) const;

@@ -20,7 +20,7 @@ const std::string ShareKeyCall::s_kKeyContentParam  = "content";
 const std::string ShareKeyCall::s_kErrorInvalidUser = "Invalid user";
 
 ShareKeyCall::ShareKeyCall(const std::string& authToken, const std::string& username, const std::string& keyName,
-                           const std::string& keyLength, const std::vector<uint8_t>& keyContent,
+                           uint16_t keyLength, const std::vector<uint8_t>& keyContent,
                            const ApiCallbacks::ShareKeyCallback& callback)
     : m_callback(callback)
 {
@@ -41,7 +41,7 @@ ShareKeyCall::ShareKeyCall(const std::string& authToken, const std::string& user
     m_request->setHeaderValue(s_kTokenParam, authToken);
     m_request->setParameter(s_kUsernameParam, username);
     m_request->setParameter(s_kKeyNameParam, keyName);
-    m_request->setParameter(s_kKeyLengthParam, keyLength);
+    m_request->setParameter(s_kKeyLengthParam, std::to_string(keyLength));
     m_request->setParameter(s_kKeyContentParam,
                             QByteArray::fromRawData(reinterpret_cast<const char*>(keyContent.data()),
                                                     safe_integral_cast<int>(keyContent.size()))

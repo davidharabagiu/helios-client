@@ -6,6 +6,7 @@
 #include "dependencyinjector.h"
 #include "keymanager.h"
 #include "typeconversions.h"
+#include "keyexchangeservice.h"
 
 QKeyStorageControllerImpl::QKeyStorageControllerImpl(QKeyStorageController* publicImpl)
     : m_publicImpl(publicImpl)
@@ -14,6 +15,12 @@ QKeyStorageControllerImpl::QKeyStorageControllerImpl(QKeyStorageController* publ
     if (!m_keyManager)
     {
         qFatal("KeyManager instance not available");
+    }
+
+    m_keyExchangeService = Single<DependencyInjector>::instance().getInstance<KeyExchangeService>();
+    if (!m_keyExchangeService)
+    {
+        qFatal("KeyExchangeService instance not available");
     }
 }
 
@@ -52,9 +59,9 @@ void QKeyStorageControllerImpl::removeAllKeys()
     emit m_publicImpl->keysChanged();
 }
 
-bool QKeyStorageControllerImpl::sendKey(const QString& username, const QString& keyName)
+void QKeyStorageControllerImpl::sendKey(const QString& username, const QString& keyName)
 {
-    return m_keyManager->sendKey(username.toStdString(), keyName.toStdString());
+    m_keyExchangeService->sendKey(username.toStdString(), keyName.toStdString());
 }
 
 uint16_t QKeyStorageControllerImpl::keySizeToByteLength(QKeyStorageControllerImpl::KeySize keySize)

@@ -127,12 +127,6 @@ void KeyManagerImpl::removeAllKeys()
     QFile(QString::fromStdString(Paths::kKeyStorageFile)).remove();
 }
 
-bool KeyManagerImpl::sendKey(const std::string& /*username*/, const std::string& /*keyName*/)
-{
-    // TODO: Implementation
-    return false;
-}
-
 void KeyManagerImpl::persistKey(const QString& keyName, QFile& output) const
 {
     static const char nullChar = '\0';

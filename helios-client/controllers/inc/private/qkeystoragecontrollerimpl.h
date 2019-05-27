@@ -8,6 +8,7 @@
 
 // Forward declarations
 class KeyManager;
+class KeyExchangeService;
 class QKeyStorageController;
 
 /**
@@ -38,7 +39,7 @@ public:  // Forwarded from QKeyStorageController
     bool        createKey(const QString& name, KeySize size);
     bool        removeKey(const QString& name);
     void        removeAllKeys();
-    bool        sendKey(const QString& username, const QString& keyName);
+    void        sendKey(const QString& username, const QString& keyName);
 
 private:
     static uint16_t keySizeToByteLength(KeySize keySize);
@@ -53,6 +54,11 @@ private:
      * @brief Key manager instance
      */
     std::shared_ptr<KeyManager> m_keyManager;
+
+    /**
+     * @brief Key exchange service instance
+     */
+    std::shared_ptr<KeyExchangeService> m_keyExchangeService;
 };
 
 #endif  // QKEYSTORAGECONTROLLERIMPL_H

@@ -19,6 +19,10 @@ add_library(${PROJECT_NAME}
     "inc/public/notificationservicelistener.h"
     "inc/private/notificationserviceimpl.h"
     "src/notificationserviceimpl.cpp"
+    "inc/public/keyexchangeservice.h"
+    "inc/private/keyexchangeserviceimpl.h"
+    "src/keyexchangeserviceimpl.cpp"
+    "inc/public/keyexchangeservicelistener.h"
 )
 
 target_include_directories(${PROJECT_NAME}

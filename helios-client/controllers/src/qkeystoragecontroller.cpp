@@ -26,7 +26,7 @@ void QKeyStorageController::removeAllKeys()
     m_privateImpl->removeAllKeys();
 }
 
-bool QKeyStorageController::sendKey(const QString& username, const QString& keyName)
+void QKeyStorageController::sendKey(const QString& username, const QString& keyName)
 {
     return m_privateImpl->sendKey(username, keyName);
 }

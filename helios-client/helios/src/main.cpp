@@ -24,6 +24,7 @@
 #include "randomfactoryimpl.h"
 #include "notificationserviceimpl.h"
 #include "notificationsapicallerimpl.h"
+#include "keyexchangeserviceimpl.h"
 
 void registerInstances()
 {
@@ -56,6 +57,10 @@ void registerInstances()
     std::shared_ptr<NotificationService> notificationService(
         new NotificationServiceImpl(std::make_unique<NotificationsApiCallerImpl>(httpRequestManager), config));
     Single<DependencyInjector>::instance().registerInstance<NotificationService>(notificationService);
+
+    std::shared_ptr<KeyExchangeService> keyExchangeService(new KeyExchangeServiceImpl(
+        keyManager, std::make_unique<RsaImpl>(), std::make_unique<UserApiCallerImpl>(httpRequestManager),
+        std::make_unique<FileApiCallerImpl>(httpRequestManager)));
 }
 
 int main(int argc, char* argv[])
