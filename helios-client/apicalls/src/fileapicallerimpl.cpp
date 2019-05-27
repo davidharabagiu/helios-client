@@ -16,6 +16,7 @@
 #include "removecall.h"
 #include "movecall.h"
 #include "isdircall.h"
+#include "sharekeycall.h"
 
 FileApiCallerImpl::FileApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
@@ -96,5 +97,13 @@ void FileApiCallerImpl::isDir(const std::string& authToken, const std::string& p
                               const ApiCallbacks::IsDirCallback& callback) const
 {
     auto call = new IsDirCall(authToken, path, callback);
+    call->send(m_visitor);
+}
+
+void FileApiCallerImpl::shareKey(const std::string& authToken, const std::string& username, const std::string& keyName,
+                                 const std::string& keyLength, const std::vector<uint8_t>& keyContent,
+                                 const ApiCallbacks::ShareKeyCallback& callback) const
+{
+    auto call = new ShareKeyCall(authToken, username, keyName, keyLength, keyContent, callback);
     call->send(m_visitor);
 }

@@ -44,6 +44,9 @@ public:  // from FileApiCaller
               const ApiCallbacks::MoveCallback& callback) const override;
     void isDir(const std::string& authToken, const std::string& path,
                const ApiCallbacks::IsDirCallback& callback) const override;
+    void shareKey(const std::string& authToken, const std::string& username, const std::string& keyName,
+                  const std::string& keyLength, const std::vector<uint8_t>& keyContent,
+                  const ApiCallbacks::ShareKeyCallback& callback) const override;
 
 private:
     /**

@@ -127,6 +127,19 @@ public:
      */
     virtual void isDir(const std::string& authToken, const std::string& path,
                        const ApiCallbacks::IsDirCallback& callback) const = 0;
+
+    /**
+     * @brief Share a file key with another user
+     * @param authToken - Authentication token
+     * @param username - Name of the user which will receive the key
+     * @param keyName - Name of the key
+     * @param keyLength - Length of the key in bytes before it was encrypted
+     * @param keyContent - Encrypted content of the key
+     * @param callback - ShareKeyCallback
+     */
+    virtual void shareKey(const std::string& authToken, const std::string& username, const std::string& keyName,
+                          const std::string& keyLength, const std::vector<uint8_t>& keyContent,
+                          const ApiCallbacks::ShareKeyCallback& callback) const = 0;
 };
 
 #endif  // FILEAPICALLER_H

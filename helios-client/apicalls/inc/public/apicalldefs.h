@@ -113,6 +113,11 @@ using ListCallback =
 using RemoveCallback = std::function<void(ApiCallStatus)>;
 
 /**
+ * @brief Share key callback function. Receives the call status.
+ */
+using ShareKeyCallback = std::function<void(ApiCallStatus)>;
+
+/**
  * @brief Move callback function. Receives the call status.
  */
 using MoveCallback = std::function<void(ApiCallStatus)>;
