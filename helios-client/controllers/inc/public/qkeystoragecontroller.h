@@ -73,6 +73,14 @@ public:
      */
     Q_INVOKABLE void removeAllKeys();
 
+    /**
+     * @brief Send a key to another user
+     * @param username - Name of the destination user
+     * @param keyName - Identity name of the key
+     * @return True if a key with this name could be found and was sent
+     */
+    Q_INVOKABLE bool sendKey(const QString& username, const QString& keyName);
+
 signals:
     /**
      * @brief SIGNAL emitted when the list of keys has changed

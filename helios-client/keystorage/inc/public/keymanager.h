@@ -51,6 +51,14 @@ public:
      * @brief Remove all keys
      */
     virtual void removeAllKeys() = 0;
+
+    /**
+     * @brief Send a key to another user
+     * @param username - Name of the destination user
+     * @param keyName - Identity name of the key
+     * @return True if a key with this name could be found and was sent
+     */
+    virtual bool sendKey(const std::string& username, const std::string& keyName) = 0;
 };
 
 #endif  // KEYMANAGER_H

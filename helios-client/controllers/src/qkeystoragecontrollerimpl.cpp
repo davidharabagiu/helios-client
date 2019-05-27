@@ -52,6 +52,11 @@ void QKeyStorageControllerImpl::removeAllKeys()
     emit m_publicImpl->keysChanged();
 }
 
+bool QKeyStorageControllerImpl::sendKey(const QString& username, const QString& keyName)
+{
+    return m_keyManager->sendKey(username.toStdString(), keyName.toStdString());
+}
+
 uint16_t QKeyStorageControllerImpl::keySizeToByteLength(QKeyStorageControllerImpl::KeySize keySize)
 {
     switch (keySize)

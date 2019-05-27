@@ -38,6 +38,7 @@ public:  // Forwarded from QKeyStorageController
     bool        createKey(const QString& name, KeySize size);
     bool        removeKey(const QString& name);
     void        removeAllKeys();
+    bool        sendKey(const QString& username, const QString& keyName);
 
 private:
     static uint16_t keySizeToByteLength(KeySize keySize);

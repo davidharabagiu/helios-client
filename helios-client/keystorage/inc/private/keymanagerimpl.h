@@ -28,11 +28,12 @@ public:
     KeyManagerImpl(std::unique_ptr<RandomFactory> randomFactory);
 
 public:  // from KeyManager
-    std::vector<std::string> listKeys(uint16_t length) const;
-    bool                     createKey(const std::string& name, uint16_t length);
-    std::vector<uint8_t>     getKey(const std::string& name) const;
-    bool                     removeKey(const std::string& name);
-    void                     removeAllKeys();
+    std::vector<std::string> listKeys(uint16_t length) const override;
+    bool                     createKey(const std::string& name, uint16_t length) override;
+    std::vector<uint8_t>     getKey(const std::string& name) const override;
+    bool                     removeKey(const std::string& name) override;
+    void                     removeAllKeys() override;
+    bool                     sendKey(const std::string& username, const std::string& keyName) override;
 
 private:
     void persistKey(const QString& keyName, QFile& output) const;
