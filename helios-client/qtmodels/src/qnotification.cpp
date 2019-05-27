@@ -10,6 +10,15 @@ bool QNotification::isValid() const
     return static_cast<bool>(m_data);
 }
 
+QString QNotification::id() const
+{
+    if (m_data)
+    {
+        return QString::fromStdString(m_data->id());
+    }
+    return QString();
+}
+
 QString QNotification::text() const
 {
     if (m_data)

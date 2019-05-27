@@ -22,6 +22,12 @@ class QNotification
     Q_PROPERTY(bool isValid READ isValid)
 
     /**
+     * @property id
+     * @brief Notification id
+     */
+    Q_PROPERTY(QString id READ id)
+
+    /**
      * @property text
      * @brief Notification content
      */
@@ -67,6 +73,12 @@ public:
      * @return bool
      */
     bool isValid() const;
+
+    /**
+     * @brief Getter for id
+     * @return QString
+     */
+    QString id() const;
 
     /**
      * @brief Getter for text

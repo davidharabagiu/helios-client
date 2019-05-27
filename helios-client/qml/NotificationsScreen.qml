@@ -72,8 +72,10 @@ Rectangle {
         id: notCtl
 
         onNotificationsChanged: {
-            notificationList.selectedIndex = -1;
-            notificationList.selectedItem = null;
+            if (notCtl.notifications.length <= notificationList.selectedIndex) {
+                notificationList.selectedIndex = -1;
+                notificationList.selectedItem = null;
+            }
         }
 
         authenticationToken: authToken
@@ -101,7 +103,7 @@ Rectangle {
             id: notificationList
 
             property int selectedIndex: -1
-            property string selectedItem
+            property var selectedItem
 
             anchors.fill: parent
             model: notCtl.notifications
@@ -112,7 +114,7 @@ Rectangle {
 
                 HLabel {
                     darkMode: root.darkMode
-                    text: modelData
+                    text: modelData.text
                     anchors.verticalCenter: parent.verticalCenter
                 }
 

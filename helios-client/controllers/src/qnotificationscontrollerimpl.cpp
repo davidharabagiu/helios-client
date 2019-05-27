@@ -65,7 +65,7 @@ void QNotificationsControllerImpl::notificationListUpdated()
     auto         serviceNotifications = m_service->notifications();
     for (const auto& el : serviceNotifications)
     {
-        m_notifications.push_back(QVariant::fromValue(QNotification(std::make_shared<Notification>(el))));
+        newNotifications.push_back(QVariant::fromValue(QNotification(std::make_shared<Notification>(el))));
     }
 
     m_notifications = newNotifications;
