@@ -17,12 +17,16 @@
 #include "manualresetevent.h"
 #include "pathutils.h"
 #include "keymanager.h"
+#include "fileapicaller.h"
+#include "notificationsapicaller.h"
 
 const size_t FileServiceImpl::s_kAcceptableKeyLength = 32;
 
 FileServiceImpl::FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
+                                 std::unique_ptr<NotificationsApiCaller> notificationsApiCaller,
                                  std::unique_ptr<CipherFactory> cipherFactory, std::shared_ptr<KeyManager> keyManager)
     : m_apiCaller(std::move(fileApiCaller))
+    , m_notificationsApiCaller(std::move(notificationsApiCaller))
     , m_config(config)
     , m_lastUsedExecutorIndex(0)
     , m_numberOfTransferExecutors(m_config->get(ConfigKeys::kNumberOfTransferExecutors).toUInt())
@@ -823,6 +827,98 @@ void FileServiceImpl::shareFile(const std::string& user, const std::string& path
             Observable::notifyAll(&FileServiceListener::errorOccured, "Unknown error occured while sharing file");
         }
     });
+}
+
+void FileServiceImpl::acceptSharedFile(const std::string& notificationId, const std::string& path, bool relative)
+{
+    if (!enabled())
+    {
+        return;
+    }
+
+    std::string fullPath;
+    if (relative)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        fullPath = PathUtils::concatenatePaths(m_currentDirectory, path);
+    }
+    else
+    {
+        fullPath = path;
+        PathUtils::removeTrailingSlash(fullPath);
+    }
+
+    m_apiCaller->acceptFile(
+        m_session.authToken(), notificationId, fullPath, [this, fullPath, notificationId](ApiCallStatus status) {
+            if (status == ApiCallStatus::SUCCESS)
+            {
+                m_apiCaller->getFileSize(
+                    m_session.authToken(), fullPath,
+                    [this, fullPath, notificationId](ApiCallStatus status, uint64_t fileSize) {
+                        if (status == ApiCallStatus::SUCCESS)
+                        {
+                            m_notificationsApiCaller->dismissNotification(
+                                m_session.authToken(), notificationId,
+                                [this, fullPath, fileSize](ApiCallStatus status) {
+                                    if (status == ApiCallStatus::SUCCESS)
+                                    {
+                                        std::string name;
+                                        std::string parent;
+                                        PathUtils::getFileNameAndParentDir(fullPath, name, parent);
+
+                                        auto newFile = std::make_shared<File>(name, parent, false, fileSize);
+
+                                        {
+                                            std::lock_guard<std::mutex> lock(m_mutex);
+                                            if (parent == m_currentDirectory)
+                                            {
+                                                m_files.emplace(name, newFile);
+                                            }
+                                        }
+
+                                        Observable::notifyAll(&FileServiceListener::acceptedFileShare, newFile);
+                                    }
+                                    else
+                                    {
+                                        std::ostringstream error;
+                                        error << "Unhandled error while dismissing notification: "
+                                              << static_cast<int>(status);
+                                        Observable::notifyAll(&FileServiceListener::errorOccured, error.str());
+                                    }
+                                });
+                        }
+                        else
+                        {
+                            std::ostringstream error;
+                            error << "Unhandled error while querying file size for " << fullPath << ": "
+                                  << static_cast<int>(status);
+                            Observable::notifyAll(&FileServiceListener::errorOccured, error.str());
+                        }
+                    });
+            }
+            else if (status == ApiCallStatus::FILE_NO_LONGER_EXISTS)
+            {
+                Observable::notifyAll(&FileServiceListener::errorOccured, "The requested file no longer exists");
+            }
+            else if (status == ApiCallStatus::FILE_ALREADY_EXISTS)
+            {
+                std::ostringstream error;
+                error << fullPath << " already exists";
+                Observable::notifyAll(&FileServiceListener::errorOccured, error.str());
+            }
+            else if (status == ApiCallStatus::INVALID_PATH)
+            {
+                std::ostringstream error;
+                error << "Path" << fullPath << " already exists";
+                Observable::notifyAll(&FileServiceListener::errorOccured, error.str());
+            }
+            else
+            {
+                std::ostringstream error;
+                error << "Unhandled error while accepting the file: " << static_cast<int>(status);
+                Observable::notifyAll(&FileServiceListener::errorOccured, error.str());
+            }
+        });
 }
 
 void FileServiceImpl::collectApiFileList(

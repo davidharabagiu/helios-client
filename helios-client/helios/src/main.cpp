@@ -51,6 +51,7 @@ void registerInstances()
 
     std::shared_ptr<FileService> fileService(
         new FileServiceImpl(config, std::make_unique<FileApiCallerImpl>(httpRequestManager),
+                            std::make_unique<NotificationsApiCallerImpl>(httpRequestManager),
                             std::make_unique<CipherFactoryImpl>(), keyManager));
     Single<DependencyInjector>::instance().registerInstance<FileService>(fileService);
 

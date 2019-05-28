@@ -316,6 +316,11 @@ void QRemoteFileSystemControllerImpl::fileShared()
     QMetaObject::invokeMethod(m_publicImpl, "fileShared", Qt::QueuedConnection);
 }
 
+void QRemoteFileSystemControllerImpl::acceptedFileShare(std::shared_ptr<const File> /*file*/)
+{
+    // To be implemented
+}
+
 void QRemoteFileSystemControllerImpl::errorOccured(const std::string& errorString)
 {
     QMetaObject::invokeMethod(m_publicImpl, "error", Qt::QueuedConnection,

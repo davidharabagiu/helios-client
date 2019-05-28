@@ -67,6 +67,7 @@ public:  // from FileServiceListener
     void transferCompleted(std::shared_ptr<FileTransfer> transfer) override;
     void transferAborted(std::shared_ptr<FileTransfer> transfer) override;
     void fileShared() override;
+    void acceptedFileShare(std::shared_ptr<const File> file) override;
     void errorOccured(const std::string& errorString) override;
 
 private:

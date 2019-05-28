@@ -40,7 +40,7 @@ public:
 
     /**
      * @brief A file or directory was removed
-     * @param path - Removed file / directory. It only contains information about name / path.
+     * @param directory - Directory which was removed
      */
     virtual void fileRemoved(std::shared_ptr<const File> directory) = 0;
 
@@ -65,14 +65,14 @@ public:
 
     /**
      * @brief A file transfer has completed.
-     * @param path - File path
+     * @param transfer - File transfer
      */
     virtual void transferCompleted(std::shared_ptr<FileTransfer> transfer) = 0;
 
     /**
      * @brief A file transfer was aborted by the user or due to an error. If it was aborted due to an error, an
      * errorOccured callback will follow with the reason.
-     * @param path - File path
+     * @param transfer - File traansfer
      */
     virtual void transferAborted(std::shared_ptr<FileTransfer> transfer) = 0;
 
@@ -80,6 +80,12 @@ public:
      * @brief A file was shared successfully
      */
     virtual void fileShared() = 0;
+
+    /**
+     * @brief A shared file from another user was accepted
+     * @param file - New file
+     */
+    virtual void acceptedFileShare(std::shared_ptr<const File> file) = 0;
 
     /**
      * @brief An operation has failed.

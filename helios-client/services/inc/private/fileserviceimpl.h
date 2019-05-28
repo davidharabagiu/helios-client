@@ -6,9 +6,9 @@
 #include <mutex>
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "fileservice.h"
-#include "fileapicaller.h"
 #include "file.h"
 #include "filetransfer.h"
 #include "executor.h"
@@ -17,6 +17,8 @@
 // Forward declarations
 class Config;
 class KeyManager;
+class FileApiCaller;
+class NotificationsApiCaller;
 
 /**
  * @class FileServiceImpl
@@ -56,6 +58,7 @@ public:
      * @param keyManager - Key manager instance
      */
     FileServiceImpl(std::shared_ptr<Config> config, std::unique_ptr<FileApiCaller> fileApiCaller,
+                    std::unique_ptr<NotificationsApiCaller> notificationsApiCaller,
                     std::unique_ptr<CipherFactory> cipherFactory, std::shared_ptr<KeyManager> keyManager);
 
     /**
@@ -82,6 +85,7 @@ public:  // from FileService
     void moveFile(const std::string& sourcePath, const std::string& destinationPath) override;
     void removeFile(const std::string& path, bool relative) override;
     void shareFile(const std::string& user, const std::string& path, bool relative) override;
+    void acceptSharedFile(const std::string& notificationId, const std::string& path, bool relative) override;
 
 private:
     /**
@@ -110,6 +114,11 @@ private:
      * @brief File operations API caller instance
      */
     std::unique_ptr<FileApiCaller> m_apiCaller;
+
+    /**
+     * @brief Notification operations API caller instance
+     */
+    std::unique_ptr<NotificationsApiCaller> m_notificationsApiCaller;
 
     /**
      * @brief Config instance
