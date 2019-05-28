@@ -5,16 +5,19 @@
 #include "rsa.h"
 #include "userapicaller.h"
 #include "fileapicaller.h"
+#include "notificationsapicaller.h"
 #include "paths.h"
 #include "typeconversions.h"
 
 KeyExchangeServiceImpl::KeyExchangeServiceImpl(std::shared_ptr<KeyManager> keyManager, std::unique_ptr<Rsa> rsa,
-                                               std::unique_ptr<UserApiCaller> userApi,
-                                               std::unique_ptr<FileApiCaller> fileApi)
+                                               std::unique_ptr<UserApiCaller>          userApi,
+                                               std::unique_ptr<FileApiCaller>          fileApi,
+                                               std::unique_ptr<NotificationsApiCaller> notificationsApi)
     : m_keyManager(keyManager)
     , m_rsa(std::move(rsa))
     , m_userApi(std::move(userApi))
     , m_fileApi(std::move(fileApi))
+    , m_notificationsApi(std::move(notificationsApi))
 {
 }
 
@@ -98,14 +101,25 @@ void KeyExchangeServiceImpl::receiveKey(const std::string& notificationId)
 
     m_fileApi->acceptKey(
         authToken, notificationId,
-        [this, authToken, userKeyFileName](ApiCallStatus status, const std::string& keyName, uint16_t keyLength,
-                                           const std::vector<uint8_t>& keyContent) {
-            if (status == ApiCallStatus::SUCCESS)
+        [this, authToken, userKeyFileName, notificationId](ApiCallStatus status, const std::string& keyName,
+                                                           uint16_t keyLength, const std::vector<uint8_t>& keyContent) {
+            if (status == ApiCallStatus::SUCCESS && authToken == m_session.authToken())
             {
                 auto decryptedKey = m_rsa->decrypt(userKeyFileName, keyContent);
                 decryptedKey.resize(keyLength);
                 m_keyManager->addKey(keyName, decryptedKey);
-                Observable::notifyAll(&KeyExchangeServiceListener::keyReceivedSuccessfully);
+
+                m_notificationsApi->dismissNotification(authToken, notificationId, [this](ApiCallStatus status) {
+                    if (status == ApiCallStatus::SUCCESS)
+                    {
+                        Observable::notifyAll(&KeyExchangeServiceListener::keyReceivedSuccessfully);
+                    }
+                    else
+                    {
+                        Observable::notifyAll(&KeyExchangeServiceListener::keyReceiveError,
+                                              KeyExchangeServiceListener::Error::UNKNWOWN_ERROR);
+                    }
+                });
             }
             else
             {

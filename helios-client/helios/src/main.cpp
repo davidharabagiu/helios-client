@@ -60,7 +60,8 @@ void registerInstances()
 
     std::shared_ptr<KeyExchangeService> keyExchangeService(new KeyExchangeServiceImpl(
         keyManager, std::make_unique<RsaImpl>(), std::make_unique<UserApiCallerImpl>(httpRequestManager),
-        std::make_unique<FileApiCallerImpl>(httpRequestManager)));
+        std::make_unique<FileApiCallerImpl>(httpRequestManager),
+        std::make_unique<NotificationsApiCallerImpl>(httpRequestManager)));
     Single<DependencyInjector>::instance().registerInstance<KeyExchangeService>(keyExchangeService);
 }
 

@@ -74,6 +74,11 @@ public:
      */
     Q_INVOKABLE void dismissAllNotifications();
 
+    /**
+     * @brief Refresh notifications list
+     */
+    Q_INVOKABLE void refresh();
+
 signals:
     /**
      * @brief SIGNAL emitted when notifications changes

@@ -37,3 +37,8 @@ void QNotificationsController::dismissAllNotifications()
 {
     m_privateImpl->dismissAllNotifications();
 }
+
+void QNotificationsController::refresh()
+{
+    m_privateImpl->refresh();
+}

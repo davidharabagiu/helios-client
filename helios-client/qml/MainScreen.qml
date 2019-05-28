@@ -8,8 +8,9 @@ Rectangle {
     property bool darkMode: false
     property var session
 
-    signal logoutButtonActivated
-    signal notificationsButtonActivated
+    signal logoutButtonActivated()
+    signal notificationsButtonActivated()
+    signal notificationAccepted()
 
     color: darkMode ? "#000000" : "#ffffff"
 
@@ -149,6 +150,7 @@ Rectangle {
         onKeyReceiveResult: {
             errorDialog.text = result;
             errorDialog.visible = true;
+            root.notificationAccepted();
         }
 
         session: root.session

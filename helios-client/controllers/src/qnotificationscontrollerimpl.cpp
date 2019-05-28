@@ -59,6 +59,11 @@ void QNotificationsControllerImpl::dismissAllNotifications()
     m_service->dismissAllNotifications();
 }
 
+void QNotificationsControllerImpl::refresh()
+{
+    m_service->refresh();
+}
+
 void QNotificationsControllerImpl::notificationListUpdated()
 {
     QVariantList newNotifications;

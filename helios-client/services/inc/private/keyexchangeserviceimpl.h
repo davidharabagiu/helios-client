@@ -8,6 +8,7 @@ class KeyManager;
 class Rsa;
 class UserApiCaller;
 class FileApiCaller;
+class NotificationsApiCaller;
 
 class KeyExchangeServiceImpl : public KeyExchangeService
 {
@@ -18,9 +19,11 @@ public:
      * @param rsa - RSA encryption utilities instance
      * @param userApi - User API instance
      * @param fileApi - File API instance
+     * @param notificationsApi - Notifications API instance
      */
     KeyExchangeServiceImpl(std::shared_ptr<KeyManager> keyManager, std::unique_ptr<Rsa> rsa,
-                           std::unique_ptr<UserApiCaller> userApi, std::unique_ptr<FileApiCaller> fileApi);
+                           std::unique_ptr<UserApiCaller> userApi, std::unique_ptr<FileApiCaller> fileApi,
+                           std::unique_ptr<NotificationsApiCaller> notificationsApi);
 
 public:  // from KeyExchangeService
     void sendKey(const std::string& user, const std::string& keyName) override;
@@ -46,6 +49,11 @@ private:
      * @brief File API instance
      */
     std::unique_ptr<FileApiCaller> m_fileApi;
+
+    /**
+     * @brief File API instance
+     */
+    std::unique_ptr<NotificationsApiCaller> m_notificationsApi;
 };
 
 #endif  // KEYEXCHANGESERVICEIMPL_H

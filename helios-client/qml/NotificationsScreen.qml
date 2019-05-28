@@ -141,4 +141,8 @@ Rectangle {
             }
         }
     }
+
+    function refreshNotifications() {
+        notCtl.refresh();
+    }
 }

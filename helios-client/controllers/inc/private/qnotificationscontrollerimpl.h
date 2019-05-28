@@ -42,6 +42,7 @@ public:  // Forwarded from QNotificationsController
     QVariantList notifications() const;
     void         dismissNotification(const QString& notificationId);
     void         dismissAllNotifications();
+    void         refresh();
 
 public:  // From NotificationServiceListener
     void notificationListUpdated() override;
