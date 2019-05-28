@@ -26,6 +26,7 @@
 #include "sharekeycall.h"
 #include "acceptkeycall.h"
 #include "sharecall.h"
+#include "acceptfilecall.h"
 #include "typeutils.h"
 
 template <typename Call>

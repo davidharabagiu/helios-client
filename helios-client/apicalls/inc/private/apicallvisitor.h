@@ -24,6 +24,7 @@ class IsDirCall;
 class ShareKeyCall;
 class AcceptKeyCall;
 class ShareCall;
+class AcceptFileCall;
 class NotificationsCall;
 class DismissNotificationCall;
 class DismissAllNotificationsCall;
@@ -160,6 +161,12 @@ public:
      * @param call - ShareCall
      */
     void visit(ShareCall* call) const;
+
+    /**
+     * @brief Visit AcceptFileCall
+     * @param call - AcceptFileCall
+     */
+    void visit(AcceptFileCall* call) const;
 
     /**
      * @brief NotificationsCall

@@ -99,6 +99,11 @@ void ApiCallVisitor::visit(ShareCall* call) const
     handlePost(call);
 }
 
+void ApiCallVisitor::visit(AcceptFileCall* call) const
+{
+    handlePost(call);
+}
+
 void ApiCallVisitor::visit(NotificationsCall* call) const
 {
     handleGet(call);

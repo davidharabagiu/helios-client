@@ -11,7 +11,7 @@
 
 /**
  * @class AcceptKeyCall
- * @brief Manages a accept file key send call
+ * @brief Manages a accept file key receive call
  */
 class AcceptKeyCall : public ApiCall
 {

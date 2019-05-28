@@ -25,6 +25,7 @@ enum class ApiCallStatus
     INVALID_REPLY_FORMAT,
     NO_KEY_SPECIFIED,
     INVALID_NOTIFICATION_TYPE,
+    FILE_NO_LONGER_EXISTS,
     UNKNOWN_ERROR
 };
 
@@ -128,6 +129,11 @@ using AcceptKeyCallback = std::function<void(ApiCallStatus, const std::string& k
  * @brief Share file callback function. Receives the call status.
  */
 using ShareCallback = std::function<void(ApiCallStatus)>;
+
+/**
+ * @brief Accept file callback function. Receives the call status.
+ */
+using AcceptFileCallback = std::function<void(ApiCallStatus)>;
 
 /**
  * @brief Move callback function. Receives the call status.

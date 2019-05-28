@@ -19,6 +19,7 @@
 #include "sharekeycall.h"
 #include "acceptkeycall.h"
 #include "sharecall.h"
+#include "acceptfilecall.h"
 
 FileApiCallerImpl::FileApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
@@ -121,5 +122,12 @@ void FileApiCallerImpl::share(const std::string& authToken, const std::string& u
                               const ApiCallbacks::ShareCallback& callback) const
 {
     auto call = new ShareCall(authToken, username, path, callback);
+    call->send(m_visitor);
+}
+
+void FileApiCallerImpl::acceptFile(const std::string& authToken, const std::string& notificationId,
+                                   const std::string& path, const ApiCallbacks::AcceptFileCallback& callback) const
+{
+    auto call = new AcceptFileCall(authToken, notificationId, path, callback);
     call->send(m_visitor);
 }
