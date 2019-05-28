@@ -271,6 +271,16 @@ Rectangle {
                 fileDialog.visible = true;
             }
         }
+
+        HButton {
+            darkMode: root.darkMode
+            anchors.verticalCenter: parent.verticalCenter
+            label: "Share"
+
+            onClicked: {
+                rfsCtl.shareFile(destinationDirInput.text, fileNameInput.text);
+            }
+        }
     }
 
     Rectangle {
