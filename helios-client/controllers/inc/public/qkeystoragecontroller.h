@@ -100,9 +100,14 @@ public:
      * @brief Send a key to another user
      * @param username - Name of the destination user
      * @param keyName - Identity name of the key
-     * @return True if a key with this name could be found and was sent
      */
     Q_INVOKABLE void sendKey(const QString& username, const QString& keyName);
+
+    /**
+     * @brief Receive a key from another user
+     * @param notificationId - Name of the notification which is piggybacked by the key
+     */
+    Q_INVOKABLE void receiveKey(const QString& notificationId);
 
 signals:
     /**
@@ -111,11 +116,18 @@ signals:
     void keysChanged();
 
     /**
-     * @brief SIGNAL emitted when a key share operation completed
+     * @brief SIGNAL emitted when a key send operation completed
      * @param success - True if the operation completed successfully
      * @param result - Result message
      */
-    void keyShareResult(bool success, const QString& result);
+    void keySendResult(bool success, const QString& result);
+
+    /**
+     * @brief SIGNAL emitted when a key receive operation completed
+     * @param success - True if the operation completed successfully
+     * @param result - Result message
+     */
+    void keyReceiveResult(bool success, const QString& result);
 
 private:
     /**

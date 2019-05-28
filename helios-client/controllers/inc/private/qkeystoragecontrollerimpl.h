@@ -56,6 +56,7 @@ public:  // Forwarded from QKeyStorageController
     bool        removeKey(const QString& name);
     void        removeAllKeys();
     void        sendKey(const QString& username, const QString& keyName);
+    void        receiveKey(const QString& notificationId);
 
 public:  // From KeyExchangeServiceListener
     void keySharedSuccessfully() override;

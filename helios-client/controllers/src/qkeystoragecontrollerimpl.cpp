@@ -91,9 +91,14 @@ void QKeyStorageControllerImpl::sendKey(const QString& username, const QString& 
     m_keyExchangeService->sendKey(username.toStdString(), keyName.toStdString());
 }
 
+void QKeyStorageControllerImpl::receiveKey(const QString& notificationId)
+{
+    m_keyExchangeService->receiveKey(notificationId.toStdString());
+}
+
 void QKeyStorageControllerImpl::keySharedSuccessfully()
 {
-    QMetaObject::invokeMethod(m_publicImpl, "keyShareResult", Qt::QueuedConnection, Q_ARG(bool, true),
+    QMetaObject::invokeMethod(m_publicImpl, "keySendResult", Qt::QueuedConnection, Q_ARG(bool, true),
                               Q_ARG(QString, "Key shared successfully"));
 }
 
@@ -123,18 +128,21 @@ void QKeyStorageControllerImpl::keyShareError(Error error)
             break;
         }
     }
-    QMetaObject::invokeMethod(m_publicImpl, "keyShareResult", Qt::QueuedConnection, Q_ARG(bool, false),
+    QMetaObject::invokeMethod(m_publicImpl, "keySendResult", Qt::QueuedConnection, Q_ARG(bool, false),
                               Q_ARG(QString, message));
 }
 
 void QKeyStorageControllerImpl::keyReceivedSuccessfully()
 {
-    // To be implemented
+    QMetaObject::invokeMethod(m_publicImpl, "keyReceiveResult", Qt::QueuedConnection, Q_ARG(bool, true),
+                              Q_ARG(QString, "Key received successfully"));
+    QMetaObject::invokeMethod(m_publicImpl, "keysChanged", Qt::QueuedConnection);
 }
 
 void QKeyStorageControllerImpl::keyReceiveError(Error /*error*/)
 {
-    // To be implemented
+    QMetaObject::invokeMethod(m_publicImpl, "keyReceiveResult", Qt::QueuedConnection, Q_ARG(bool, false),
+                              Q_ARG(QString, "An unknown error occured while receiving the key"));
 }
 
 uint16_t QKeyStorageControllerImpl::keySizeToByteLength(QKeyStorageControllerImpl::KeySize keySize)

@@ -21,6 +21,11 @@ public:
         NO_SUCH_KEY,
 
         /**
+         * @brief The key sender cannot handle transfers at this time
+         */
+        SENDER_DISABLED_TRANSFERS,
+
+        /**
          * @brief The key recipient doesn't accept any transfers at this time
          */
         RECIPIENT_DISABLED_TRANSFERS,

@@ -119,9 +119,10 @@ using RemoveCallback = std::function<void(ApiCallStatus)>;
 using ShareKeyCallback = std::function<void(ApiCallStatus)>;
 
 /**
- * @brief Accept shared key callback function. Receives the call status.
+ * @brief Accept shared key callback function. Receives the call status, key name, key length and key content.
  */
-using AcceptKeyCallback = std::function<void(ApiCallStatus, const std::vector<uint8_t>& fileKey)>;
+using AcceptKeyCallback = std::function<void(ApiCallStatus, const std::string& keyName, uint16_t keyLength,
+                                             const std::vector<uint8_t>& keyContent)>;
 
 /**
  * @brief Move callback function. Receives the call status.

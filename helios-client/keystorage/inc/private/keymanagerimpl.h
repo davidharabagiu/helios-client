@@ -30,6 +30,7 @@ public:
 public:  // from KeyManager
     std::vector<std::string> listKeys(uint16_t length) const override;
     bool                     createKey(const std::string& name, uint16_t length) override;
+    void                     addKey(const std::string& name, const std::vector<uint8_t>& content) override;
     std::vector<uint8_t>     getKey(const std::string& name) const override;
     bool                     removeKey(const std::string& name) override;
     void                     removeAllKeys() override;

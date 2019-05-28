@@ -34,6 +34,14 @@ public:
     virtual bool createKey(const std::string& name, uint16_t length) = 0;
 
     /**
+     * @brief Add a key with an existing content. If a key with this name already exists, numbers may be appended to the
+     * end of the key in order to solve this conflict.
+     * @param name - Required name of the key
+     * @param content - Content of the key
+     */
+    virtual void addKey(const std::string& name, const std::vector<uint8_t>& content) = 0;
+
+    /**
      * @brief Retrieve an existent key
      * @param name - Name of the key
      * @return The requested key. The vector has size zero if the key with the given name does not exist.

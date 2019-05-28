@@ -78,12 +78,39 @@ void KeyExchangeServiceImpl::sendKey(const std::string& user, const std::string&
         });
 }
 
-void KeyExchangeServiceImpl::receiveKey(const std::string& /*notificationId*/)
+void KeyExchangeServiceImpl::receiveKey(const std::string& notificationId)
 {
     if (!enabled())
     {
         return;
     }
 
-    // To be implemented
+    auto  userKeyFileName = m_session.username() + ".pubk";
+    QFile userKeyFile(QString::fromStdString(userKeyFileName));
+    if (!userKeyFile.exists())
+    {
+        Observable::notifyAll(&KeyExchangeServiceListener::keyReceiveError,
+                              KeyExchangeServiceListener::Error::SENDER_DISABLED_TRANSFERS);
+        return;
+    }
+
+    auto authToken = m_session.authToken();
+
+    m_fileApi->acceptKey(
+        authToken, notificationId,
+        [this, authToken, userKeyFileName](ApiCallStatus status, const std::string& keyName, uint16_t keyLength,
+                                           const std::vector<uint8_t>& keyContent) {
+            if (status == ApiCallStatus::SUCCESS)
+            {
+                auto decryptedKey = m_rsa->decrypt(userKeyFileName, keyContent);
+                decryptedKey.resize(keyLength);
+                m_keyManager->addKey(keyName, decryptedKey);
+                Observable::notifyAll(&KeyExchangeServiceListener::keyReceivedSuccessfully);
+            }
+            else
+            {
+                Observable::notifyAll(&KeyExchangeServiceListener::keyReceiveError,
+                                      KeyExchangeServiceListener::Error::UNKNWOWN_ERROR);
+            }
+        });
 }

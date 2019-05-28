@@ -1,5 +1,7 @@
 #include <QDebug>
 #include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "acceptkeycall.h"
 #include "single.h"
@@ -14,6 +16,9 @@
 const std::string AcceptKeyCall::s_kUrl                          = "acceptkey";
 const std::string AcceptKeyCall::s_kTokenParam                   = "token";
 const std::string AcceptKeyCall::s_kNotificationIdParam          = "notification";
+const QString     AcceptKeyCall::s_kKeyNameJsonField             = "name";
+const QString     AcceptKeyCall::s_kKeyLengthJsonField           = "length";
+const QString     AcceptKeyCall::s_kKeyContentJsonField          = "content";
 const std::string AcceptKeyCall::s_kErrorInvalidNotificationType = "Invalid notification type";
 
 AcceptKeyCall::AcceptKeyCall(const std::string& authToken, const std::string& notificationId,
@@ -54,21 +59,49 @@ void AcceptKeyCall::receive(HttpStatus status, const std::vector<uint8_t>& reply
 
     if (status == HttpStatus::OK)
     {
-        QByteArray key = QByteArray::fromBase64(QByteArray::fromStdString(replyStr));
-        m_callback(ApiCallStatus::SUCCESS, std::vector<uint8_t>(key.begin(), key.end()));
+        QJsonParseError jsonError;
+        auto            json = QJsonDocument::fromJson(
+            QByteArray(reinterpret_cast<const char*>(reply.data()), safe_integral_cast<int>(reply.size())), &jsonError);
+        if (jsonError.error != QJsonParseError::NoError)
+        {
+            qCritical() << "JSON parse error: " << jsonError.errorString();
+            m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, "", 0, {});
+            return;
+        }
+
+        if (!json.isObject())
+        {
+            qCritical() << "Invalid json reply received: " << replyStr.c_str();
+            m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, "", 0, {});
+        }
+        auto jsonKeyNameField    = json[s_kKeyNameJsonField];
+        auto jsonKeyLengthField  = json[s_kKeyLengthJsonField];
+        auto jsonKeyContentField = json[s_kKeyContentJsonField];
+        if (jsonKeyNameField.type() != QJsonValue::String || jsonKeyLengthField.type() != QJsonValue::Double ||
+            jsonKeyContentField.type() != QJsonValue::String)
+        {
+            qCritical() << "Invalid json reply received: " << replyStr.c_str();
+            m_callback(ApiCallStatus::INVALID_REPLY_FORMAT, "", 0, {});
+            return;
+        }
+
+        QByteArray key = QByteArray::fromBase64(jsonKeyContentField.toString().toUtf8());
+        m_callback(ApiCallStatus::SUCCESS, jsonKeyNameField.toString().toStdString(),
+                   safe_integral_cast<uint16_t>(jsonKeyLengthField.toInt()),
+                   std::vector<uint8_t>(key.begin(), key.end()));
     }
     else if (status == HttpStatus::UNAUTHORIZED)
     {
-        m_callback(ApiCallStatus::UNAUTHORIZED, {});
+        m_callback(ApiCallStatus::UNAUTHORIZED, "", 0, {});
     }
     else if (status == HttpStatus::BAD_REQUEST && replyStr == s_kErrorInvalidNotificationType)
     {
-        m_callback(ApiCallStatus::INVALID_NOTIFICATION_TYPE, {});
+        m_callback(ApiCallStatus::INVALID_NOTIFICATION_TYPE, "", 0, {});
     }
     else
     {
         qCritical() << "Unhandled HTTP reply with status " << static_cast<int>(status) << " and content "
                     << replyStr.c_str();
-        m_callback(ApiCallStatus::UNKNOWN_ERROR, {});
+        m_callback(ApiCallStatus::UNKNOWN_ERROR, "", 0, {});
     }
 }

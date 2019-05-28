@@ -46,3 +46,8 @@ void QKeyStorageController::sendKey(const QString& username, const QString& keyN
 {
     m_privateImpl->sendKey(username, keyName);
 }
+
+void QKeyStorageController::receiveKey(const QString& notificationId)
+{
+    m_privateImpl->receiveKey(notificationId);
+}

@@ -84,6 +84,23 @@ bool KeyManagerImpl::createKey(const std::string& name, uint16_t length)
     return true;
 }
 
+void KeyManagerImpl::addKey(const std::string& name, const std::vector<uint8_t>& content)
+{
+    QString actualName;
+    for (int count = 0;
+         m_keys.contains(actualName = QString::fromStdString(count ? name + std::to_string(count) : name)); ++count)
+        ;
+
+    auto key =
+        QByteArray::fromRawData(reinterpret_cast<const char*>(content.data()), safe_integral_cast<int>(content.size()));
+    m_keys.insert(actualName, key);
+
+    QFile storageFile(QString::fromStdString(Paths::kKeyStorageFile));
+    storageFile.open(QIODevice::WriteOnly | QIODevice::Append);
+    persistKey(actualName, storageFile);
+    storageFile.close();
+}
+
 std::vector<uint8_t> KeyManagerImpl::getKey(const std::string& name) const
 {
     std::vector<uint8_t> result;

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <QString>
 
 #include "apicall.h"
 #include "apicalldefs.h"
@@ -60,6 +61,21 @@ private:
      * @brief Notification id parameter name
      */
     static const std::string s_kNotificationIdParam;
+
+    /**
+     * @brief Name of the JSON field representing the key name in the reply
+     */
+    static const QString s_kKeyNameJsonField;
+
+    /**
+     * @brief Name of the JSON field representing the key length in the reply
+     */
+    static const QString s_kKeyLengthJsonField;
+
+    /**
+     * @brief Name of the JSON field representing the key content in the reply
+     */
+    static const QString s_kKeyContentJsonField;
 
     /**
      * @brief Invalid notification type error message
