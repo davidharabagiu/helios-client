@@ -77,6 +77,11 @@ public:
     virtual void transferAborted(std::shared_ptr<FileTransfer> transfer) = 0;
 
     /**
+     * @brief A file was shared successfully
+     */
+    virtual void fileShared() = 0;
+
+    /**
      * @brief An operation has failed.
      * @param errorString - Error message
      */

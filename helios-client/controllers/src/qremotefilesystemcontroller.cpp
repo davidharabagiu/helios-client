@@ -88,3 +88,8 @@ void QRemoteFileSystemController::cancelTransfer(const QFileTransfer& transfer)
 {
     m_privateImpl->cancelTransfer(transfer);
 }
+
+void QRemoteFileSystemController::shareFile(const QString& username, const QString& fileName)
+{
+    m_privateImpl->shareFile(username, fileName);
+}

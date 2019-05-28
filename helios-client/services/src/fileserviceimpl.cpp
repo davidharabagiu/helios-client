@@ -786,6 +786,45 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
     });
 }
 
+void FileServiceImpl::shareFile(const std::string& user, const std::string& path, bool relative)
+{
+    if (!enabled())
+    {
+        return;
+    }
+
+    std::string fullPath;
+    if (relative)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        fullPath = PathUtils::concatenatePaths(m_currentDirectory, path);
+    }
+    else
+    {
+        fullPath = path;
+        PathUtils::removeTrailingSlash(fullPath);
+    }
+
+    m_apiCaller->share(m_session.authToken(), user, fullPath, [this, user, fullPath](ApiCallStatus status) {
+        if (status == ApiCallStatus::SUCCESS)
+        {
+            Observable::notifyAll(&FileServiceListener::fileShared);
+        }
+        else if (status == ApiCallStatus::INVALID_USERNAME)
+        {
+            Observable::notifyAll(&FileServiceListener::errorOccured, "User " + user + " not found");
+        }
+        else if (status == ApiCallStatus::INVALID_PATH)
+        {
+            Observable::notifyAll(&FileServiceListener::errorOccured, "Path " + fullPath + " is invalid");
+        }
+        else
+        {
+            Observable::notifyAll(&FileServiceListener::errorOccured, "Unknown error occured while sharing file");
+        }
+    });
+}
+
 void FileServiceImpl::collectApiFileList(
     const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files)
 {

@@ -150,6 +150,14 @@ public:
      */
     Q_INVOKABLE void cancelTransfer(const QFileTransfer& transfer);
 
+    /**
+     * @brief Share a file with another user. The user will also need the key which was used to encrypt the file in
+     * order to open it
+     * @param username - Name of the user to share the file with
+     * @param fileName - Name of the file to share relative to cwd
+     */
+    Q_INVOKABLE void shareFile(const QString& username, const QString& fileName);
+
 signals:
     /**
      * @brief SIGNAL emitted when files changes
@@ -195,6 +203,11 @@ signals:
      * @param transfer - File transfer
      */
     void transferRemoved(const QFileTransfer& transfer);
+
+    /**
+     * @brief SIGNAL emitted when a file was shared successfully
+     */
+    void fileShared();
 
     /**
      * @brief SIGNAL emitted when an error occured

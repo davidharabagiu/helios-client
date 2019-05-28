@@ -155,6 +155,11 @@ void QRemoteFileSystemControllerImpl::cancelTransfer(const QFileTransfer& transf
     m_fileService->cancelOperation(transfer.remotePath().toStdString());
 }
 
+void QRemoteFileSystemControllerImpl::shareFile(const QString& username, const QString& fileName)
+{
+    m_fileService->shareFile(username.toStdString(), fileName.toStdString(), true);
+}
+
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
 {
     auto files = m_fileService->files();
@@ -304,6 +309,11 @@ void QRemoteFileSystemControllerImpl::transferAborted(std::shared_ptr<FileTransf
         m_transfers.erase(it);
         QMetaObject::invokeMethod(m_publicImpl, "transfersChanged", Qt::QueuedConnection);
     }
+}
+
+void QRemoteFileSystemControllerImpl::fileShared()
+{
+    QMetaObject::invokeMethod(m_publicImpl, "fileShared", Qt::QueuedConnection);
 }
 
 void QRemoteFileSystemControllerImpl::errorOccured(const std::string& errorString)

@@ -81,6 +81,7 @@ public:  // from FileService
     void cancelOperation(const std::string& path) override;
     void moveFile(const std::string& sourcePath, const std::string& destinationPath) override;
     void removeFile(const std::string& path, bool relative) override;
+    void shareFile(const std::string& user, const std::string& path, bool relative) override;
 
 private:
     /**

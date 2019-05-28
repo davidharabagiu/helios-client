@@ -54,6 +54,7 @@ public:  // forwarded from QRemoteFileSystemController
     void         upload(const QUrl& localPath, const QString& encryptionKeyName);
     void         download(const QString& filename, const QUrl& destinationDir, const QString& decryptionKeyName);
     void         cancelTransfer(const QFileTransfer& transfer);
+    void         shareFile(const QString& username, const QString& fileName);
 
 public:  // from FileServiceListener
     void currentDirectoryChanged() override;
@@ -65,6 +66,7 @@ public:  // from FileServiceListener
     void transferProgressChanged(std::shared_ptr<FileTransfer> transfer) override;
     void transferCompleted(std::shared_ptr<FileTransfer> transfer) override;
     void transferAborted(std::shared_ptr<FileTransfer> transfer) override;
+    void fileShared() override;
     void errorOccured(const std::string& errorString) override;
 
 private:

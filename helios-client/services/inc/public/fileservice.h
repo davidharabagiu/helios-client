@@ -95,6 +95,14 @@ public:
      * @param relative - True if the path is relative to the current working directory
      */
     virtual void removeFile(const std::string& path, bool relative) = 0;
+
+    /**
+     * @brief Share a file with another user.
+     * @param user - Name of the user to share the file with
+     * @param path - Path of the remote file to share
+     * @param relative - True if the remote path is relative to the current working directory
+     */
+    virtual void shareFile(const std::string& user, const std::string& path, bool relative) = 0;
 };
 
 #endif  // FILESERVICE_H
