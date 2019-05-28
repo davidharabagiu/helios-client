@@ -141,7 +141,12 @@ Rectangle {
             keyListing.model = ksCtl.keys(KeyStorageController.KEY_SIZE_256);
         }
 
-        onKeyShareResult: {
+        onKeySendResult: {
+            errorDialog.text = result;
+            errorDialog.visible = true;
+        }
+
+        onKeyReceiveResult: {
             errorDialog.text = result;
             errorDialog.visible = true;
         }
@@ -474,6 +479,12 @@ Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    function acceptNotification(notification) {
+        if (notification.type === NotificationsController.KEY_SHARE) {
+            ksCtl.receiveKey(notification.id);
         }
     }
 }

@@ -6,7 +6,7 @@
 
 #include "apicall.h"
 #include "apicalldefs.h"
-#include "urlencodedrequest.h"
+#include "formdatarequest.h"
 
 /**
  * @class ShareKeyCall
@@ -31,9 +31,9 @@ public:
 public:
     /**
      * @brief Returns the http request
-     * @return std::shared_ptr<UrlEncodedRequest>
+     * @return std::shared_ptr<FormDataRequest>
      */
-    std::shared_ptr<UrlEncodedRequest> request();
+    std::shared_ptr<FormDataRequest> request();
 
 public:  // from ApiCall
     void send(std::shared_ptr<ApiCallVisitor> visitor) override;
@@ -43,7 +43,7 @@ private:
     /**
      * @brief Http request
      */
-    std::shared_ptr<UrlEncodedRequest> m_request;
+    std::shared_ptr<FormDataRequest> m_request;
 
     /**
      * @brief Callback

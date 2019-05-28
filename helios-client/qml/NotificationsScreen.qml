@@ -9,6 +9,7 @@ Rectangle {
     property var session
 
     signal backButtonActivated()
+    signal acceptButtonActivated(var notification)
 
     color: darkMode ? "#000000" : "#ffffff"
 
@@ -57,6 +58,18 @@ Rectangle {
             label: "Dismiss All"
             onClicked: {
                 notCtl.dismissAllNotifications();
+            }
+
+            height: controls.height
+        }
+
+        HButton {
+            id: acceptButton
+
+            darkMode: root.darkMode
+            label: "Accept"
+            onClicked: {
+                acceptButtonActivated(notificationList.selectedItem);
             }
 
             height: controls.height

@@ -85,7 +85,7 @@ void KeyExchangeServiceImpl::receiveKey(const std::string& notificationId)
         return;
     }
 
-    auto  userKeyFileName = m_session.username() + ".pubk";
+    auto  userKeyFileName = m_session.username() + ".pk";
     QFile userKeyFile(QString::fromStdString(userKeyFileName));
     if (!userKeyFile.exists())
     {

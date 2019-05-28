@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "qusersession.h"
+#include "qnotification.h"
 
 // Forward declarations
 class QNotificationsControllerImpl;
@@ -32,6 +33,8 @@ class QNotificationsController : public QObject
     Q_PROPERTY(QVariantList notifications READ notifications NOTIFY notificationsChanged)
 
 public:
+    Q_ENUMS(QNotification::QNotificationType);
+
     /**
      * @brief Constructor
      * @param parent - Parent QObject

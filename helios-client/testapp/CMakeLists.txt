@@ -4,6 +4,7 @@ project(testapp)
 
 include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 include(${CMAKE_SCRIPTS}/rpath_config.cmake REQUIRED)
+include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_executable(${PROJECT_NAME}
     "main.cpp"
@@ -18,6 +19,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 find_library(CRYPTOPP_LIB cryptopp $ENV{CRYPTOPP_DIR}/lib)
 
 target_link_libraries(${PROJECT_NAME}
+    ${QT5_LIBS}
     ${CRYPTOPP_LIB}
     crypto
     utils

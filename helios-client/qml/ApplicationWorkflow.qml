@@ -8,6 +8,7 @@ StackView {
     property var settingsCtl
 
     signal registrationSuccessful()
+    signal notificationAccepted(var notification)
 
     initialItem: loginScreenComponent
 
@@ -117,6 +118,13 @@ StackView {
             onNotificationsButtonActivated: {
                 root.push(notificationsScreenComponent);
             }
+
+            Connections {
+                target: root
+                onNotificationAccepted: {
+                    acceptNotification(notification);
+                }
+            }
         }
     }
 
@@ -129,6 +137,10 @@ StackView {
 
             onBackButtonActivated: {
                 root.pop();
+            }
+
+            onAcceptButtonActivated: {
+                root.notificationAccepted(notification);
             }
         }
     }

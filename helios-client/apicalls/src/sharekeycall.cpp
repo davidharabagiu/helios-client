@@ -16,7 +16,7 @@ const std::string ShareKeyCall::s_kTokenParam       = "token";
 const std::string ShareKeyCall::s_kUsernameParam    = "to";
 const std::string ShareKeyCall::s_kKeyNameParam     = "name";
 const std::string ShareKeyCall::s_kKeyLengthParam   = "length";
-const std::string ShareKeyCall::s_kKeyContentParam  = "content";
+const std::string ShareKeyCall::s_kKeyContentParam  = "data";
 const std::string ShareKeyCall::s_kErrorInvalidUser = "Invalid user";
 
 ShareKeyCall::ShareKeyCall(const std::string& authToken, const std::string& username, const std::string& keyName,
@@ -36,20 +36,20 @@ ShareKeyCall::ShareKeyCall(const std::string& authToken, const std::string& user
         qFatal("Config instance not available");
     }
 
-    m_request = requestFactory->createUrlEncodedRequest(
-        config->get(ConfigKeys::kServerUrlKey).toString().toStdString() + "/" + s_kUrl);
+    m_request = requestFactory->createFormDataRequest(config->get(ConfigKeys::kServerUrlKey).toString().toStdString() +
+                                                      "/" + s_kUrl);
     m_request->setHeaderValue(s_kTokenParam, authToken);
-    m_request->setParameter(s_kUsernameParam, username);
-    m_request->setParameter(s_kKeyNameParam, keyName);
-    m_request->setParameter(s_kKeyLengthParam, std::to_string(keyLength));
-    m_request->setParameter(s_kKeyContentParam,
-                            QByteArray::fromRawData(reinterpret_cast<const char*>(keyContent.data()),
-                                                    safe_integral_cast<int>(keyContent.size()))
-                                .toBase64()
-                                .toStdString());
+    m_request->setPart(s_kUsernameParam, FormDataRequest::HttpPartType::TEXT, username);
+    m_request->setPart(s_kKeyNameParam, FormDataRequest::HttpPartType::TEXT, keyName);
+    m_request->setPart(s_kKeyLengthParam, FormDataRequest::HttpPartType::TEXT, std::to_string(keyLength));
+    m_request->setPart(s_kKeyContentParam, FormDataRequest::HttpPartType::FILE,
+                       QByteArray::fromRawData(reinterpret_cast<const char*>(keyContent.data()),
+                                               safe_integral_cast<int>(keyContent.size()))
+                           .toBase64()
+                           .toStdString());
 }
 
-std::shared_ptr<UrlEncodedRequest> ShareKeyCall::request()
+std::shared_ptr<FormDataRequest> ShareKeyCall::request()
 {
     return m_request;
 }
