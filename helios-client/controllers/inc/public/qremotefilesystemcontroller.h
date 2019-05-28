@@ -217,6 +217,11 @@ signals:
     void fileShared();
 
     /**
+     * @brief SIGNAL emitted when a file share was accepted successfully
+     */
+    void acceptedSharedFile();
+
+    /**
      * @brief SIGNAL emitted when an error occured
      * @param message - Error message
      */

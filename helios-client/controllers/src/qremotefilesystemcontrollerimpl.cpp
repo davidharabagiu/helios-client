@@ -331,6 +331,7 @@ void QRemoteFileSystemControllerImpl::acceptedFileShare(std::shared_ptr<const Fi
         QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
         QMetaObject::invokeMethod(m_publicImpl, "fileAddedInCwd", Qt::QueuedConnection, Q_ARG(QHeliosFile, newFile));
     }
+    QMetaObject::invokeMethod(m_publicImpl, "acceptedSharedFile", Qt::QueuedConnection);
 }
 
 void QRemoteFileSystemControllerImpl::errorOccured(const std::string& errorString)

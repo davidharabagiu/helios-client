@@ -8,7 +8,7 @@ StackView {
     property var settingsCtl
 
     signal registrationSuccessful()
-    signal notificationAccepted(var notification)
+    signal notificationAccepted(var notification, var target)
     signal notificationAcceptedDone()
 
     initialItem: loginScreenComponent
@@ -127,7 +127,7 @@ StackView {
             Connections {
                 target: root
                 onNotificationAccepted: {
-                    acceptNotification(notification);
+                    acceptNotification(notification, target);
                 }
             }
         }
@@ -145,7 +145,7 @@ StackView {
             }
 
             onAcceptButtonActivated: {
-                root.notificationAccepted(notification);
+                root.notificationAccepted(notification, target);
             }
 
             Connections {

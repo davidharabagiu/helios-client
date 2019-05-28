@@ -9,7 +9,7 @@ Rectangle {
     property var session
 
     signal backButtonActivated()
-    signal acceptButtonActivated(var notification)
+    signal acceptButtonActivated(var notification, var target)
 
     color: darkMode ? "#000000" : "#ffffff"
 
@@ -69,10 +69,17 @@ Rectangle {
             darkMode: root.darkMode
             label: "Accept"
             onClicked: {
-                acceptButtonActivated(notificationList.selectedItem);
+                acceptButtonActivated(notificationList.selectedItem, targetFileInput.text);
             }
 
             height: controls.height
+        }
+
+        HTextInput {
+            id: targetFileInput
+            darkMode: root.darkMode
+            hint: "Target file name"
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
 

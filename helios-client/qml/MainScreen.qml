@@ -129,6 +129,17 @@ Rectangle {
             transferList.removeTransfer(transfer);
         }
 
+        onFileShared: {
+            errorDialog.text = "File shared successfully";
+            errorDialog.visible = true;
+        }
+
+        onAcceptedSharedFile: {
+            errorDialog.text = "File accepted successfully";
+            errorDialog.visible = true;
+            root.notificationAccepted();
+        }
+
         onError: {
             errorDialog.text = message;
             errorDialog.visible = true;
@@ -494,9 +505,11 @@ Rectangle {
         }
     }
 
-    function acceptNotification(notification) {
+    function acceptNotification(notification, target) {
         if (notification.type === NotificationsController.KEY_SHARE) {
             ksCtl.receiveKey(notification.id);
+        } else if (notification.type === NotificationsController.FILE_SHARE) {
+            rfsCtl.acceptSharedFile(notification.id, target);
         }
     }
 }
