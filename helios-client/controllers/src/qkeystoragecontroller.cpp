@@ -4,6 +4,12 @@ QKeyStorageController::QKeyStorageController(QObject* parent)
     : QObject(parent)
     , m_privateImpl(new QKeyStorageControllerImpl(this))
 {
+    m_privateImpl->registerForNotifications();
+}
+
+QKeyStorageController::~QKeyStorageController()
+{
+    m_privateImpl->unregisterFromNotifications();
 }
 
 QStringList QKeyStorageController::keys(KeySize keySize) const

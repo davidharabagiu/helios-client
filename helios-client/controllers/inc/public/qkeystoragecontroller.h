@@ -47,6 +47,11 @@ public:
     explicit QKeyStorageController(QObject* parent = nullptr);
 
     /**
+     * @brief Destructor
+     */
+    ~QKeyStorageController();
+
+    /**
      * @brief Returns all the names of the keys which are of a given size
      * @param keySize - enum KeySize
      * @return QStringList
@@ -86,6 +91,13 @@ signals:
      * @brief SIGNAL emitted when the list of keys has changed
      */
     void keysChanged();
+
+    /**
+     * @brief SIGNAL emitted when a key share operation completed
+     * @param success - True if the operation completed successfully
+     * @param result - Result message
+     */
+    void keyShareResult(bool success, const QString& result);
 
 private:
     /**

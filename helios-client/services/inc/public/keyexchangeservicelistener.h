@@ -39,7 +39,7 @@ public:
     /**
      * @brief Destructor
      */
-    ~KeyExchangeServiceListener() = default;
+    virtual ~KeyExchangeServiceListener() = default;
 
     /**
      * @brief A key sharing operation completed successfully

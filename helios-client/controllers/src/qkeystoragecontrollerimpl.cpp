@@ -24,6 +24,16 @@ QKeyStorageControllerImpl::QKeyStorageControllerImpl(QKeyStorageController* publ
     }
 }
 
+void QKeyStorageControllerImpl::registerForNotifications()
+{
+    m_keyExchangeService->registerListener(shared_from_this());
+}
+
+void QKeyStorageControllerImpl::unregisterFromNotifications()
+{
+    m_keyExchangeService->unregisterListener(shared_from_this());
+}
+
 QStringList QKeyStorageControllerImpl::keys(QKeyStorageControllerImpl::KeySize keySize) const
 {
     QStringList result;
@@ -62,6 +72,42 @@ void QKeyStorageControllerImpl::removeAllKeys()
 void QKeyStorageControllerImpl::sendKey(const QString& username, const QString& keyName)
 {
     m_keyExchangeService->sendKey(username.toStdString(), keyName.toStdString());
+}
+
+void QKeyStorageControllerImpl::keySharedSuccessfully()
+{
+    QMetaObject::invokeMethod(m_publicImpl, "keyShareResult", Qt::QueuedConnection, Q_ARG(bool, true),
+                              Q_ARG(QString, "Key shared successfully"));
+}
+
+void QKeyStorageControllerImpl::errorOccured(KeyExchangeServiceListener::Error error)
+{
+    QString message;
+    switch (error)
+    {
+        case KeyExchangeServiceListener::Error::NO_SUCH_KEY:
+        {
+            message = "Requested key was not found";
+            break;
+        }
+        case KeyExchangeServiceListener::Error::UNKNOWN_USER:
+        {
+            message = "Key recipient was not found";
+            break;
+        }
+        case KeyExchangeServiceListener::Error::RECIPIENT_DISABLED_TRANSFERS:
+        {
+            message = "The key recipient doesn't allow transfers at this time";
+            break;
+        }
+        default:
+        {
+            message = "An unknown error occured while sharing the key";
+            break;
+        }
+    }
+    QMetaObject::invokeMethod(m_publicImpl, "keyShareResult", Qt::QueuedConnection, Q_ARG(bool, false),
+                              Q_ARG(QString, message));
 }
 
 uint16_t QKeyStorageControllerImpl::keySizeToByteLength(QKeyStorageControllerImpl::KeySize keySize)
