@@ -64,6 +64,8 @@ add_library(${PROJECT_NAME}
     "src/sharekeycall.cpp"
     "inc/private/acceptkeycall.h"
     "src/acceptkeycall.cpp"
+    "inc/private/sharecall.h"
+    "src/sharecall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

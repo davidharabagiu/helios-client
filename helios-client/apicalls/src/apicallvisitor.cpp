@@ -94,6 +94,11 @@ void ApiCallVisitor::visit(AcceptKeyCall* call) const
     handleGet(call);
 }
 
+void ApiCallVisitor::visit(ShareCall* call) const
+{
+    handlePost(call);
+}
+
 void ApiCallVisitor::visit(NotificationsCall* call) const
 {
     handleGet(call);

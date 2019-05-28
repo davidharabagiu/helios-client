@@ -18,6 +18,7 @@
 #include "isdircall.h"
 #include "sharekeycall.h"
 #include "acceptkeycall.h"
+#include "sharecall.h"
 
 FileApiCallerImpl::FileApiCallerImpl(const std::shared_ptr<HttpRequestManager>& requestManager)
 {
@@ -113,5 +114,12 @@ void FileApiCallerImpl::acceptKey(const std::string& authToken, const std::strin
                                   const ApiCallbacks::AcceptKeyCallback& callback) const
 {
     auto call = new AcceptKeyCall(authToken, notificationId, callback);
+    call->send(m_visitor);
+}
+
+void FileApiCallerImpl::share(const std::string& authToken, const std::string& username, const std::string& path,
+                              const ApiCallbacks::ShareCallback& callback) const
+{
+    auto call = new ShareCall(authToken, username, path, callback);
     call->send(m_visitor);
 }

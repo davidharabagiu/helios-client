@@ -149,6 +149,16 @@ public:
      */
     virtual void acceptKey(const std::string& authToken, const std::string& notificationId,
                            const ApiCallbacks::AcceptKeyCallback& callback) const = 0;
+
+    /**
+     * @brief Share a file with another user
+     * @param authToken - Authentication token
+     * @param username - Name of the user which will receive the file
+     * @param path - Path of the file to share
+     * @param callback - ShareCallback
+     */
+    virtual void share(const std::string& authToken, const std::string& username, const std::string& path,
+                       const ApiCallbacks::ShareCallback& callback) const = 0;
 };
 
 #endif  // FILEAPICALLER_H

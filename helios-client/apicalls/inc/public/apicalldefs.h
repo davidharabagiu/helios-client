@@ -125,6 +125,11 @@ using AcceptKeyCallback = std::function<void(ApiCallStatus, const std::string& k
                                              const std::vector<uint8_t>& keyContent)>;
 
 /**
+ * @brief Share file callback function. Receives the call status.
+ */
+using ShareCallback = std::function<void(ApiCallStatus)>;
+
+/**
  * @brief Move callback function. Receives the call status.
  */
 using MoveCallback = std::function<void(ApiCallStatus)>;

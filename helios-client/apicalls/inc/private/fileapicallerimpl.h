@@ -49,6 +49,8 @@ public:  // from FileApiCaller
                   const ApiCallbacks::ShareKeyCallback& callback) const override;
     void acceptKey(const std::string& authToken, const std::string& notificationId,
                    const ApiCallbacks::AcceptKeyCallback& callback) const override;
+    void share(const std::string& authToken, const std::string& username, const std::string& path,
+               const ApiCallbacks::ShareCallback& callback) const override;
 
 private:
     /**
