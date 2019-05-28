@@ -12,6 +12,16 @@ QKeyStorageController::~QKeyStorageController()
     m_privateImpl->unregisterFromNotifications();
 }
 
+void QKeyStorageController::setAuthenticationToken(const QString& newValue)
+{
+    m_privateImpl->setAuthenticationToken(newValue);
+}
+
+void QKeyStorageController::resetAuthenticationToken()
+{
+    m_privateImpl->resetAuthenticationToken();
+}
+
 QStringList QKeyStorageController::keys(KeySize keySize) const
 {
     return m_privateImpl->keys(static_cast<QKeyStorageControllerImpl::KeySize>(keySize));
@@ -34,5 +44,5 @@ void QKeyStorageController::removeAllKeys()
 
 void QKeyStorageController::sendKey(const QString& username, const QString& keyName)
 {
-    return m_privateImpl->sendKey(username, keyName);
+    m_privateImpl->sendKey(username, keyName);
 }

@@ -37,9 +37,13 @@ void QRemoteFileSystemControllerImpl::unregisterFromNotifications()
 
 void QRemoteFileSystemControllerImpl::setAuthenticationToken(const QString& newVal)
 {
-    if (newVal.length() > 0)
+    if (!newVal.isEmpty())
     {
         m_fileService->setAuthToken(newVal.toStdString());
+    }
+    else
+    {
+        resetAuthenticationToken();
     }
 }
 

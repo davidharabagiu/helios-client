@@ -141,6 +141,13 @@ Rectangle {
         onKeysChanged: {
             keyListing.model = ksCtl.keys(KeyStorageController.KEY_SIZE_256);
         }
+
+        onKeyShareResult: {
+            errorDialog.text = result;
+            errorDialog.visible = true;
+        }
+
+        authenticationToken: authToken
     }
 
     FileListing {
@@ -353,7 +360,7 @@ Rectangle {
         HTextInput {
             id: keyNameInput
             darkMode: root.darkMode
-            hint: "Key name"
+            hint: "Key name / User"
             anchors {
                 right: newKeyButton.left
                 rightMargin: 5
@@ -401,6 +408,24 @@ Rectangle {
                     } else {
                         keyListing.selectedIndex = -1;
                     }
+                }
+            }
+        }
+
+        HButton {
+            id: shareKeyButton
+            anchors {
+                bottom: removeKeyButton.top
+                bottomMargin: 5
+                right: parent.right
+                rightMargin: 5
+            }
+            darkMode: root.darkMode
+            label: "Share key"
+
+            onClicked: {
+                if (keyListing.selectedIndex !== -1) {
+                    ksCtl.sendKey(keyNameInput.text, keyListing.selectedKey);
                 }
             }
         }

@@ -48,6 +48,8 @@ public:
     void unregisterFromNotifications();
 
 public:  // Forwarded from QKeyStorageController
+    void        setAuthenticationToken(const QString& newVal);
+    void        resetAuthenticationToken();
     QStringList keys(KeySize keySize) const;
     bool        createKey(const QString& name, KeySize size);
     bool        removeKey(const QString& name);

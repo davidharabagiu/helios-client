@@ -34,6 +34,23 @@ void QKeyStorageControllerImpl::unregisterFromNotifications()
     m_keyExchangeService->unregisterListener(shared_from_this());
 }
 
+void QKeyStorageControllerImpl::setAuthenticationToken(const QString& newVal)
+{
+    if (!newVal.isEmpty())
+    {
+        m_keyExchangeService->setAuthToken(newVal.toStdString());
+    }
+    else
+    {
+        resetAuthenticationToken();
+    }
+}
+
+void QKeyStorageControllerImpl::resetAuthenticationToken()
+{
+    m_keyExchangeService->removeAuthToken();
+}
+
 QStringList QKeyStorageControllerImpl::keys(QKeyStorageControllerImpl::KeySize keySize) const
 {
     QStringList result;

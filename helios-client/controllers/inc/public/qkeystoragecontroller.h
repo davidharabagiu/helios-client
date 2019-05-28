@@ -17,6 +17,12 @@ class QKeyStorageController : public QObject
 {
     Q_OBJECT
 
+    /**
+     * @property authenticationToken
+     * @brief Authentication token of the current user session used to access the user's remote files
+     */
+    Q_PROPERTY(QString authenticationToken WRITE setAuthenticationToken RESET resetAuthenticationToken)
+
 public:
     /**
      * @brief Specify a key size in bit count
@@ -50,6 +56,17 @@ public:
      * @brief Destructor
      */
     ~QKeyStorageController();
+
+    /**
+     * @brief Setter for authenticationToken
+     * @param newValue - QString
+     */
+    void setAuthenticationToken(const QString& newValue);
+
+    /**
+     * @brief Remove the current authentication token
+     */
+    void resetAuthenticationToken();
 
     /**
      * @brief Returns all the names of the keys which are of a given size
