@@ -5,6 +5,9 @@
 #include <QString>
 #include <QObject>
 
+#include "qusersession.h"
+
+// Forward declarations
 class QAuthenticationControllerImpl;
 
 /**
@@ -27,20 +30,11 @@ class QAuthenticationController : public QObject
      */
     Q_PROPERTY(bool loggedIn READ loggedIn NOTIFY loggedInChanged)
 
-    // TODO: Create Qt wrapper over UserSession and expose the session as a property instead of exposing username and
-    // authenticationToken directly
-
     /**
-     * @property username
-     * @brief Name of the current logged in user. Valid only when logged in.
+     * @property session
+     * @brief Current session. Valid only when logged in.
      */
-    Q_PROPERTY(QString username READ username NOTIFY usernameChanged)
-
-    /**
-     * @property authenticationToken
-     * @brief Current authenticationToken. Valid only when logged in.
-     */
-    Q_PROPERTY(QString authenticationToken READ authenticationToken NOTIFY authenticationTokenChanged)
+    Q_PROPERTY(QUserSession session READ session NOTIFY sessionChanged)
 
 public:
     /**
@@ -94,16 +88,10 @@ public:
     bool loggedIn() const;
 
     /**
-     * @brief Getter for username
-     * @return QString
+     * @brief Getter for session
+     * @return QUserSession
      */
-    QString username() const;
-
-    /**
-     * @brief Getter for authenticationToken
-     * @return QString
-     */
-    QString authenticationToken() const;
+    QUserSession session() const;
 
 signals:
     /**
@@ -133,14 +121,9 @@ signals:
     void loggedInChanged();
 
     /**
-     * @brief SIGNAL emitted when username changes
+     * @brief SIGNAL emitted when session changes
      */
-    void usernameChanged();
-
-    /**
-     * @brief SIGNAL emitted when authenticationToken changes
-     */
-    void authenticationTokenChanged();
+    void sessionChanged();
 
 private:
     /**

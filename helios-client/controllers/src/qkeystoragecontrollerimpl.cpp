@@ -34,21 +34,21 @@ void QKeyStorageControllerImpl::unregisterFromNotifications()
     m_keyExchangeService->unregisterListener(shared_from_this());
 }
 
-void QKeyStorageControllerImpl::setAuthenticationToken(const QString& newVal)
+void QKeyStorageControllerImpl::setSession(const QUserSession& newVal)
 {
-    if (!newVal.isEmpty())
+    if (newVal.isValid())
     {
-        m_keyExchangeService->setAuthToken(newVal.toStdString());
+        m_keyExchangeService->setSession(*newVal.data());
     }
     else
     {
-        resetAuthenticationToken();
+        resetSession();
     }
 }
 
-void QKeyStorageControllerImpl::resetAuthenticationToken()
+void QKeyStorageControllerImpl::resetSession()
 {
-    m_keyExchangeService->removeAuthToken();
+    m_keyExchangeService->removeSession();
 }
 
 QStringList QKeyStorageControllerImpl::keys(QKeyStorageControllerImpl::KeySize keySize) const
@@ -97,22 +97,22 @@ void QKeyStorageControllerImpl::keySharedSuccessfully()
                               Q_ARG(QString, "Key shared successfully"));
 }
 
-void QKeyStorageControllerImpl::errorOccured(KeyExchangeServiceListener::Error error)
+void QKeyStorageControllerImpl::keyShareError(Error error)
 {
     QString message;
     switch (error)
     {
-        case KeyExchangeServiceListener::Error::NO_SUCH_KEY:
+        case Error::NO_SUCH_KEY:
         {
             message = "Requested key was not found";
             break;
         }
-        case KeyExchangeServiceListener::Error::UNKNOWN_USER:
+        case Error::UNKNOWN_USER:
         {
             message = "Key recipient was not found";
             break;
         }
-        case KeyExchangeServiceListener::Error::RECIPIENT_DISABLED_TRANSFERS:
+        case Error::RECIPIENT_DISABLED_TRANSFERS:
         {
             message = "The key recipient doesn't allow transfers at this time";
             break;
@@ -125,6 +125,16 @@ void QKeyStorageControllerImpl::errorOccured(KeyExchangeServiceListener::Error e
     }
     QMetaObject::invokeMethod(m_publicImpl, "keyShareResult", Qt::QueuedConnection, Q_ARG(bool, false),
                               Q_ARG(QString, message));
+}
+
+void QKeyStorageControllerImpl::keyReceivedSuccessfully()
+{
+    // To be implemented
+}
+
+void QKeyStorageControllerImpl::keyReceiveError(Error /*error*/)
+{
+    // To be implemented
 }
 
 uint16_t QKeyStorageControllerImpl::keySizeToByteLength(QKeyStorageControllerImpl::KeySize keySize)

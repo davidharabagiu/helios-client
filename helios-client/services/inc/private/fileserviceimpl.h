@@ -63,10 +63,9 @@ public:
      */
     ~FileServiceImpl();
 
-public:  // from AuthenticatedServiceInterface
-    bool enabled() const override;
-    void setAuthToken(const std::string& authToken) override;
-    void removeAuthToken() override;
+public:  // from AuthenticatedService
+    void setSession(const UserSession& authToken) override;
+    void removeSession() override;
 
 public:  // from FileService
     std::string                                currentDirectory() const override;
@@ -115,11 +114,6 @@ private:
      * @brief Config instance
      */
     std::shared_ptr<Config> m_config;
-
-    /**
-     * @brief Authentication token
-     */
-    std::string m_authToken;
 
     /**
      * @brief Current working directory

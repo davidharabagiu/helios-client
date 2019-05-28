@@ -47,10 +47,21 @@ public:
     virtual void keySharedSuccessfully() = 0;
 
     /**
-     * @brief An asynchronous operation has failed
-     * @param errorString - Error message
+     * @brief A key sharing operation has failed
+     * @param error - Error type
      */
-    virtual void errorOccured(Error error) = 0;
+    virtual void keyShareError(Error error) = 0;
+
+    /**
+     * @brief A key accepting / receiving operation completed successfully
+     */
+    virtual void keyReceivedSuccessfully() = 0;
+
+    /**
+     * @brief A key accepting / receiving operation has failed
+     * @param error - Error type
+     */
+    virtual void keyReceiveError(Error error) = 0;
 };
 
 #endif  // KEYEXCHANGESERVICELISTENER_H

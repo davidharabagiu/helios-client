@@ -33,12 +33,11 @@ void QAuthenticationControllerImpl::loginCompleted(bool success, const std::stri
     if (success)
     {
         QMetaObject::invokeMethod(m_publicImpl, "loggedInChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "usernameChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "authenticationTokenChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "sessionChanged", Qt::QueuedConnection);
     }
 
     QMetaObject::invokeMethod(m_publicImpl, "loginCompleted", Qt::QueuedConnection, Q_ARG(bool, success),
-                              Q_ARG(const QString&, QString::fromStdString(errorString)));
+                              Q_ARG(QString, QString::fromStdString(errorString)));
 }
 
 void QAuthenticationControllerImpl::logoutCompleted(bool success, const std::string& errorString)
@@ -46,17 +45,17 @@ void QAuthenticationControllerImpl::logoutCompleted(bool success, const std::str
     if (success)
     {
         QMetaObject::invokeMethod(m_publicImpl, "loggedInChanged", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_publicImpl, "usernameChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "sessionChanged", Qt::QueuedConnection);
     }
 
     QMetaObject::invokeMethod(m_publicImpl, "logoutCompleted", Qt::QueuedConnection, Q_ARG(bool, success),
-                              Q_ARG(const QString&, QString::fromStdString(errorString)));
+                              Q_ARG(QString, QString::fromStdString(errorString)));
 }
 
 void QAuthenticationControllerImpl::userCreationCompleted(bool success, const std::string& errorString)
 {
     QMetaObject::invokeMethod(m_publicImpl, "userCreationCompleted", Qt::QueuedConnection, Q_ARG(bool, success),
-                              Q_ARG(const QString&, QString::fromStdString(errorString)));
+                              Q_ARG(QString, QString::fromStdString(errorString)));
 }
 
 void QAuthenticationControllerImpl::restoreSession()
@@ -107,20 +106,11 @@ bool QAuthenticationControllerImpl::loggedIn() const
     return m_userService->loggedIn();
 }
 
-QString QAuthenticationControllerImpl::username() const
+QUserSession QAuthenticationControllerImpl::session() const
 {
     if (m_userService->loggedIn())
     {
-        return QString::fromStdString(m_userService->session().username());
+        return QUserSession(std::make_shared<UserSession>(m_userService->session()));
     }
-    return QString();
-}
-
-QString QAuthenticationControllerImpl::authenticationToken() const
-{
-    if (m_userService->loggedIn())
-    {
-        return QString::fromStdString(m_userService->session().authToken());
-    }
-    return QString();
+    return QUserSession();
 }

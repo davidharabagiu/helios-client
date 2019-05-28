@@ -6,7 +6,8 @@ include(${CMAKE_SCRIPTS}/compiler_options.cmake REQUIRED)
 include(${CMAKE_SCRIPTS}/qt_configuration.cmake REQUIRED)
 
 add_library(${PROJECT_NAME}
-    "inc/public/authenticatedserviceinterface.h"
+    "inc/public/authenticatedservice.h"
+    "src/authenticatedservice.cpp"
     "inc/public/userservicelistener.h"
     "inc/public/userservice.h"
     "inc/private/userserviceimpl.h"

@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include "keyexchangeservicelistener.h"
+#include "qusersession.h"
 
 // Forward declarations
 class KeyManager;
@@ -48,8 +49,8 @@ public:
     void unregisterFromNotifications();
 
 public:  // Forwarded from QKeyStorageController
-    void        setAuthenticationToken(const QString& newVal);
-    void        resetAuthenticationToken();
+    void        setSession(const QUserSession& newVal);
+    void        resetSession();
     QStringList keys(KeySize keySize) const;
     bool        createKey(const QString& name, KeySize size);
     bool        removeKey(const QString& name);
@@ -58,7 +59,9 @@ public:  // Forwarded from QKeyStorageController
 
 public:  // From KeyExchangeServiceListener
     void keySharedSuccessfully() override;
-    void errorOccured(Error error) override;
+    void keyShareError(Error error) override;
+    void keyReceivedSuccessfully() override;
+    void keyReceiveError(Error error) override;
 
 private:
     static uint16_t keySizeToByteLength(KeySize keySize);

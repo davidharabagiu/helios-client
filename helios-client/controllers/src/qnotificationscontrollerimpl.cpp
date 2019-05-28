@@ -27,21 +27,21 @@ void QNotificationsControllerImpl::unregisterFromNotifications()
     m_service->unregisterListener(shared_from_this());
 }
 
-void QNotificationsControllerImpl::setAuthenticationToken(const QString& newValue)
+void QNotificationsControllerImpl::setSession(const QUserSession& newVal)
 {
-    if (newValue.isNull() || newValue.isEmpty())
+    if (newVal.isValid())
     {
-        m_service->removeAuthToken();
+        m_service->setSession(*newVal.data());
     }
     else
     {
-        m_service->setAuthToken(newValue.toStdString());
+        resetSession();
     }
 }
 
-void QNotificationsControllerImpl::resetAuthenticationToken()
+void QNotificationsControllerImpl::resetSession()
 {
-    m_service->removeAuthToken();
+    m_service->removeSession();
 }
 
 QVariantList QNotificationsControllerImpl::notifications() const

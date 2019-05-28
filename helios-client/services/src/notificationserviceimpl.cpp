@@ -12,24 +12,19 @@ NotificationServiceImpl::NotificationServiceImpl(std::unique_ptr<NotificationsAp
         safe_integral_cast<uint32_t>(qvariant_cast<uint>(config->get(ConfigKeys::kNotificationsRefreshInterval)));
 }
 
-bool NotificationServiceImpl::enabled() const
+void NotificationServiceImpl::setSession(const UserSession& session)
 {
-    return !m_authToken.empty();
-}
-
-void NotificationServiceImpl::setAuthToken(const std::string& authToken)
-{
-    removeAuthToken();
-    m_authToken = authToken;
+    removeSession();
+    AuthenticatedService::setSession(session);
     refresh();
     m_refreshTimer.start(m_refreshTimerInterval, [this] { refresh(); }, false);
 }
 
-void NotificationServiceImpl::removeAuthToken()
+void NotificationServiceImpl::removeSession()
 {
     m_refreshTimer.stop();
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_authToken.clear();
+    AuthenticatedService::removeSession();
     Observable::notifyAll(&NotificationServiceListener::notificationListUpdated);
 }
 
@@ -40,12 +35,12 @@ void NotificationServiceImpl::refresh()
         return;
     }
 
-    auto authToken = m_authToken;
+    auto authToken = m_session.authToken();
     m_api->notifications(
         authToken,
         [this, authToken](ApiCallStatus                                                              status,
                           const std::vector<std::tuple<std::string, std::string, NotificationType>>& result) {
-            if (status == ApiCallStatus::SUCCESS && m_authToken == authToken)
+            if (status == ApiCallStatus::SUCCESS && m_session.authToken() == authToken)
             {
                 std::lock_guard<std::mutex> lock(m_mutex);
                 m_notifications.clear();
@@ -75,9 +70,9 @@ std::vector<Notification> NotificationServiceImpl::notifications() const
 
 void NotificationServiceImpl::dismissNotification(const std::string& notificationId)
 {
-    auto authToken = m_authToken;
+    auto authToken = m_session.authToken();
     m_api->dismissNotification(authToken, notificationId, [this, authToken, notificationId](ApiCallStatus status) {
-        if (status == ApiCallStatus::SUCCESS && authToken == m_authToken)
+        if (status == ApiCallStatus::SUCCESS && authToken == m_session.authToken())
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             auto                        it = m_notifications.find(notificationId);
@@ -92,9 +87,9 @@ void NotificationServiceImpl::dismissNotification(const std::string& notificatio
 
 void NotificationServiceImpl::dismissAllNotifications()
 {
-    auto authToken = m_authToken;
+    auto authToken = m_session.authToken();
     m_api->dismissAllNotifications(authToken, [this, authToken](ApiCallStatus status) {
-        if (status == ApiCallStatus::SUCCESS && authToken == m_authToken)
+        if (status == ApiCallStatus::SUCCESS && authToken == m_session.authToken())
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             m_notifications.clear();

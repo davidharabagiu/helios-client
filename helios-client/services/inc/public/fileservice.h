@@ -9,14 +9,13 @@
 #include "fileservicelistener.h"
 #include "file.h"
 #include "filetransfer.h"
-#include "authenticatedserviceinterface.h"
+#include "authenticatedservice.h"
 
 /**
  * @class FileService
  * @brief Interface for the remote file system management service
  */
-class FileService : public AuthenticatedServiceInterface,
-                    public Observable<FileServiceListener, ObservableNotifyMode::ASYNC>
+class FileService : public AuthenticatedService, public Observable<FileServiceListener, ObservableNotifyMode::ASYNC>
 {
 public:
     /**

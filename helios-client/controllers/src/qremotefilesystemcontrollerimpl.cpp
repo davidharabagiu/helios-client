@@ -35,21 +35,21 @@ void QRemoteFileSystemControllerImpl::unregisterFromNotifications()
     m_fileService->unregisterListener(shared_from_this());
 }
 
-void QRemoteFileSystemControllerImpl::setAuthenticationToken(const QString& newVal)
+void QRemoteFileSystemControllerImpl::setSession(const QUserSession& newVal)
 {
-    if (!newVal.isEmpty())
+    if (newVal.isValid())
     {
-        m_fileService->setAuthToken(newVal.toStdString());
+        m_fileService->setSession(*newVal.data());
     }
     else
     {
-        resetAuthenticationToken();
+        resetSession();
     }
 }
 
-void QRemoteFileSystemControllerImpl::resetAuthenticationToken()
+void QRemoteFileSystemControllerImpl::resetSession()
 {
-    m_fileService->removeAuthToken();
+    m_fileService->removeSession();
 }
 
 QString QRemoteFileSystemControllerImpl::cwd() const

@@ -6,7 +6,7 @@ Rectangle {
     id: root
 
     property bool darkMode: false
-    property string authToken
+    property var session
 
     signal backButtonActivated()
 
@@ -78,7 +78,7 @@ Rectangle {
             }
         }
 
-        authenticationToken: authToken
+        session: root.session
     }
 
     Rectangle {

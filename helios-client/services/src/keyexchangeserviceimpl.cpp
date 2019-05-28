@@ -18,21 +18,6 @@ KeyExchangeServiceImpl::KeyExchangeServiceImpl(std::shared_ptr<KeyManager> keyMa
 {
 }
 
-bool KeyExchangeServiceImpl::enabled() const
-{
-    return !m_authToken.empty();
-}
-
-void KeyExchangeServiceImpl::setAuthToken(const std::string& authToken)
-{
-    m_authToken = authToken;
-}
-
-void KeyExchangeServiceImpl::removeAuthToken()
-{
-    m_authToken.clear();
-}
-
 void KeyExchangeServiceImpl::sendKey(const std::string& user, const std::string& keyName)
 {
     if (!enabled())
@@ -43,12 +28,12 @@ void KeyExchangeServiceImpl::sendKey(const std::string& user, const std::string&
     auto fileKey = m_keyManager->getKey(keyName);
     if (fileKey.empty())
     {
-        Observable::notifyAll(&KeyExchangeServiceListener::errorOccured,
+        Observable::notifyAll(&KeyExchangeServiceListener::keyShareError,
                               KeyExchangeServiceListener::Error::NO_SUCH_KEY);
         return;
     }
 
-    auto authToken = m_authToken;
+    auto authToken = m_session.authToken();
 
     m_userApi->getUserKey(
         authToken, user, [this, authToken, fileKey, user, keyName](ApiCallStatus status, const std::string& userKey) {
@@ -70,25 +55,35 @@ void KeyExchangeServiceImpl::sendKey(const std::string& user, const std::string&
                                         }
                                         else
                                         {
-                                            Observable::notifyAll(&KeyExchangeServiceListener::errorOccured,
+                                            Observable::notifyAll(&KeyExchangeServiceListener::keyShareError,
                                                                   KeyExchangeServiceListener::Error::UNKNWOWN_ERROR);
                                         }
                                     });
             }
             else if (status == ApiCallStatus::NO_KEY_SPECIFIED)
             {
-                Observable::notifyAll(&KeyExchangeServiceListener::errorOccured,
+                Observable::notifyAll(&KeyExchangeServiceListener::keyShareError,
                                       KeyExchangeServiceListener::Error::RECIPIENT_DISABLED_TRANSFERS);
             }
             else if (status == ApiCallStatus::INVALID_USERNAME)
             {
-                Observable::notifyAll(&KeyExchangeServiceListener::errorOccured,
+                Observable::notifyAll(&KeyExchangeServiceListener::keyShareError,
                                       KeyExchangeServiceListener::Error::UNKNOWN_USER);
             }
             else
             {
-                Observable::notifyAll(&KeyExchangeServiceListener::errorOccured,
+                Observable::notifyAll(&KeyExchangeServiceListener::keyShareError,
                                       KeyExchangeServiceListener::Error::UNKNWOWN_ERROR);
             }
         });
+}
+
+void KeyExchangeServiceImpl::receiveKey(const std::string& /*notificationId*/)
+{
+    if (!enabled())
+    {
+        return;
+    }
+
+    // To be implemented
 }

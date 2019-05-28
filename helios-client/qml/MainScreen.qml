@@ -6,8 +6,7 @@ Rectangle {
     id: root
 
     property bool darkMode: false
-    property string username
-    property string authToken
+    property var session
 
     signal logoutButtonActivated
     signal notificationsButtonActivated
@@ -16,7 +15,7 @@ Rectangle {
 
     HLabel {
         id: welcomeLabel
-        text: "Welcome, " + username
+        text: "Welcome, " + session.username
         darkMode: root.darkMode
         anchors {
             left: parent.left
@@ -102,7 +101,7 @@ Rectangle {
     RemoteFileSystemController {
         id: rfsCtl
 
-        authenticationToken: authToken
+        session: root.session
 
         onCwdChanged: {
             fileListing.files = files;
@@ -147,7 +146,7 @@ Rectangle {
             errorDialog.visible = true;
         }
 
-        authenticationToken: authToken
+        session: root.session
     }
 
     FileListing {

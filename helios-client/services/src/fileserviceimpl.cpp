@@ -48,24 +48,19 @@ FileServiceImpl::~FileServiceImpl()
     m_transfersCompletedCondVar.wait(lock, [this] { return m_activeTransfers.empty(); });
 }
 
-bool FileServiceImpl::enabled() const
+void FileServiceImpl::setSession(const UserSession& session)
 {
-    return !m_authToken.empty();
-}
-
-void FileServiceImpl::setAuthToken(const std::string& authToken)
-{
-    removeAuthToken();
+    removeSession();
 
     m_apiCaller->list(
-        authToken, "",
-        [this, authToken](ApiCallStatus                                                              status,
-                          const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files) {
+        session.authToken(), "",
+        [this, session](ApiCallStatus                                                              status,
+                        const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files) {
             if (status == ApiCallStatus::SUCCESS)
             {
                 {
                     std::lock_guard<std::mutex> lock(m_mutex);
-                    m_authToken = authToken;
+                    AuthenticatedService::setSession(session);
                     collectApiFileList(files);
                 }
                 Observable::notifyAll(&FileServiceListener::currentDirectoryChanged);
@@ -84,11 +79,11 @@ void FileServiceImpl::setAuthToken(const std::string& authToken)
         });
 }
 
-void FileServiceImpl::removeAuthToken()
+void FileServiceImpl::removeSession()
 {
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_authToken.clear();
+        AuthenticatedService::removeSession();
         m_currentDirectory.clear();
         m_files.clear();
         m_activeTransfers.clear();
@@ -152,7 +147,7 @@ void FileServiceImpl::changeCurrentDirectory(const std::string& path, bool relat
     }
 
     m_apiCaller->list(
-        m_authToken, fullPath,
+        m_session.authToken(), fullPath,
         [this, fullPath](ApiCallStatus                                                              status,
                          const std::vector<std::tuple<std::string, bool, std::optional<uint64_t>>>& files) {
             if (status == ApiCallStatus::SUCCESS)
@@ -214,7 +209,7 @@ void FileServiceImpl::createDirectory(const std::string& path, bool relative)
         PathUtils::removeTrailingSlash(fullPath);
     }
 
-    m_apiCaller->createDirectory(m_authToken, fullPath, [this, fullPath](ApiCallStatus status) {
+    m_apiCaller->createDirectory(m_session.authToken(), fullPath, [this, fullPath](ApiCallStatus status) {
         if (status == ApiCallStatus::SUCCESS)
         {
             std::string dirName;
@@ -307,7 +302,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
     cipher->setKey(encryptionKey.data());
 
     m_apiCaller->beginUpload(
-        m_authToken, fullRemotePath,
+        m_session.authToken(), fullRemotePath,
         [this, localPath, fullRemotePath, cipher](ApiCallStatus status, const std::string& transferId) {
             if (status == ApiCallStatus::SUCCESS)
             {
@@ -354,7 +349,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     while (transferred < fileSize && !transfer->canceled)
                     {
                         ApiCallStatus lastStatus;
-                        m_apiCaller->upload(m_authToken, transferId, transferred,
+                        m_apiCaller->upload(m_session.authToken(), transferId, transferred,
                                             std::vector<uint8_t>(buffer.get(), buffer.get() + encryptedBytes),
                                             [&chunkDone, &lastStatus](ApiCallStatus status) {
                                                 lastStatus = status;
@@ -494,7 +489,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
     cipher->setKey(decryptionKey.data());
 
     m_apiCaller->beginDownload(
-        m_authToken, fullRemotePath,
+        m_session.authToken(), fullRemotePath,
         [this, localPath, fullRemotePath, cipher](ApiCallStatus status, const std::string& transferId,
                                                   uint64_t fileSize) {
             if (status == ApiCallStatus::SUCCESS)
@@ -534,7 +529,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                             {
                                 // We have data left to download
                                 m_apiCaller->download(
-                                    m_authToken, transferId, transferred, actualChunkSize,
+                                    m_session.authToken(), transferId, transferred, actualChunkSize,
                                     [&chunkDone, &lastStatus, &transferred, &buffer, &lastTransferred, &decryptionDone](
                                         ApiCallStatus status, const std::vector<uint8_t>& bytes) {
                                         lastStatus = status;
@@ -657,42 +652,44 @@ void FileServiceImpl::moveFile(const std::string& sourcePath, const std::string&
     std::string destination(destinationPath);
     PathUtils::removeTrailingSlash(destination);
 
-    m_apiCaller->move(m_authToken, source, destination, [this, source, destination](ApiCallStatus status) {
+    m_apiCaller->move(m_session.authToken(), source, destination, [this, source, destination](ApiCallStatus status) {
         if (status == ApiCallStatus::SUCCESS)
         {
-            m_apiCaller->isDir(m_authToken, destination, [this, source, destination](ApiCallStatus status, bool isDir) {
-                if (status == ApiCallStatus::SUCCESS)
-                {
-                    if (isDir)
+            m_apiCaller->isDir(
+                m_session.authToken(), destination, [this, source, destination](ApiCallStatus status, bool isDir) {
+                    if (status == ApiCallStatus::SUCCESS)
                     {
-                        completeMove(source, destination, isDir);
+                        if (isDir)
+                        {
+                            completeMove(source, destination, isDir);
+                        }
+                        else
+                        {
+                            m_apiCaller->getFileSize(m_session.authToken(), destination,
+                                                     [this, source, destination](ApiCallStatus status, uint64_t size) {
+                                                         if (status == ApiCallStatus::SUCCESS)
+                                                         {
+                                                             completeMove(source, destination, false, size);
+                                                         }
+                                                         else
+                                                         {
+                                                             std::ostringstream ss;
+                                                             ss << "Error while querying file size. ApiCallStatus = ";
+                                                             ss << static_cast<int>(status);
+                                                             Observable::notifyAll(&FileServiceListener::errorOccured,
+                                                                                   ss.str());
+                                                         }
+                                                     });
+                        }
                     }
                     else
                     {
-                        m_apiCaller->getFileSize(
-                            m_authToken, destination, [this, source, destination](ApiCallStatus status, uint64_t size) {
-                                if (status == ApiCallStatus::SUCCESS)
-                                {
-                                    completeMove(source, destination, false, size);
-                                }
-                                else
-                                {
-                                    std::ostringstream ss;
-                                    ss << "Error while querying file size. ApiCallStatus = ";
-                                    ss << static_cast<int>(status);
-                                    Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                                }
-                            });
+                        std::ostringstream ss;
+                        ss << "Error while checking if a file is a directory. ApiCallStatus = ";
+                        ss << static_cast<int>(status);
+                        Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
                     }
-                }
-                else
-                {
-                    std::ostringstream ss;
-                    ss << "Error while checking if a file is a directory. ApiCallStatus = ";
-                    ss << static_cast<int>(status);
-                    Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                }
-            });
+                });
         }
         else if (status == ApiCallStatus::INVALID_PATH)
         {
@@ -752,7 +749,7 @@ void FileServiceImpl::removeFile(const std::string& path, bool relative)
         }
     }
 
-    m_apiCaller->remove(m_authToken, fullPath, [this, fullPath](ApiCallStatus status) {
+    m_apiCaller->remove(m_session.authToken(), fullPath, [this, fullPath](ApiCallStatus status) {
         if (status == ApiCallStatus::SUCCESS)
         {
             std::string name;

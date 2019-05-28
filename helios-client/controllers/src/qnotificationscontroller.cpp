@@ -13,14 +13,14 @@ QNotificationsController::~QNotificationsController()
     m_privateImpl->unregisterFromNotifications();
 }
 
-void QNotificationsController::setAuthenticationToken(const QString& newValue)
+void QNotificationsController::setSession(const QUserSession& newValue)
 {
-    m_privateImpl->setAuthenticationToken(newValue);
+    m_privateImpl->setSession(newValue);
 }
 
-void QNotificationsController::resetAuthenticationToken()
+void QNotificationsController::resetSession()
 {
-    m_privateImpl->resetAuthenticationToken();
+    m_privateImpl->resetSession();
 }
 
 QVariantList QNotificationsController::notifications() const

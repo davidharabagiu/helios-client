@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "qkeystoragecontrollerimpl.h"
+#include "qusersession.h"
 
 /**
  * @class QKeyStorageController
@@ -19,9 +20,9 @@ class QKeyStorageController : public QObject
 
     /**
      * @property authenticationToken
-     * @brief Authentication token of the current user session used to access the user's remote files
+     * @brief Current user session used to access the user's remote files
      */
-    Q_PROPERTY(QString authenticationToken WRITE setAuthenticationToken RESET resetAuthenticationToken)
+    Q_PROPERTY(QUserSession session WRITE setSession RESET resetSession)
 
 public:
     /**
@@ -58,15 +59,15 @@ public:
     ~QKeyStorageController();
 
     /**
-     * @brief Setter for authenticationToken
+     * @brief Setter for session
      * @param newValue - QString
      */
-    void setAuthenticationToken(const QString& newValue);
+    void setSession(const QUserSession& newValue);
 
     /**
-     * @brief Remove the current authentication token
+     * @brief Remove the current user session
      */
-    void resetAuthenticationToken();
+    void resetSession();
 
     /**
      * @brief Returns all the names of the keys which are of a given size

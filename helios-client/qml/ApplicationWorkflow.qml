@@ -108,8 +108,7 @@ StackView {
 
         MainScreen {
             darkMode: settingsCtl.darkMode
-            username: authCtl.username
-            authToken: authCtl.authenticationToken
+            session: authCtl.session
 
             onLogoutButtonActivated: {
                 authCtl.logout();
@@ -126,7 +125,7 @@ StackView {
 
         NotificationsScreen {
             darkMode: settingsCtl.darkMode
-            authToken: authCtl.authenticationToken
+            session: authCtl.session
 
             onBackButtonActivated: {
                 root.pop();

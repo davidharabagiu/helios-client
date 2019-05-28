@@ -12,14 +12,14 @@ QKeyStorageController::~QKeyStorageController()
     m_privateImpl->unregisterFromNotifications();
 }
 
-void QKeyStorageController::setAuthenticationToken(const QString& newValue)
+void QKeyStorageController::setSession(const QUserSession& newValue)
 {
-    m_privateImpl->setAuthenticationToken(newValue);
+    m_privateImpl->setSession(newValue);
 }
 
-void QKeyStorageController::resetAuthenticationToken()
+void QKeyStorageController::resetSession()
 {
-    m_privateImpl->resetAuthenticationToken();
+    m_privateImpl->resetSession();
 }
 
 QStringList QKeyStorageController::keys(KeySize keySize) const

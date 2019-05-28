@@ -18,6 +18,8 @@ add_library(${PROJECT_NAME}
     "src/qtransferslist.cpp"
     "inc/qnotification.h"
     "src/qnotification.cpp"
+    "inc/qusersession.h"
+    "src/qusersession.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

@@ -22,13 +22,9 @@ public:
     KeyExchangeServiceImpl(std::shared_ptr<KeyManager> keyManager, std::unique_ptr<Rsa> rsa,
                            std::unique_ptr<UserApiCaller> userApi, std::unique_ptr<FileApiCaller> fileApi);
 
-public:  // from AuthenticatedServiceInterface
-    bool enabled() const override;
-    void setAuthToken(const std::string& authToken) override;
-    void removeAuthToken() override;
-
 public:  // from KeyExchangeService
     void sendKey(const std::string& user, const std::string& keyName) override;
+    void receiveKey(const std::string& notificationId) override;
 
 private:
     /**
@@ -50,11 +46,6 @@ private:
      * @brief File API instance
      */
     std::unique_ptr<FileApiCaller> m_fileApi;
-
-    /**
-     * @brief Current user's authentication token
-     */
-    std::string m_authToken;
 };
 
 #endif  // KEYEXCHANGESERVICEIMPL_H

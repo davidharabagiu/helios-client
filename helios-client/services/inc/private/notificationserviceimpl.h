@@ -27,10 +27,9 @@ public:
      */
     NotificationServiceImpl(std::unique_ptr<NotificationsApiCaller> api, std::shared_ptr<Config> config);
 
-public:  // from AuthenticatedServiceInterface
-    bool enabled() const override;
-    void setAuthToken(const std::string& authToken) override;
-    void removeAuthToken() override;
+public:  // from AuthenticatedService
+    void setSession(const UserSession& session) override;
+    void removeSession() override;
 
 public:  // from NotificationService
     void                      refresh() override;
@@ -43,11 +42,6 @@ private:
      * @brief Notifications API instance
      */
     std::unique_ptr<NotificationsApiCaller> m_api;
-
-    /**
-     * @brief Authentication token
-     */
-    std::string m_authToken;
 
     /**
      * @brief Notifications refresh timer

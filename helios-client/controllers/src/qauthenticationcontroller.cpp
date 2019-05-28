@@ -43,12 +43,7 @@ bool QAuthenticationController::loggedIn() const
     return m_privateImpl->loggedIn();
 }
 
-QString QAuthenticationController::username() const
+QUserSession QAuthenticationController::session() const
 {
-    return m_privateImpl->username();
-}
-
-QString QAuthenticationController::authenticationToken() const
-{
-    return m_privateImpl->authenticationToken();
+    return m_privateImpl->session();
 }

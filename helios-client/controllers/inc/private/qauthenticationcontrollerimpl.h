@@ -5,6 +5,7 @@
 #include <QString>
 
 #include "userservicelistener.h"
+#include "qusersession.h"
 
 class QAuthenticationController;
 class UserService;
@@ -39,14 +40,13 @@ public:  // from UserServiceListener
     void userCreationCompleted(bool success, const std::string& errorString) override;
 
 public:  // forwarded from QAuthenticationController
-    void    restoreSession();
-    bool    login(const QString& username, const QString& password);
-    bool    logout();
-    bool    createUser(const QString& username, const QString& password);
-    void    setPersistLogin(bool newVal);
-    bool    loggedIn() const;
-    QString username() const;
-    QString authenticationToken() const;
+    void         restoreSession();
+    bool         login(const QString& username, const QString& password);
+    bool         logout();
+    bool         createUser(const QString& username, const QString& password);
+    void         setPersistLogin(bool newVal);
+    bool         loggedIn() const;
+    QUserSession session() const;
 
 private:
     /**

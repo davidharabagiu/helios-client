@@ -6,6 +6,7 @@
 #include <QVariant>
 
 #include "notificationservicelistener.h"
+#include "qusersession.h"
 
 // Forward declarations
 class QNotificationsController;
@@ -36,8 +37,8 @@ public:
     void unregisterFromNotifications();
 
 public:  // Forwarded from QNotificationsController
-    void         setAuthenticationToken(const QString& newValue);
-    void         resetAuthenticationToken();
+    void         setSession(const QUserSession& newVal);
+    void         resetSession();
     QVariantList notifications() const;
     void         dismissNotification(const QString& notificationId);
     void         dismissAllNotifications();

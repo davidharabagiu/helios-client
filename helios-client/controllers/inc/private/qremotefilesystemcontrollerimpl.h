@@ -7,6 +7,8 @@
 #include <memory>
 #include "fileservicelistener.h"
 
+#include "qusersession.h"
+
 // Forward declarations
 class QRemoteFileSystemController;
 class FileService;
@@ -37,8 +39,8 @@ public:
     void unregisterFromNotifications();
 
 public:  // forwarded from QRemoteFileSystemController
-    void         setAuthenticationToken(const QString& newVal);
-    void         resetAuthenticationToken();
+    void         setSession(const QUserSession& newVal);
+    void         resetSession();
     QString      cwd() const;
     void         setCwd(const QString& newValue);
     QVariantList files() const;
