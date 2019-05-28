@@ -24,6 +24,7 @@ enum class ApiCallStatus
     INVALID_TRANSFER_ID,
     INVALID_REPLY_FORMAT,
     NO_KEY_SPECIFIED,
+    INVALID_NOTIFICATION_TYPE,
     UNKNOWN_ERROR
 };
 
@@ -116,6 +117,11 @@ using RemoveCallback = std::function<void(ApiCallStatus)>;
  * @brief Share key callback function. Receives the call status.
  */
 using ShareKeyCallback = std::function<void(ApiCallStatus)>;
+
+/**
+ * @brief Accept shared key callback function. Receives the call status.
+ */
+using AcceptKeyCallback = std::function<void(ApiCallStatus, const std::vector<uint8_t>& fileKey)>;
 
 /**
  * @brief Move callback function. Receives the call status.

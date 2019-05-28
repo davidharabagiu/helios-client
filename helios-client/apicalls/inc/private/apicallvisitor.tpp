@@ -24,6 +24,7 @@
 #include "dismissnotificationcall.h"
 #include "dismissallnotificationscall.h"
 #include "sharekeycall.h"
+#include "acceptkeycall.h"
 #include "typeutils.h"
 
 template <typename Call>

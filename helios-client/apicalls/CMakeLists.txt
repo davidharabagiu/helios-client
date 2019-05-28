@@ -62,6 +62,8 @@ add_library(${PROJECT_NAME}
     "src/dismissallnotificationscall.cpp"
     "inc/private/sharekeycall.h"
     "src/sharekeycall.cpp"
+    "inc/private/acceptkeycall.h"
+    "src/acceptkeycall.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}
