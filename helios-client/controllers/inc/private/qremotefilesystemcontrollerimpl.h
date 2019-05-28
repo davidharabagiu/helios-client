@@ -55,6 +55,7 @@ public:  // forwarded from QRemoteFileSystemController
     void         download(const QString& filename, const QUrl& destinationDir, const QString& decryptionKeyName);
     void         cancelTransfer(const QFileTransfer& transfer);
     void         shareFile(const QString& username, const QString& fileName);
+    void         acceptSharedFile(const QString& notificationId, const QString& fileName);
 
 public:  // from FileServiceListener
     void currentDirectoryChanged() override;

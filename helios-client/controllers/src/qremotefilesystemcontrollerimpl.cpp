@@ -160,6 +160,11 @@ void QRemoteFileSystemControllerImpl::shareFile(const QString& username, const Q
     m_fileService->shareFile(username.toStdString(), fileName.toStdString(), true);
 }
 
+void QRemoteFileSystemControllerImpl::acceptSharedFile(const QString& notificationId, const QString& fileName)
+{
+    m_fileService->acceptSharedFile(notificationId.toStdString(), fileName.toStdString(), true);
+}
+
 void QRemoteFileSystemControllerImpl::currentDirectoryChanged()
 {
     auto files = m_fileService->files();
@@ -316,9 +321,16 @@ void QRemoteFileSystemControllerImpl::fileShared()
     QMetaObject::invokeMethod(m_publicImpl, "fileShared", Qt::QueuedConnection);
 }
 
-void QRemoteFileSystemControllerImpl::acceptedFileShare(std::shared_ptr<const File> /*file*/)
+void QRemoteFileSystemControllerImpl::acceptedFileShare(std::shared_ptr<const File> file)
 {
-    // To be implemented
+    if (file->parentDirectory() == m_fileService->currentDirectory())
+    {
+        QHeliosFile newFile(file);
+        m_files.push_back(QVariant::fromValue(newFile));
+
+        QMetaObject::invokeMethod(m_publicImpl, "filesChanged", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_publicImpl, "fileAddedInCwd", Qt::QueuedConnection, Q_ARG(QHeliosFile, newFile));
+    }
 }
 
 void QRemoteFileSystemControllerImpl::errorOccured(const std::string& errorString)

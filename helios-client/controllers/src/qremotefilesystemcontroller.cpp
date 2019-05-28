@@ -93,3 +93,8 @@ void QRemoteFileSystemController::shareFile(const QString& username, const QStri
 {
     m_privateImpl->shareFile(username, fileName);
 }
+
+void QRemoteFileSystemController::acceptSharedFile(const QString& notificationId, const QString& fileName)
+{
+    m_privateImpl->acceptSharedFile(notificationId, fileName);
+}

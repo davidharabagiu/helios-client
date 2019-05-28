@@ -158,6 +158,13 @@ public:
      */
     Q_INVOKABLE void shareFile(const QString& username, const QString& fileName);
 
+    /**
+     * @brief Accept a shared file from a notification's payload
+     * @param notificationId - Notification id
+     * @param fileName - Name of the destination file relative to cwd
+     */
+    Q_INVOKABLE void acceptSharedFile(const QString& notificationId, const QString& fileName);
+
 signals:
     /**
      * @brief SIGNAL emitted when files changes
