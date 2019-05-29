@@ -44,6 +44,11 @@ void AesCipher::decrypt(const uint8_t* in, uint64_t count, uint8_t* out)
     run(in, count, out, CipherDirection::INVERSE);
 }
 
+size_t AesCipher::blockSize() const
+{
+    return s_kBlockSize;
+}
+
 uint64_t AesCipher::run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction)
 {
     // Events for waiting on executors

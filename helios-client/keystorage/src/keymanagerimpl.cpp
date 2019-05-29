@@ -1,45 +1,73 @@
 #include <cstring>
 #include <limits>
+#include <QCryptographicHash>
 
 #include "keymanagerimpl.h"
 #include "paths.h"
 #include "typeconversions.h"
 #include "random.h"
 #include "randomfactory.h"
+#include "cipher.h"
+#include "cipherfactory.h"
 
-KeyManagerImpl::KeyManagerImpl(std::unique_ptr<RandomFactory> rngFactory)
+KeyManagerImpl::KeyManagerImpl(std::unique_ptr<RandomFactory> rngFactory, std::unique_ptr<CipherFactory> cipherFactory)
     : m_rng(rngFactory->isaac64())
+    , m_cipher(cipherFactory->createCipher(CipherFactory::Algorithm::AES256, 1))
 {
-    QFile storageFile(QString::fromStdString(Paths::kKeyStorageFile));
+}
+
+void KeyManagerImpl::loadKeys(const std::string& username, const std::string& password)
+{
+    m_storagePath = Paths::kKeyStoragePath + "/" + username + ".keystorage";
+    auto hashedPassword =
+        QCryptographicHash::hash(QByteArray::fromStdString(password), QCryptographicHash::Algorithm::Sha3_256);
+    m_encryptionKey = std::vector<uint8_t>(hashedPassword.begin(), hashedPassword.end());
+
+    QFile storageFile(QString::fromStdString(m_storagePath));
     if (!storageFile.exists())
     {
         return;
     }
-
     storageFile.open(QIODevice::ReadOnly);
-    QByteArray fileContent = storageFile.readAll();
+    QByteArray encryptedStorage = storageFile.readAll();
     storageFile.close();
 
-    for (int i = 0; i < fileContent.length();)
+    QByteArray decryptedStorage;
+    uint32_t   storageSize;
+    std::memcpy(&storageSize, encryptedStorage.data(), sizeof(storageSize));
+    decryptedStorage.resize(safe_integral_cast<int>(storageSize));
+
+    m_cipher->setKey(m_encryptionKey.data());
+    m_cipher->decrypt(reinterpret_cast<const uint8_t*>(encryptedStorage.data() + sizeof(storageSize)), storageSize,
+                      reinterpret_cast<uint8_t*>(decryptedStorage.data()));
+
+    for (int i = 0; i < decryptedStorage.length();)
     {
         // Read key name
         QString keyName;
-        while (fileContent.at(i) != '\0')
+        while (decryptedStorage.at(i) != '\0')
         {
-            keyName += fileContent.at(i++);
+            keyName += decryptedStorage.at(i++);
         }
 
         // Read key size
         uint16_t keySize;
-        std::memcpy(&keySize, fileContent.data() + ++i, sizeof(keySize));
+        std::memcpy(&keySize, decryptedStorage.data() + ++i, sizeof(keySize));
         i += sizeof(keySize);
 
         // Read key content
-        QByteArray keyContent = fileContent.mid(i, safe_integral_cast<int>(keySize));
+        QByteArray keyContent = decryptedStorage.mid(i, safe_integral_cast<int>(keySize));
         i += keySize;
 
         m_keys.insert(keyName, keyContent);
     }
+}
+
+void KeyManagerImpl::unloadKeys()
+{
+    m_keys.clear();
+    m_encryptionKey.clear();
+    m_storagePath.clear();
 }
 
 std::vector<std::string> KeyManagerImpl::listKeys(uint16_t length) const
@@ -76,10 +104,7 @@ bool KeyManagerImpl::createKey(const std::string& name, uint16_t length)
     QString keyName(QString::fromStdString(name));
     m_keys.insert(keyName, key);
 
-    QFile storageFile(QString::fromStdString(Paths::kKeyStorageFile));
-    storageFile.open(QIODevice::WriteOnly | QIODevice::Append);
-    persistKey(keyName, storageFile);
-    storageFile.close();
+    persistKeys();
 
     return true;
 }
@@ -95,10 +120,7 @@ void KeyManagerImpl::addKey(const std::string& name, const std::vector<uint8_t>&
         QByteArray::fromRawData(reinterpret_cast<const char*>(content.data()), safe_integral_cast<int>(content.size()));
     m_keys.insert(actualName, key);
 
-    QFile storageFile(QString::fromStdString(Paths::kKeyStorageFile));
-    storageFile.open(QIODevice::WriteOnly | QIODevice::Append);
-    persistKey(actualName, storageFile);
-    storageFile.close();
+    persistKeys();
 }
 
 std::vector<uint8_t> KeyManagerImpl::getKey(const std::string& name) const
@@ -125,38 +147,45 @@ bool KeyManagerImpl::removeKey(const std::string& name)
         return success;
     }
 
-    QFile storageFile(QString::fromStdString(Paths::kKeyStorageFile));
-    storageFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    persistKeys();
 
-    auto keyNames = m_keys.keys();
-    for (const auto& key : keyNames)
-    {
-        persistKey(key, storageFile);
-    }
-
-    storageFile.close();
     return success;
 }
 
 void KeyManagerImpl::removeAllKeys()
 {
     m_keys.clear();
-    QFile(QString::fromStdString(Paths::kKeyStorageFile)).remove();
+    QFile(QString::fromStdString(m_storagePath)).remove();
 }
 
-void KeyManagerImpl::persistKey(const QString& keyName, QFile& output) const
+void KeyManagerImpl::persistKeys() const
 {
-    static const char nullChar = '\0';
-
-    auto it = m_keys.find(keyName);
-    if (it == m_keys.cend())
+    QByteArray decryptedStorage;
+    for (auto it = m_keys.constKeyValueBegin(); it != m_keys.constKeyValueEnd(); ++it)
     {
-        return;
+        decryptedStorage.push_back((*it).first.toUtf8());
+        decryptedStorage.push_back('\0');
+        uint16_t keyLength = safe_integral_cast<uint16_t>((*it).second.length());
+        decryptedStorage.push_back(QByteArray::fromRawData(reinterpret_cast<char*>(&keyLength), sizeof(keyLength)));
+        decryptedStorage.push_back((*it).second);
     }
 
-    output.write(keyName.toUtf8());
-    output.write(&nullChar, 1);
-    uint16_t keyLength = safe_integral_cast<uint16_t>(it->length());
-    output.write(reinterpret_cast<char*>(&keyLength), sizeof(keyLength));
-    output.write(*it);
+    auto decryptedStorageSize = safe_integral_cast<uint32_t>(decryptedStorage.size());
+
+    QByteArray encryptedStorage;
+    encryptedStorage.resize(
+        safe_integral_cast<int>(safe_integral_cast<int>(sizeof(decryptedStorageSize)) +
+                                ((decryptedStorage.size() % safe_integral_cast<int>(m_cipher->blockSize()) == 0) ?
+                                     decryptedStorage.size() :
+                                     (decryptedStorage.size() / safe_integral_cast<int>(m_cipher->blockSize()) + 1) *
+                                         safe_integral_cast<int>(m_cipher->blockSize()))));
+    std::memcpy(encryptedStorage.data(), &decryptedStorageSize, sizeof(decryptedStorageSize));
+    m_cipher->setKey(m_encryptionKey.data());
+    m_cipher->encrypt(reinterpret_cast<const uint8_t*>(decryptedStorage.data()), decryptedStorageSize,
+                      reinterpret_cast<uint8_t*>(encryptedStorage.data() + sizeof(decryptedStorageSize)));
+
+    QFile storageFile(QString::fromStdString(m_storagePath));
+    storageFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    storageFile.write(encryptedStorage);
+    storageFile.close();
 }

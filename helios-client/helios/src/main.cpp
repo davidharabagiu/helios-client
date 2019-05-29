@@ -42,12 +42,14 @@ void registerInstances()
     httpRequestManager->setIgnoreSslErrors(config->get(ConfigKeys::kIgnoreSslErrors).toBool());
     Single<DependencyInjector>::instance().registerInstance<HttpRequestManager>(httpRequestManager);
 
-    std::shared_ptr<UserService> userService(new UserServiceImpl(
-        std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager, std::make_unique<RsaImpl>()));
-    Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
-
-    std::shared_ptr<KeyManager> keyManager(new KeyManagerImpl(std::make_unique<RandomFactoryImpl>()));
+    std::shared_ptr<KeyManager> keyManager(
+        new KeyManagerImpl(std::make_unique<RandomFactoryImpl>(), std::make_unique<CipherFactoryImpl>()));
     Single<DependencyInjector>::instance().registerInstance<KeyManager>(keyManager);
+
+    std::shared_ptr<UserService> userService(
+        new UserServiceImpl(std::make_unique<UserApiCallerImpl>(httpRequestManager), settingsManager,
+                            std::make_unique<RsaImpl>(), keyManager));
+    Single<DependencyInjector>::instance().registerInstance<UserService>(userService);
 
     std::shared_ptr<FileService> fileService(
         new FileServiceImpl(config, std::make_unique<FileApiCallerImpl>(httpRequestManager),

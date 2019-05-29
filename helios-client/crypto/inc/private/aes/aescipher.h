@@ -35,6 +35,7 @@ public:  // from Cipher
     void     setKey(const uint8_t* key) override;
     uint64_t encrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
     void     decrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
+    size_t   blockSize() const override;
 
 public:
     /**

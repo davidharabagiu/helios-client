@@ -10,6 +10,7 @@
 #include "userservicelistener.h"
 #include "useraccount.h"
 #include "rsa.h"
+#include "keymanager.h"
 #include "executor.h"
 
 namespace SettingsKeys
@@ -25,10 +26,12 @@ const std::string kAuthToken = "token";
 }  // namespace SettingsKeys
 
 UserServiceImpl::UserServiceImpl(std::unique_ptr<UserApiCaller>          userApiCaller,
-                                 const std::shared_ptr<SettingsManager>& settingsManager, std::unique_ptr<Rsa> rsa)
+                                 const std::shared_ptr<SettingsManager>& settingsManager, std::unique_ptr<Rsa> rsa,
+                                 const std::shared_ptr<KeyManager>& keyManager)
     : m_apiCaller(std::move(userApiCaller))
     , m_settingsManager(settingsManager)
     , m_rsa(std::move(rsa))
+    , m_keyManager(keyManager)
 {
 }
 
@@ -46,7 +49,8 @@ void UserServiceImpl::login(const UserAccount& account, bool persist)
 {
     m_apiCaller->login(account.username(), account.password(),
                        [this, account, persist](ApiCallStatus status, const std::string& authToken) {
-                           handleLoggedIn(status, UserSession(account.username(), authToken), persist);
+                           handleLoggedIn(status, UserSession(account.username(), authToken), account.password(),
+                                          persist);
                        });
 }
 
@@ -86,7 +90,8 @@ void UserServiceImpl::createUser(const UserAccount& account)
                               [this](ApiCallStatus status) { handleUserCreated(status); });
 }
 
-void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& session, bool persist)
+void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& session, const std::string& password,
+                                     bool persist)
 {
     bool        success = false;
     std::string errorString;
@@ -96,6 +101,7 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
         {
             m_session = session;
             success   = true;
+            m_keyManager->loadKeys(session.username(), password);
             break;
         }
         case ApiCallStatus::INVALID_USERNAME:
@@ -141,6 +147,7 @@ void UserServiceImpl::handleLoggedOut(ApiCallStatus status)
         m_settingsManager->reset(SettingsKeys::kAuthToken);
         m_settingsManager->save();
         m_session.clear();
+        m_keyManager->unloadKeys();
     }
     else
     {

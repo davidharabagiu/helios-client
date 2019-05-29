@@ -19,6 +19,18 @@ public:
     virtual ~KeyManager() = default;
 
     /**
+     * @brief Decrypt and load the user local key storage
+     * @param username - Name of the user
+     * @param password - Password of the user used for decryption
+     */
+    virtual void loadKeys(const std::string& username, const std::string& password) = 0;
+
+    /**
+     * @brief Unload all keys from memory
+     */
+    virtual void unloadKeys() = 0;
+
+    /**
      * @brief Get all key names which have a given length
      * @param length - Length of the keys in bytes
      * @return std::vector<std::string>

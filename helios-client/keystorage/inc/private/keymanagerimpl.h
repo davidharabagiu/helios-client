@@ -13,6 +13,8 @@
 // Forward declarations
 class RandomFactory;
 class Random;
+class CipherFactory;
+class Cipher;
 
 /**
  * @class KeyManagerImpl
@@ -23,11 +25,14 @@ class KeyManagerImpl : public KeyManager
 public:
     /**
      * @brief Constructor
-     * @param randomFactory - RNG factory
+     * @param randomFactory - RNG factory instance
+     * @param cipherFactory - Cipher factory instance
      */
-    KeyManagerImpl(std::unique_ptr<RandomFactory> randomFactory);
+    KeyManagerImpl(std::unique_ptr<RandomFactory> randomFactory, std::unique_ptr<CipherFactory> cipherFactory);
 
 public:  // from KeyManager
+    void                     loadKeys(const std::string& username, const std::string& password) override;
+    void                     unloadKeys() override;
     std::vector<std::string> listKeys(uint16_t length) const override;
     bool                     createKey(const std::string& name, uint16_t length) override;
     void                     addKey(const std::string& name, const std::vector<uint8_t>& content) override;
@@ -36,7 +41,10 @@ public:  // from KeyManager
     void                     removeAllKeys() override;
 
 private:
-    void persistKey(const QString& keyName, QFile& output) const;
+    /**
+     * @brief Persist all keys in encrypted storage
+     */
+    void persistKeys() const;
 
 private:
     /**
@@ -48,6 +56,21 @@ private:
      * @brief RNG instance
      */
     std::shared_ptr<Random> m_rng;
+
+    /**
+     * @brief Cipher instance
+     */
+    std::shared_ptr<Cipher> m_cipher;
+
+    /**
+     * @brief Key storage path
+     */
+    std::string m_storagePath;
+
+    /**
+     * @brief Key used for storage encryption and decryption
+     */
+    std::vector<uint8_t> m_encryptionKey;
 };
 
 #endif  // KEYMANAGERIMPL_H

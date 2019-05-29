@@ -2,6 +2,7 @@
 #define CIPHER_H
 
 #include <cstdint>
+#include <cstddef>
 
 /**
  * @class Cipher
@@ -37,6 +38,12 @@ public:
      * @param out - Output (plain text) buffer
      */
     virtual void decrypt(const uint8_t* in, uint64_t count, uint8_t* out) = 0;
+
+    /**
+     * @brief Returns the block size of an encryption in bytes. The output size will be a multiple of this value.
+     * @return uint16_t
+     */
+    virtual size_t blockSize() const = 0;
 };
 
 #endif  // CIPHER_H

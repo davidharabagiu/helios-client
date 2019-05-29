@@ -10,9 +10,11 @@
 #include "usersession.h"
 #include "executor.h"
 
+// Forward declarations
 class UserApiCaller;
 class SettingsManager;
 class Rsa;
+class KeyManager;
 
 /**
  * @class UserServiceImpl
@@ -26,9 +28,11 @@ public:
      * @param userApiCaller - Api caller for user operations
      * @param settingsManager - Settings manager
      * @param rsa - Rsa utilities instance
+     * @param keyManager - Key manager instance
      */
     UserServiceImpl(std::unique_ptr<UserApiCaller>          userApiCaller,
-                    const std::shared_ptr<SettingsManager>& settingsManager, std::unique_ptr<Rsa> rsa);
+                    const std::shared_ptr<SettingsManager>& settingsManager, std::unique_ptr<Rsa> rsa,
+                    const std::shared_ptr<KeyManager>& keyManager);
 
 public:  // from UserService
     const UserSession& session() const override;
@@ -43,9 +47,10 @@ private:
      * @brief Handle login operation completion
      * @param status - Completion status
      * @param session - New user session
+     * @param password - User password
      * @param persist - True to persist authentication
      */
-    void handleLoggedIn(ApiCallStatus status, const UserSession& session, bool persist);
+    void handleLoggedIn(ApiCallStatus status, const UserSession& session, const std::string& password, bool persist);
 
     /**
      * @brief Handle logout operation completion
@@ -92,6 +97,11 @@ private:
      * @brief RSA utilities instance
      */
     std::unique_ptr<Rsa> m_rsa;
+
+    /**
+     * @brief Key manager instance
+     */
+    std::shared_ptr<KeyManager> m_keyManager;
 
     /**
      * @brief Executor used for generating key pairs asynchronously

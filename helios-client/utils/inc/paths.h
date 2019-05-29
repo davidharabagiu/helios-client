@@ -11,7 +11,7 @@ const std::string kMainQmlFile            = "main.qml";
 const std::string kConfigFile             = "config.json";
 const std::string kDefaultSettingsFile    = "default_settings.json";
 const std::string kSettingsFile           = "settings.json";
-const std::string kKeyStorageFile         = "keys";
+const std::string kKeyStoragePath         = ".";
 const std::string kTemporaryPublicKeyFile = ".temp.pubk";
 }  // namespace Paths
 
