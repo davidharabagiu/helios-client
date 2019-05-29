@@ -31,7 +31,7 @@ public:
     KeyManagerImpl(std::unique_ptr<RandomFactory> randomFactory, std::unique_ptr<CipherFactory> cipherFactory);
 
 public:  // from KeyManager
-    void                     loadKeys(const std::string& username, const std::string& password) override;
+    bool                     loadKeys(const std::string& username, const std::string& password) override;
     void                     unloadKeys() override;
     std::vector<std::string> listKeys(uint16_t length) const override;
     bool                     createKey(const std::string& name, uint16_t length) override;
@@ -71,6 +71,12 @@ private:
      * @brief Key used for storage encryption and decryption
      */
     std::vector<uint8_t> m_encryptionKey;
+
+    /**
+     * @brief Validity check bytes appended at the beginning of the key storage before encryption in order to check if
+     * decryption was performed successfully
+     */
+    static const QByteArray s_kStorageValidityCheck;
 };
 
 #endif  // KEYMANAGERIMPL_H

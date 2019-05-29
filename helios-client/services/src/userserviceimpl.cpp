@@ -101,7 +101,10 @@ void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& se
         {
             m_session = session;
             success   = true;
-            m_keyManager->loadKeys(session.username(), password);
+            if (!m_keyManager->loadKeys(session.username(), password))
+            {
+                qFatal("Invalid key storage format");
+            }
             break;
         }
         case ApiCallStatus::INVALID_USERNAME:

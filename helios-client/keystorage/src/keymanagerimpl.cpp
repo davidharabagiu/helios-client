@@ -10,13 +10,15 @@
 #include "cipher.h"
 #include "cipherfactory.h"
 
+const QByteArray KeyManagerImpl::s_kStorageValidityCheck = QByteArray::fromRawData("KEK", 3);
+
 KeyManagerImpl::KeyManagerImpl(std::unique_ptr<RandomFactory> rngFactory, std::unique_ptr<CipherFactory> cipherFactory)
     : m_rng(rngFactory->isaac64())
     , m_cipher(cipherFactory->createCipher(CipherFactory::Algorithm::AES256, 1))
 {
 }
 
-void KeyManagerImpl::loadKeys(const std::string& username, const std::string& password)
+bool KeyManagerImpl::loadKeys(const std::string& username, const std::string& password)
 {
     m_storagePath = Paths::kKeyStoragePath + "/" + username + ".keystorage";
     auto hashedPassword =
@@ -26,7 +28,7 @@ void KeyManagerImpl::loadKeys(const std::string& username, const std::string& pa
     QFile storageFile(QString::fromStdString(m_storagePath));
     if (!storageFile.exists())
     {
-        return;
+        return true;
     }
     storageFile.open(QIODevice::ReadOnly);
     QByteArray encryptedStorage = storageFile.readAll();
@@ -41,7 +43,12 @@ void KeyManagerImpl::loadKeys(const std::string& username, const std::string& pa
     m_cipher->decrypt(reinterpret_cast<const uint8_t*>(encryptedStorage.data() + sizeof(storageSize)), storageSize,
                       reinterpret_cast<uint8_t*>(decryptedStorage.data()));
 
-    for (int i = 0; i < decryptedStorage.length();)
+    if (decryptedStorage.mid(0, s_kStorageValidityCheck.size()) != s_kStorageValidityCheck)
+    {
+        return false;
+    }
+
+    for (int i = s_kStorageValidityCheck.length(); i < decryptedStorage.length();)
     {
         // Read key name
         QString keyName;
@@ -61,6 +68,8 @@ void KeyManagerImpl::loadKeys(const std::string& username, const std::string& pa
 
         m_keys.insert(keyName, keyContent);
     }
+
+    return true;
 }
 
 void KeyManagerImpl::unloadKeys()
@@ -160,7 +169,7 @@ void KeyManagerImpl::removeAllKeys()
 
 void KeyManagerImpl::persistKeys() const
 {
-    QByteArray decryptedStorage;
+    QByteArray decryptedStorage = s_kStorageValidityCheck;
     for (auto it = m_keys.constKeyValueBegin(); it != m_keys.constKeyValueEnd(); ++it)
     {
         decryptedStorage.push_back((*it).first.toUtf8());

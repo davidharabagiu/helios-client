@@ -22,8 +22,9 @@ public:
      * @brief Decrypt and load the user local key storage
      * @param username - Name of the user
      * @param password - Password of the user used for decryption
+     * @return True if the storage could be decrypted using the given password
      */
-    virtual void loadKeys(const std::string& username, const std::string& password) = 0;
+    virtual bool loadKeys(const std::string& username, const std::string& password) = 0;
 
     /**
      * @brief Unload all keys from memory
