@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
+import QtQuick.Dialogs 1.2
 import helios 1.0
 
 StackView {
@@ -13,6 +14,71 @@ StackView {
 
     initialItem: loginScreenComponent
 
+    Dialog {
+        id: restoreSessionDialog
+        visible: false
+        title: "Restore session"
+
+        contentItem: Rectangle {
+            color: settingsCtl.darkMode ? "#000000" : "#ffffff"
+            implicitWidth: 250
+            implicitHeight: 100
+
+            HTextInput {
+                id: restoreSessionPasswordInput
+
+                darkMode: settingsCtl.darkMode
+                hint: "Password"
+                password: true
+
+                anchors {
+                    left: parent.left
+                    leftMargin: 5
+                    right: parent.right
+                    rightMargin: 5
+                    top: parent.top
+                    topMargin: dialogButtons.y / 2 - height / 2
+                }
+            }
+
+            Row {
+                id: dialogButtons
+
+                anchors {
+                    right: parent.right
+                    rightMargin: 5
+                    bottom: parent.bottom
+                    bottomMargin: 5
+                    left: parent.left
+                    leftMargin: 5
+                }
+
+                layoutDirection: Qt.RightToLeft
+                height: 25
+                spacing: 5
+
+                HButton {
+                    label: "Abort"
+                    darkMode: settingsCtl.darkMode
+
+                    onClicked: {
+                        restoreSessionDialog.visible = false;
+                    }
+                }
+
+                HButton {
+                    label: "Proceed"
+                    darkMode: settingsCtl.darkMode
+
+                    onClicked: {
+                        authCtl.restoreSession(restoreSessionPasswordInput.text);
+                        restoreSessionDialog.visible = false;
+                    }
+                }
+            }
+        }
+    }
+
     AuthenticationController {
         id: authCtl
 
@@ -24,8 +90,14 @@ StackView {
             }
         }
 
+        onKeyStorageDecryptionFailed: {
+            restoreSessionDialog.visible = true;
+        }
+
         Component.onCompleted: {
-            restoreSession();
+            if (hasPersistedLogin) {
+                restoreSessionDialog.visible = true;
+            }
         }
     }
 

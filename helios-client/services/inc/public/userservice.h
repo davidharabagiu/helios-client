@@ -39,9 +39,10 @@ public:
     virtual void login(const UserAccount& account, bool persist) = 0;
 
     /**
-     * @brief Restore the last session if the login operation was persisted.
+     * @brief Restore the last session if the login operation was persisted. The user password in required in order to
+     * decrypt the key storage.
      */
-    virtual void restoreSession() = 0;
+    virtual void restoreSession(const std::string& password) = 0;
 
     /**
      * @brief Log out from the system. The authentication token will become invalid and be removed.
@@ -53,6 +54,12 @@ public:
      * @param account - UserAccount
      */
     virtual void createUser(const UserAccount& account) = 0;
+
+    /**
+     * @brief Returns true if there is a persisted session available for the restoreSession operations
+     * @return bool
+     */
+    virtual bool canRestoreSession() const = 0;
 };
 
 #endif  // USERSERVICE_H

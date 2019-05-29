@@ -35,6 +35,11 @@ public:
      * @param errorString - Valid only when success is false. It details the occured problem.
      */
     virtual void userCreationCompleted(bool success, const std::string& errorString) = 0;
+
+    /**
+     * @brief Key storage decryption during the restore session operation has failed. Operation aborted.
+     */
+    virtual void keyStorageDecryptionFailed() = 0;
 };
 
 #endif  // USERSERVICELISTENER_H

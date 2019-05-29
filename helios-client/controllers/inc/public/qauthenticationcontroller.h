@@ -36,6 +36,13 @@ class QAuthenticationController : public QObject
      */
     Q_PROPERTY(QUserSession session READ session NOTIFY sessionChanged)
 
+    /**
+     * @property hasPersistedLogin
+     * @brief Use this to check if the user has any persisted login (stored token) before performing the restoreSession
+     * operation.
+     */
+    Q_PROPERTY(bool hasPersistedLogin READ hasPersistedLogin)
+
 public:
     /**
      * @brief Constructor
@@ -50,8 +57,9 @@ public:
 
     /**
      * @brief Restore last saved session if it exists
+     * @param password - Password used for key storage decryption
      */
-    Q_INVOKABLE void restoreSession();
+    Q_INVOKABLE void restoreSession(const QString& password);
 
     /**
      * @brief Authenticate
@@ -93,6 +101,12 @@ public:
      */
     QUserSession session() const;
 
+    /**
+     * @brief Getter for hasPersistedLogin
+     * @return bool
+     */
+    bool hasPersistedLogin() const;
+
 signals:
     /**
      * @brief SIGNAL emitted when a login operation completed
@@ -124,6 +138,12 @@ signals:
      * @brief SIGNAL emitted when session changes
      */
     void sessionChanged();
+
+    /**
+     * @brief SIGNAL emitted when the key storage decryption phase in the restore session operation has failed (the
+     * password is wrong).
+     */
+    void keyStorageDecryptionFailed();
 
 private:
     /**

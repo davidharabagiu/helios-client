@@ -54,7 +54,7 @@ void UserServiceImpl::login(const UserAccount& account, bool persist)
                        });
 }
 
-void UserServiceImpl::restoreSession()
+void UserServiceImpl::restoreSession(const std::string& password)
 {
     auto varUsername = m_settingsManager->get(SettingsKeys::kUsername);
     auto varToken    = m_settingsManager->get(SettingsKeys::kAuthToken);
@@ -64,8 +64,9 @@ void UserServiceImpl::restoreSession()
         auto        username = varUsername.toString().toStdString();
         auto        token    = varToken.toString().toStdString();
         UserSession session(username, token);
-        m_apiCaller->checkToken(username, token,
-                                [this, session](ApiCallStatus status) { handleCheckToken(status, session); });
+        m_apiCaller->checkToken(username, token, [this, session, password](ApiCallStatus status) {
+            handleCheckToken(status, session, password);
+        });
     }
 }
 
@@ -88,6 +89,19 @@ void UserServiceImpl::createUser(const UserAccount& account)
 
     m_apiCaller->registerUser(account.username(), account.password(),
                               [this](ApiCallStatus status) { handleUserCreated(status); });
+}
+
+bool UserServiceImpl::canRestoreSession() const
+{
+    auto varUsername = m_settingsManager->get(SettingsKeys::kUsername);
+    auto varToken    = m_settingsManager->get(SettingsKeys::kAuthToken);
+
+    if (varUsername.type() == QVariant::String && varToken.type() == QVariant::String)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 void UserServiceImpl::handleLoggedIn(ApiCallStatus status, const UserSession& session, const std::string& password,
@@ -196,12 +210,18 @@ void UserServiceImpl::handleUserCreated(ApiCallStatus status)
     Observable::notifyAll(&UserServiceListener::userCreationCompleted, success, errorString);
 }
 
-void UserServiceImpl::handleCheckToken(ApiCallStatus status, const UserSession& session)
+void UserServiceImpl::handleCheckToken(ApiCallStatus status, const UserSession& session, const std::string& password)
 {
     if (status == ApiCallStatus::SUCCESS)
     {
         if (session.valid())
         {
+            if (!m_keyManager->loadKeys(session.username(), password))
+            {
+                Observable::notifyAll(&UserServiceListener::keyStorageDecryptionFailed);
+                return;
+            }
+
             m_session = session;
             Observable::notifyAll(&UserServiceListener::loginCompleted, true, std::string());
             checkUserKeys();

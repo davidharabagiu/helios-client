@@ -38,15 +38,17 @@ public:  // from UserServiceListener
     void loginCompleted(bool success, const std::string& errorString) override;
     void logoutCompleted(bool success, const std::string& errorString) override;
     void userCreationCompleted(bool success, const std::string& errorString) override;
+    void keyStorageDecryptionFailed() override;
 
 public:  // forwarded from QAuthenticationController
-    void         restoreSession();
+    void         restoreSession(const QString& password);
     bool         login(const QString& username, const QString& password);
     bool         logout();
     bool         createUser(const QString& username, const QString& password);
     void         setPersistLogin(bool newVal);
     bool         loggedIn() const;
     QUserSession session() const;
+    bool         hasPersistedLogin() const;
 
 private:
     /**

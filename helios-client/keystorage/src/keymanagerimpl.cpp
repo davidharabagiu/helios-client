@@ -35,18 +35,22 @@ bool KeyManagerImpl::loadKeys(const std::string& username, const std::string& pa
     storageFile.close();
 
     QByteArray decryptedStorage;
-    uint32_t   storageSize;
-    std::memcpy(&storageSize, encryptedStorage.data(), sizeof(storageSize));
-    decryptedStorage.resize(safe_integral_cast<int>(storageSize));
+    uint32_t   realStorageSize;
+    auto       paddedStorageSize = encryptedStorage.size() - static_cast<int>(sizeof(realStorageSize));
+    std::memcpy(&realStorageSize, encryptedStorage.data(), sizeof(realStorageSize));
+    decryptedStorage.resize(paddedStorageSize);
 
     m_cipher->setKey(m_encryptionKey.data());
-    m_cipher->decrypt(reinterpret_cast<const uint8_t*>(encryptedStorage.data() + sizeof(storageSize)), storageSize,
+    m_cipher->decrypt(reinterpret_cast<const uint8_t*>(encryptedStorage.data() + sizeof(realStorageSize)),
+                      safe_integral_cast<uint64_t>(paddedStorageSize),
                       reinterpret_cast<uint8_t*>(decryptedStorage.data()));
 
     if (decryptedStorage.mid(0, s_kStorageValidityCheck.size()) != s_kStorageValidityCheck)
     {
         return false;
     }
+
+    decryptedStorage.resize(static_cast<int>(realStorageSize));
 
     for (int i = s_kStorageValidityCheck.length(); i < decryptedStorage.length();)
     {
@@ -179,19 +183,20 @@ void KeyManagerImpl::persistKeys() const
         decryptedStorage.push_back((*it).second);
     }
 
-    auto decryptedStorageSize = safe_integral_cast<uint32_t>(decryptedStorage.size());
+    auto paddedStorageSize = ((decryptedStorage.size() % safe_integral_cast<int>(m_cipher->blockSize()) == 0) ?
+                                  decryptedStorage.size() :
+                                  (decryptedStorage.size() / safe_integral_cast<int>(m_cipher->blockSize()) + 1) *
+                                      safe_integral_cast<int>(m_cipher->blockSize()));
+
+    auto realStorageSize = decryptedStorage.size();
 
     QByteArray encryptedStorage;
-    encryptedStorage.resize(
-        safe_integral_cast<int>(safe_integral_cast<int>(sizeof(decryptedStorageSize)) +
-                                ((decryptedStorage.size() % safe_integral_cast<int>(m_cipher->blockSize()) == 0) ?
-                                     decryptedStorage.size() :
-                                     (decryptedStorage.size() / safe_integral_cast<int>(m_cipher->blockSize()) + 1) *
-                                         safe_integral_cast<int>(m_cipher->blockSize()))));
-    std::memcpy(encryptedStorage.data(), &decryptedStorageSize, sizeof(decryptedStorageSize));
+    encryptedStorage.resize(safe_integral_cast<int>(sizeof(realStorageSize)) + paddedStorageSize);
+    std::memcpy(encryptedStorage.data(), &realStorageSize, sizeof(realStorageSize));
     m_cipher->setKey(m_encryptionKey.data());
-    m_cipher->encrypt(reinterpret_cast<const uint8_t*>(decryptedStorage.data()), decryptedStorageSize,
-                      reinterpret_cast<uint8_t*>(encryptedStorage.data() + sizeof(decryptedStorageSize)));
+    m_cipher->encrypt(reinterpret_cast<const uint8_t*>(decryptedStorage.data()),
+                      safe_integral_cast<uint64_t>(realStorageSize),
+                      reinterpret_cast<uint8_t*>(encryptedStorage.data() + sizeof(realStorageSize)));
 
     QFile storageFile(QString::fromStdString(m_storagePath));
     storageFile.open(QIODevice::WriteOnly | QIODevice::Truncate);

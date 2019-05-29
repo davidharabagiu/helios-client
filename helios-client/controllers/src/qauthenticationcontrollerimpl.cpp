@@ -58,9 +58,14 @@ void QAuthenticationControllerImpl::userCreationCompleted(bool success, const st
                               Q_ARG(QString, QString::fromStdString(errorString)));
 }
 
-void QAuthenticationControllerImpl::restoreSession()
+void QAuthenticationControllerImpl::keyStorageDecryptionFailed()
 {
-    m_userService->restoreSession();
+    QMetaObject::invokeMethod(m_publicImpl, "keyStorageDecryptionFailed", Qt::QueuedConnection);
+}
+
+void QAuthenticationControllerImpl::restoreSession(const QString& password)
+{
+    m_userService->restoreSession(password.toStdString());
 }
 
 bool QAuthenticationControllerImpl::login(const QString& username, const QString& password)
@@ -113,4 +118,9 @@ QUserSession QAuthenticationControllerImpl::session() const
         return QUserSession(std::make_shared<UserSession>(m_userService->session()));
     }
     return QUserSession();
+}
+
+bool QAuthenticationControllerImpl::hasPersistedLogin() const
+{
+    return m_userService->canRestoreSession();
 }

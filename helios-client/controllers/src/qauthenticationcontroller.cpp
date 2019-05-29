@@ -13,9 +13,9 @@ QAuthenticationController::~QAuthenticationController()
     m_privateImpl->unregisterFromNotifications();
 }
 
-void QAuthenticationController::restoreSession()
+void QAuthenticationController::restoreSession(const QString& password)
 {
-    m_privateImpl->restoreSession();
+    m_privateImpl->restoreSession(password);
 }
 
 bool QAuthenticationController::login(const QString& username, const QString& password)
@@ -46,4 +46,9 @@ bool QAuthenticationController::loggedIn() const
 QUserSession QAuthenticationController::session() const
 {
     return m_privateImpl->session();
+}
+
+bool QAuthenticationController::hasPersistedLogin() const
+{
+    return m_privateImpl->hasPersistedLogin();
 }

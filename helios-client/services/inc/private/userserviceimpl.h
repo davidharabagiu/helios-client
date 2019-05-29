@@ -38,9 +38,10 @@ public:  // from UserService
     const UserSession& session() const override;
     bool               loggedIn() const override;
     void               login(const UserAccount& account, bool persist) override;
-    void               restoreSession() override;
+    void               restoreSession(const std::string& password) override;
     void               logout() override;
     void               createUser(const UserAccount& account) override;
+    bool               canRestoreSession() const override;
 
 private:
     /**
@@ -68,8 +69,9 @@ private:
      * @brief Handle checkToken operation completion
      * @param status - Completion status
      * @param session - Candidate session to be validated
+     * @param password - Password used to decrypt the key storage. If this fails, the authentication will be aborted.
      */
-    void handleCheckToken(ApiCallStatus status, const UserSession& session);
+    void handleCheckToken(ApiCallStatus status, const UserSession& session, const std::string& password);
 
     /**
      * @brief Check if the public and private user keys for the current user exist and update the public key stored on
