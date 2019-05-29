@@ -338,7 +338,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     uint64_t chunkSize =
                         safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
                     auto                       stream = std::static_pointer_cast<std::ifstream>(transfer->stream);
-                    std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize]);
+                    std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize + sizeof(fileSize)]);
 
                     auto     fileSize    = transfer->transfer->fileSize();
                     uint64_t transferred = transfer->transfer->transferredBytes();
@@ -347,18 +347,24 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
 
                     // Prepare first transfer
                     uint64_t read = (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
-                    stream->read(reinterpret_cast<char*>(buffer.get()), safe_integral_cast<std::streamsize>(read));
-                    uint64_t encryptedBytes = cipher->encrypt(buffer.get(), read, buffer.get());
+                    std::memcpy(buffer.get(), &fileSize, sizeof(fileSize));
+                    stream->read(reinterpret_cast<char*>(buffer.get() + sizeof(fileSize)),
+                                 safe_integral_cast<std::streamsize>(read));
+                    uint64_t encryptedBytes =
+                        cipher->encrypt(buffer.get() + sizeof(fileSize), read, buffer.get() + sizeof(fileSize));
+                    uint64_t totalBytesToSend = encryptedBytes + sizeof(fileSize);
+                    uint64_t totalBytesSent   = 0;
 
                     while (transferred < fileSize && !transfer->canceled)
                     {
                         ApiCallStatus lastStatus;
-                        m_apiCaller->upload(m_session.authToken(), transferId, transferred,
-                                            std::vector<uint8_t>(buffer.get(), buffer.get() + encryptedBytes),
+                        m_apiCaller->upload(m_session.authToken(), transferId, totalBytesSent,
+                                            std::vector<uint8_t>(buffer.get(), buffer.get() + totalBytesToSend),
                                             [&chunkDone, &lastStatus](ApiCallStatus status) {
                                                 lastStatus = status;
                                                 chunkDone.set();
                                             });
+                        totalBytesSent += totalBytesToSend;
 
                         // Save current value of "encryptedBytes"
                         uint64_t _encryptedBytes = encryptedBytes;
@@ -366,10 +372,11 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         // Prepare next transfer if necessary
                         if (transferred + read < fileSize)
                         {
-                            read = (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
+                            read =
+                                (transferred + read + chunkSize > fileSize) ? fileSize - transferred - read : chunkSize;
                             stream->read(reinterpret_cast<char*>(buffer.get()),
                                          safe_integral_cast<std::streamsize>(read));
-                            encryptedBytes = cipher->encrypt(buffer.get(), read, buffer.get());
+                            totalBytesToSend = encryptedBytes = cipher->encrypt(buffer.get(), read, buffer.get());
                         }
 
                         // Wait for current transfer to finish
@@ -416,7 +423,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         std::lock_guard<std::mutex> lock(m_mutex);
                         if (remoteFileParent == m_currentDirectory)
                         {
-                            auto file = std::make_shared<File>(remoteFileName, remoteFileParent, false, transferred);
+                            auto file = std::make_shared<File>(remoteFileName, remoteFileParent, false, totalBytesSent);
                             m_files[remoteFileName] = file;
                             Observable::notifyAll(&FileServiceListener::uploadedFileInCurrentDir, file);
                         }
@@ -507,101 +514,127 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                 Observable::notifyAll(&FileServiceListener::transferStarted, transfer->transfer);
 
                 // Post transfer execution
-                m_transferExecutors[nextExecutorIndex()]->post(
-                    [this, transfer, transferId, fullRemotePath, cipher]() mutable {
-                        uint64_t chunkSize =
-                            safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
-                        auto                       stream = std::static_pointer_cast<std::ofstream>(transfer->stream);
-                        std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize]);
+                m_transferExecutors[nextExecutorIndex()]->post([this, transfer, transferId, fullRemotePath,
+                                                                cipher]() mutable {
+                    uint64_t chunkSize =
+                        safe_integral_cast<uint64_t>(m_config->get(ConfigKeys::kUploadChunkSize).toUInt()) * 1024;
+                    auto                       stream = std::static_pointer_cast<std::ofstream>(transfer->stream);
+                    std::unique_ptr<uint8_t[]> buffer(new uint8_t[chunkSize + sizeof(uint64_t)]);
 
-                        auto     fileSize    = transfer->transfer->fileSize();
-                        uint64_t transferred = transfer->transfer->transferredBytes();
-                        uint64_t processed   = 0;
+                    auto     fileSize    = transfer->transfer->fileSize();
+                    uint64_t transferred = transfer->transfer->transferredBytes();
+                    uint64_t processed   = 0;
+                    uint64_t written     = 0;
 
-                        AutoResetEvent   chunkDone;
-                        ManualResetEvent decryptionDone;
+                    AutoResetEvent   chunkDone;
+                    ManualResetEvent decryptionDone;
 
-                        ApiCallStatus lastStatus;
-                        uint64_t      lastTransferred;
+                    ApiCallStatus lastStatus;
+                    uint64_t      lastTransferred;
 
-                        while (processed < fileSize && !transfer->canceled)
+                    // Actual file size before encryption
+                    uint64_t actualFileSize;
+                    bool     firstTransfer   = true;
+                    bool     firstProcessing = true;
+
+                    while (processed < fileSize && !transfer->canceled)
+                    {
+                        uint64_t _offset         = firstTransfer ? sizeof(actualFileSize) : 0;
+                        uint64_t actualChunkSize = (transferred + chunkSize + _offset > fileSize) ?
+                                                       fileSize - transferred :
+                                                       chunkSize + _offset;
+                        firstTransfer = false;
+
+                        if (transferred < fileSize)
                         {
-                            uint64_t actualChunkSize =
-                                (transferred + chunkSize > fileSize) ? fileSize - transferred : chunkSize;
+                            // We have data left to download
+                            m_apiCaller->download(
+                                m_session.authToken(), transferId, transferred, actualChunkSize,
+                                [&chunkDone, &lastStatus, &transferred, &buffer, &lastTransferred, &decryptionDone](
+                                    ApiCallStatus status, const std::vector<uint8_t>& bytes) {
+                                    lastStatus = status;
+                                    if (status == ApiCallStatus::SUCCESS)
+                                    {
+                                        decryptionDone.wait();
+                                        std::copy(bytes.cbegin(), bytes.cend(), buffer.get());
+                                        transferred += bytes.size();
+                                        lastTransferred = safe_integral_cast<uint64_t>(bytes.size());
+                                    }
+                                    chunkDone.set();
+                                });
+                        }
 
-                            if (transferred < fileSize)
+                        decryptionDone.reset();
+                        if (transferred > 0)
+                        {
+                            if (firstProcessing)
                             {
-                                // We have data left to download
-                                m_apiCaller->download(
-                                    m_session.authToken(), transferId, transferred, actualChunkSize,
-                                    [&chunkDone, &lastStatus, &transferred, &buffer, &lastTransferred, &decryptionDone](
-                                        ApiCallStatus status, const std::vector<uint8_t>& bytes) {
-                                        lastStatus = status;
-                                        if (status == ApiCallStatus::SUCCESS)
-                                        {
-                                            decryptionDone.wait();
-                                            std::copy(bytes.cbegin(), bytes.cend(), buffer.get());
-                                            transferred += bytes.size();
-                                            lastTransferred = safe_integral_cast<uint64_t>(bytes.size());
-                                        }
-                                        chunkDone.set();
-                                    });
+                                std::memcpy(&actualFileSize, buffer.get(), sizeof(actualFileSize));
                             }
 
-                            decryptionDone.reset();
-                            if (transferred > 0)
+                            // We have data for decryption
+                            auto     _offset       = firstProcessing ? sizeof(actualFileSize) : 0;
+                            uint64_t paddingLength = 0;
+                            cipher->decrypt(buffer.get() + _offset, lastTransferred - _offset, buffer.get() + _offset);
+
+                            // Remove padding
+                            if (written + lastTransferred - _offset > actualFileSize)
                             {
-                                // We have data for decryption
-                                cipher->decrypt(buffer.get(), lastTransferred, buffer.get());
-                                stream->write(reinterpret_cast<const char*>(buffer.get()),
-                                              safe_integral_cast<std::__1::streamsize>(lastTransferred));
-
-                                if (lastStatus == ApiCallStatus::SUCCESS)
-                                {
-                                    transfer->transfer->setTransferredBytes(transferred);
-                                    Observable::notifyAll(&FileServiceListener::transferProgressChanged,
-                                                          transfer->transfer);
-                                }
-                                else
-                                {
-                                    // Upload failure
-                                    std::ostringstream ss;
-                                    ss << "Error while downloading. ApiCallStatus = ";
-                                    ss << static_cast<int>(lastStatus);
-                                    Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
-                                    break;
-                                }
-
-                                processed += lastTransferred;
+                                paddingLength = written + lastTransferred - _offset - actualFileSize;
                             }
-                            decryptionDone.set();
 
-                            if (transferred < fileSize)
+                            stream->write(
+                                reinterpret_cast<const char*>(buffer.get() + _offset),
+                                safe_integral_cast<std::__1::streamsize>(lastTransferred - _offset - paddingLength));
+                            written += lastTransferred - _offset - paddingLength;
+
+                            if (lastStatus == ApiCallStatus::SUCCESS)
                             {
-                                chunkDone.wait();
+                                transfer->transfer->setTransferredBytes(transferred);
+                                Observable::notifyAll(&FileServiceListener::transferProgressChanged,
+                                                      transfer->transfer);
                             }
-                        }
+                            else
+                            {
+                                // Upload failure
+                                std::ostringstream ss;
+                                ss << "Error while downloading. ApiCallStatus = ";
+                                ss << static_cast<int>(lastStatus);
+                                Observable::notifyAll(&FileServiceListener::errorOccured, ss.str());
+                                break;
+                            }
 
-                        // Cleanup
+                            processed += lastTransferred;
+                            firstProcessing = false;
+                        }
+                        decryptionDone.set();
+
+                        if (transferred < fileSize)
                         {
-                            std::lock_guard<std::mutex> lock(m_mutex);
-                            m_activeTransfers.erase(fullRemotePath);
+                            chunkDone.wait();
                         }
+                    }
 
-                        if (processed == fileSize)
-                        {
-                            // Notify completion
-                            Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
-                        }
-                        else
-                        {
-                            Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
-                        }
+                    // Cleanup
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_activeTransfers.erase(fullRemotePath);
+                    }
 
-                        cipher.reset();
+                    if (processed == fileSize)
+                    {
+                        // Notify completion
+                        Observable::notifyAll(&FileServiceListener::transferCompleted, transfer->transfer);
+                    }
+                    else
+                    {
+                        Observable::notifyAll(&FileServiceListener::transferAborted, transfer->transfer);
+                    }
 
-                        m_transfersCompletedCondVar.notify_one();
-                    });
+                    cipher.reset();
+
+                    m_transfersCompletedCondVar.notify_one();
+                });
             }
             else if (status == ApiCallStatus::INVALID_PATH)
             {
