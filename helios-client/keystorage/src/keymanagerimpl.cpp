@@ -131,6 +131,8 @@ void KeyManagerImpl::addKey(const std::string& name, const std::vector<uint8_t>&
 
     auto key =
         QByteArray::fromRawData(reinterpret_cast<const char*>(content.data()), safe_integral_cast<int>(content.size()));
+    key.detach();
+
     m_keys.insert(actualName, key);
 
     persistKeys();
