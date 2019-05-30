@@ -70,13 +70,14 @@ void registerInstances()
 
 int main(int argc, char* argv[])
 {
-    QtModels::registerQmlTypes("helios");
-    Controllers::registerQmlTypes("helios");
-    registerInstances();
-
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
+
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
+    QtModels::registerQmlTypes("helios");
+    Controllers::registerQmlTypes("helios");
+    registerInstances();
 
     QQmlApplicationEngine engine;
     engine.load(QDir(QCoreApplication::applicationDirPath())
