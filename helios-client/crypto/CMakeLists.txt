@@ -27,6 +27,8 @@ add_library(${PROJECT_NAME}
     "inc/private/aes/commondefs.h"
     "inc/private/aes/utils.h"
     "inc/private/aes/tables.h"
+    "inc/private/misc/bigintegeralgorithmsextended.h"
+    "src/misc/bigintegeralgorithmsextended.cpp"
 )
 
 target_include_directories(${PROJECT_NAME}

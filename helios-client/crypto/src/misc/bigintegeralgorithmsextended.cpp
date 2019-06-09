@@ -1,4 +1,4 @@
-#include "bigintegeralgorithmsextended.h"
+#include "misc/bigintegeralgorithmsextended.h"
 #include "typeconversions.h"
 #include "random.h"
 

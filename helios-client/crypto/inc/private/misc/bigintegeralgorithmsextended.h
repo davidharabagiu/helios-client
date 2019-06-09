@@ -1,5 +1,5 @@
-#ifndef BIGINTEGERALGORITHMSEXTENDED_H
-#define BIGINTEGERALGORITHMSEXTENDED_H
+#ifndef MISC_BIGINTEGERALGORITHMSEXTENDED_H
+#define MISC_BIGINTEGERALGORITHMSEXTENDED_H
 
 #include <BigIntegerLibrary.hh>
 #include <memory>
@@ -38,4 +38,4 @@ bool isProbablyPrime(const std::shared_ptr<Random>& generator, const BigUnsigned
 BigUnsigned lcm(const BigUnsigned& a, const BigUnsigned& b);
 }  // namespace BigIntegerAlgorithms
 
-#endif  // BIGINTEGERALGORITHMSEXTENDED_H
+#endif  // MISC_BIGINTEGERALGORITHMSEXTENDED_H

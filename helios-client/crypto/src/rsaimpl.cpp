@@ -5,7 +5,7 @@
 
 #include "rsaimpl.h"
 #include "typeconversions.h"
-#include "bigintegeralgorithmsextended.h"
+#include "misc/bigintegeralgorithmsextended.h"
 #include "random.h"
 #include "randomfactoryimpl.h"
 
