@@ -23,5 +23,3 @@ add_subdirectory(async)
 if (WITH_TESTS)
     add_subdirectory(tests)
 endif()
-
-add_subdirectory(testapp)
