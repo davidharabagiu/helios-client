@@ -9,7 +9,7 @@
 
 #include "executor.h"
 
-namespace
+namespace __internal
 {
 /**
  * @class ObservableBase
@@ -53,7 +53,7 @@ protected:
      */
     std::vector<std::weak_ptr<Listener>> m_listeners;
 };
-}  // namespace
+}  // namespace __internal
 
 /**
  * @brief Specifies how the observable should handle notification sending
@@ -84,7 +84,7 @@ class Observable
  * @tparam Listener - Listener / Observer type
  */
 template <typename Listener>
-class Observable<Listener, ObservableNotifyMode::SYNC> : public ObservableBase<Listener>
+class Observable<Listener, ObservableNotifyMode::SYNC> : public __internal::ObservableBase<Listener>
 {
 protected:
     /**
@@ -97,7 +97,7 @@ protected:
     template <typename M, typename... Args>
     void notifyAll(M&& callback, Args&&... args)
     {
-        auto& listeners = ObservableBase<Listener>::m_listeners;
+        auto& listeners = __internal::ObservableBase<Listener>::m_listeners;
         for (auto it = listeners.cbegin(); it != listeners.cend();)
         {
             if (it->expired())
@@ -119,7 +119,7 @@ protected:
  * @tparam Listener - Listener / Observer type
  */
 template <typename Listener>
-class Observable<Listener, ObservableNotifyMode::ASYNC> : public ObservableBase<Listener>
+class Observable<Listener, ObservableNotifyMode::ASYNC> : public __internal::ObservableBase<Listener>
 {
 public:
     /**
@@ -141,7 +141,7 @@ protected:
     template <typename M, typename... Args>
     void notifyAll(M&& callback, Args&&... args)
     {
-        auto& listeners = ObservableBase<Listener>::m_listeners;
+        auto& listeners = __internal::ObservableBase<Listener>::m_listeners;
         for (auto it = listeners.cbegin(); it != listeners.cend();)
         {
             if (it->expired())

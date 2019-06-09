@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "cipherfactoryimpl.h"
 #include "aes/aescipher.h"
 

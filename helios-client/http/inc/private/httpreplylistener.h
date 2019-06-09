@@ -4,7 +4,7 @@
 #include <QObject>
 #include <functional>
 
-#include <QSSlError>
+#include <QSslError>
 
 class QNetworkReply;
 

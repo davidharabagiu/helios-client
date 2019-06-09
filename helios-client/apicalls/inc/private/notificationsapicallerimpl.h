@@ -1,6 +1,8 @@
 #ifndef NOTIFICATIONAPICALLERIMPL_H
 #define NOTIFICATIONAPICALLERIMPL_H
 
+#include <memory>
+
 #include "notificationsapicaller.h"
 
 // Forward declarations

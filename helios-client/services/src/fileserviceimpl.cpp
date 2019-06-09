@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cassert>
 #include <condition_variable>
+#include <cstring>
 
 #include "fileserviceimpl.h"
 #include "apicalldefs.h"
@@ -307,7 +308,7 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
 
     m_apiCaller->beginUpload(
         m_session.authToken(), fullRemotePath,
-        [this, localPath, fullRemotePath, cipher](ApiCallStatus status, const std::string& transferId) {
+        [this, localPath, fullRemotePath, cipher](ApiCallStatus status, const std::string& transferId) mutable {
             if (status == ApiCallStatus::SUCCESS)
             {
                 // Obtain the file size
@@ -502,7 +503,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
     m_apiCaller->beginDownload(
         m_session.authToken(), fullRemotePath,
         [this, localPath, fullRemotePath, cipher](ApiCallStatus status, const std::string& transferId,
-                                                  uint64_t fileSize) {
+                                                  uint64_t fileSize) mutable {
             if (status == ApiCallStatus::SUCCESS)
             {
                 auto transfer      = std::make_shared<FileTransferInternal>();
@@ -585,7 +586,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
 
                             stream->write(
                                 reinterpret_cast<const char*>(buffer.get() + _offset),
-                                safe_integral_cast<std::__1::streamsize>(lastTransferred - _offset - paddingLength));
+                                safe_integral_cast<std::streamsize>(lastTransferred - _offset - paddingLength));
                             written += lastTransferred - _offset - paddingLength;
 
                             if (lastStatus == ApiCallStatus::SUCCESS)

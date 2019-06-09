@@ -12,7 +12,7 @@ Timer::Timer(QObject* parent)
 
 void Timer::start(uint32_t msec, std::function<void()> func, bool singleShot)
 {
-    if (msec < 0 || !func)
+    if (!func)
     {
         return;
     }

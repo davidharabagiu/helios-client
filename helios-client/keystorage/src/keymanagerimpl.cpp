@@ -64,7 +64,7 @@ bool KeyManagerImpl::loadKeys(const std::string& username, const std::string& pa
         // Read key size
         uint16_t keySize;
         std::memcpy(&keySize, decryptedStorage.data() + ++i, sizeof(keySize));
-        i += sizeof(keySize);
+        i += safe_integral_cast<int>(sizeof(keySize));
 
         // Read key content
         QByteArray keyContent = decryptedStorage.mid(i, safe_integral_cast<int>(keySize));

@@ -1,6 +1,7 @@
 #ifndef RSAIMPL_H
 #define RSAIMPL_H
 
+#include <memory>
 #include <BigIntegerLibrary.hh>
 
 #include "rsa.h"
