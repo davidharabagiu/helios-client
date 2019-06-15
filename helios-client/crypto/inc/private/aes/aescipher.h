@@ -37,7 +37,7 @@ public:  // from Cipher
     void     decrypt(const uint8_t* in, uint64_t count, uint8_t* out) override;
     size_t   blockSize() const override;
 
-public:
+private:
     /**
      * @brief Run the AES encryption or decryption cipher
      * @param in - Input buffer
@@ -48,7 +48,6 @@ public:
      */
     uint64_t run(const uint8_t* in, uint64_t count, uint8_t* out, CipherDirection direction);
 
-private:
     /**
      * @brief Generate keys for each round
      * @param key - Input key
