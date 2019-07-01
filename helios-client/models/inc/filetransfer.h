@@ -66,6 +66,18 @@ public:
      */
     void setTransferredBytes(uint64_t newVal);
 
+    /**
+     * @brief Getter for m_speed
+     * @return uint64_t
+     */
+    uint64_t speed() const;
+
+    /**
+     * @brief Setter for m_spped
+     * @param newVal - uint64_t
+     */
+    void setSpeed(uint64_t newVal);
+
 private:
     /**
      * @brief Local path of the transferred file
@@ -91,6 +103,11 @@ private:
      * @brief Total bytes
      */
     uint64_t m_fileSize;
+
+    /**
+     * @brief Calculated transfer speed represented in bytes per second
+     */
+    uint64_t m_speed;
 };
 
 #endif  // FILETRANSFER_H

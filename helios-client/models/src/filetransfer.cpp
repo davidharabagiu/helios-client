@@ -7,6 +7,7 @@ FileTransfer::FileTransfer(const std::string& localPath, const std::string remot
     , m_mode(mode)
     , m_transferredBytes(0)
     , m_fileSize(fileSize)
+    , m_speed(0)
 {
 }
 
@@ -38,4 +39,14 @@ uint64_t FileTransfer::transferredBytes() const
 void FileTransfer::setTransferredBytes(uint64_t newVal)
 {
     m_transferredBytes = newVal;
+}
+
+uint64_t FileTransfer::speed() const
+{
+    return m_speed;
+}
+
+void FileTransfer::setSpeed(uint64_t newVal)
+{
+    m_speed = newVal;
 }

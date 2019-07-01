@@ -8,6 +8,7 @@
 #include <cassert>
 #include <condition_variable>
 #include <cstring>
+#include <chrono>
 
 #include "fileserviceimpl.h"
 #include "apicalldefs.h"
@@ -356,6 +357,8 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                     uint64_t totalBytesToSend = encryptedBytes + sizeof(fileSize);
                     uint64_t totalBytesSent   = 0;
 
+                    auto startTime = std::chrono::steady_clock::now();
+
                     while (transferred < fileSize && !transfer->canceled)
                     {
                         ApiCallStatus lastStatus;
@@ -387,6 +390,13 @@ void FileServiceImpl::uploadFile(const std::string& localPath, const std::string
                         {
                             transferred += _encryptedBytes;
                             transfer->transfer->setTransferredBytes(transferred);
+
+                            auto currentTime      = std::chrono::steady_clock::now();
+                            auto transferDuration = safe_integral_cast<uint64_t>(
+                                std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count());
+                            transfer->transfer->setSpeed(transferDuration == 0 ? 0 :
+                                                                                 transferred / transferDuration * 1000);
+
                             Observable::notifyAll(&FileServiceListener::transferProgressChanged, transfer->transfer);
                         }
                         else
@@ -537,6 +547,7 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                     uint64_t actualFileSize;
                     bool     firstTransfer   = true;
                     bool     firstProcessing = true;
+                    auto     startTime       = std::chrono::steady_clock::now();
 
                     while (processed < fileSize && !transfer->canceled)
                     {
@@ -592,6 +603,14 @@ void FileServiceImpl::downloadFile(const std::string& remotePath, bool relative,
                             if (lastStatus == ApiCallStatus::SUCCESS)
                             {
                                 transfer->transfer->setTransferredBytes(transferred);
+
+                                auto currentTime      = std::chrono::steady_clock::now();
+                                auto transferDuration = safe_integral_cast<uint64_t>(
+                                    std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime)
+                                        .count());
+                                transfer->transfer->setSpeed(
+                                    transferDuration == 0 ? 0 : transferred / transferDuration * 1000);
+
                                 Observable::notifyAll(&FileServiceListener::transferProgressChanged,
                                                       transfer->transfer);
                             }

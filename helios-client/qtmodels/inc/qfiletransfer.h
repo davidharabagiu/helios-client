@@ -45,6 +45,12 @@ class QFileTransfer
      */
     Q_PROPERTY(quint64 transferredBytes READ transferredBytes)
 
+    /**
+     * @property speed
+     * @brief Transfer speed represented in bytes per second
+     */
+    Q_PROPERTY(quint64 speed READ speed)
+
 public:  // Enums
     /**
      * @brief File transfer mode
@@ -86,6 +92,7 @@ public:  // Wrappers over FileTransfer methods
     QTransferMode mode() const;
     quint64       fileSize() const;
     quint64       transferredBytes() const;
+    quint64       speed() const;
 
 private:
     /**

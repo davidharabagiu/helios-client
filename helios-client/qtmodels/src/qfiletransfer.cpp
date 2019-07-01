@@ -39,3 +39,8 @@ quint64 QFileTransfer::transferredBytes() const
 {
     return isValid() ? m_data->transferredBytes() : 0;
 }
+
+quint64 QFileTransfer::speed() const
+{
+    return isValid() ? m_data->speed() : 0;
+}

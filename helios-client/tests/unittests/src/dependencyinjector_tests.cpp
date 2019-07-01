@@ -82,15 +82,3 @@ TEST_F(DependencyInjectorTests, GetInstanceAfterReplace)
     EXPECT_EQ(test3->m_a, test2->m_a);
     EXPECT_EQ(test2.get(), test3.get());
 }
-
-TEST_F(DependencyInjectorTests, DestructorUnregistersAll)
-{
-    DependencyInjector depInjector;
-
-    auto test = std::make_shared<MyTestClass>(666);
-    EXPECT_TRUE(depInjector.registerInstance<MyTestClass>(test));
-
-    depInjector.~DependencyInjector();
-    auto test2 = depInjector.getInstance<MyTestClass>();
-    EXPECT_EQ(test2.get(), nullptr);
-}

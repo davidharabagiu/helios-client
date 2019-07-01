@@ -493,6 +493,11 @@ Rectangle {
                               String(Math.round(model.transferData.transferredBytes / model.transferData.fileSize * 100)) + "%)"
                     }
 
+                    HLabel {
+                        darkMode: root.darkMode
+                        text: String(Math.round(model.transferData.speed / (1024 * 1024))) + " MB/s"
+                    }
+
                     HButton {
                         darkMode: root.darkMode
                         label: "Cancel"
