@@ -57,7 +57,7 @@ void BeginDownloadCall::receive(HttpStatus status, const std::vector<uint8_t>& r
     std::string fileSizeStr;
     replyStream >> fileSizeStr;
 
-    uint64_t fileSize;
+    uint64_t fileSize = 0;
     try
     {
         fileSize = std::stoull(fileSizeStr);
